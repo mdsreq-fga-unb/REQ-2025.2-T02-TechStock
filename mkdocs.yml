@@ -1,5 +1,8 @@
-site_name: TechStock 
-docs_dir: ./docs
+site_name: TechStock
+repo_url: https://github.com/mdsreq-fga-unb/REQ-2025.2-T02-TechStock
+repo_name: REQ-2025.2-T02-TechStock
+site_url: https://mdsreq-fga-unb.github.io/REQ-2025.2-T02-TechStock/
+use_directory_urls: false
 
 theme:
   name: material
@@ -48,6 +51,7 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
 nav:
   - Home: index.md
   - Visão:
