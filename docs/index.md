@@ -71,7 +71,7 @@ A equipe de desenvolvedores do projeto TechStock é composta por membros do curs
 
   <!-- Card Brenda Beatriz -->
   <div class="team-card">
-    <img src="assets/brenda_perfil.jpeg" alt="Brenda Beatriz"/>
+    <img src="/assets/brenda_perfil.jpeg" alt="Brenda Beatriz"/>
     <h3>Brenda Beatriz</h3>
     <p class="role">Desenvolvedora Frontend & Analista de QA</p>
     <div class="social-links">
