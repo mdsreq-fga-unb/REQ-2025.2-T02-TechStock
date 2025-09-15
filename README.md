@@ -3,9 +3,9 @@
 ---
 
 ## 📝 Sobre o Projeto
-O **TechStock** é um sistema web desenvolvido para gerenciar **estoque, vendas, manutenções e clientes** da loja de celulares "CELLVEX".  
-O projeto foi idealizado para a disciplina de **Requisitos de Software (2025.2)** da Universidade de Brasília.  
-O objetivo principal é **automatizar processos manuais**, como controle de garantias e gestão de estoque, permitindo decisões mais rápidas e precisas.
+- O **TechStock** é um sistema web desenvolvido para gerenciar **estoque, vendas, manutenções e clientes** da loja de celulares "CELLVEX".  
+- O projeto foi idealizado para a disciplina de **Requisitos de Software (2025.2)** da Universidade de Brasília.  
+- O objetivo principal é **automatizar processos manuais**, como controle de garantias e gestão de estoque, permitindo decisões mais rápidas e precisas.
 
 **Principais benefícios do sistema:**
 - Automatização de processos manuais.
