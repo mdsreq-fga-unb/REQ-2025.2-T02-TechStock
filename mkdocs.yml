@@ -1,0 +1,74 @@
+site_name: TechStock
+docs_dir: ./docs
+repo_url: https://mdsreq-fga-unb.github.io/REQ-2025.2-T02-TechStock/
+repo_name: REQ-2025.2-T02-TechStock
+
+theme:
+  name: material
+  language: pt-BR
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  palette:
+    # Paleta para modo claro
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/weather-sunny
+        name: Mudar para modo escuro
+    # Paleta para modo escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/weather-night
+        name: Mudar para modo claro
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - toc.follow
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+    - header.autohide
+    - navigation.footer
+    - search.highlight
+    - search.share
+    - search.suggest
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Visão:
+    - Cenário atual: visao/cenario.md
+    - Solução proposta: visao/solucao.md
+    - Estratégias: visao/estrategias.md
+    - Cronograma: visao/cronograma.md
+    - Interação com cliente: visao/interacao.md
+    - Lições Aprendidas: visao/licoes.md
+  - Requisitos:
+    - Funcionais: requisitos/requisitos-funcionais.md
+    - Não Funcionais: requisitos/requisitos-nao-funcionais.md
+  - Backlog:
+    - Geral: backlog/geral.md
+    - MVP: backlog/mvp.md
+    - Mapeamento: backlog/mapeamento.md
+  - Entregas:
+    - Unidade 1: entregas/unidade1.md
+    - Unidade 2: entregas/unidade2.md
+    - Unidade 3: entregas/unidade3.md
+    - Unidade 4: entregas/unidade4.md
