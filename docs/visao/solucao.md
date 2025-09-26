@@ -3,7 +3,7 @@
 ## 2.1 Objetivos do Produto
 
 ### Objetivo Geral
-Organizar o processo de vendas, produtos, clientes, peças, do estabelecimento “Cellvex” por meio de uma solução digital.  
+Implantar um sistema digital capaz de centralizar, estabelecer a organização das vendas e o controle de estoque da empresa ‘CELLVEX’. 
 
 ### Objetivos Específicos
 

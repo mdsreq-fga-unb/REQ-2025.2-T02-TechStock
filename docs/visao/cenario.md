@@ -2,23 +2,11 @@
 
 ## 1.1 Introdução ao Negócio e Contexto
 
-O mercado de celulares no Brasil, especialmente o de iPhones e smartphones premium, é altamente
-competitivo e dinâmico, movimentado tanto por consumidores finais quanto por revendedores e
-assistências técnicas. A crescente dependência das pessoas por dispositivos móveis e a rápida
-obsolescência tecnológica alimentam uma demanda constante por reparos, trocas de peças e aquisição
-de novos aparelhos.
+O mercado de celulares no Brasil, especialmente o de iPhones e smartphones premium, é altamente competitivo e dinâmico, movimentado tanto por consumidores finais quanto por revendedores e assistências técnicas. A crescente dependência das pessoas por dispositivos móveis e a rápida obsolescência tecnológica alimentam uma demanda constante por reparos, trocas de peças e aquisição de novos aparelhos.  
 
-É nesse cenário que se insere a loja de Moisés “CELLVEX”, um pequeno negócio localizado na
-região do Novo Gama – GO, especializado na compra, venda e manutenção de celulares, com foco em
-iPhones. O modelo de atuação envolve múltiplas facetas: aquisição de aparelhos com defeito para
-reparo e revenda, importação de dispositivos, negociação direta com clientes e realização de
-manutenções gerais em smartphones.
+É nesse cenário que se insere a loja de Moisés **“CELLVEX”**, um pequeno negócio localizado na região do Novo Gama – GO, especializado na compra, venda e manutenção de celulares, com foco em iPhones. O modelo de atuação envolve múltiplas facetas: aquisição de aparelhos com defeito para reparo e revenda, importação de dispositivos, negociação direta com clientes e realização de manutenções gerais em smartphones. 
 
-Apesar da consolidação da loja como referência local em compra, venda e manutenção de celulares,
-sua forma de gestão ainda é limitada por processos não automatizados e falta de integração entre
-controles. Essa fragilidade operacional representa um ponto crítico para a expansão do negócio, pois
-em um mercado cada vez mais digitalizado e competitivo, a falta de organização tecnológica reduz a
-confiabilidade das informações e limita a capacidade de crescimento sustentável.
+Apesar da consolidação da loja como referência local em compra, venda e manutenção de celulares, sua forma de gestão ainda é limitada por processos não automatizados e falta de integração entre controles. Essa fragilidade operacional representa um ponto crítico para a expansão do negócio, pois em um mercado cada vez mais digitalizado e competitivo, a falta de organização tecnológica reduz a confiabilidade das informações e limita a capacidade de crescimento sustentável. 
 
 ## 1.2 Identificação da Oportunidade ou Problema
 A loja de Moisés experimenta uma demanda crescente e consistente, impulsionada pela sua reputação positiva e pela qualidade do serviço técnico. No entanto, à medida que o volume de operações aumenta, as fragilidades dos processos manuais tornam-se evidentes, limitando a capacidade de resposta e gerando pontos de falha críticos. 
