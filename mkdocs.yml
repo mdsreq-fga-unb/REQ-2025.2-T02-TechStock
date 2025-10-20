@@ -53,20 +53,23 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Visão:
+  - Visão do Produto:
     - Cenário atual: visao/cenario.md
     - Solução proposta: visao/solucao.md
     - Estratégias: visao/estrategias.md
+    - Engenharia de Requisitos: visao/engenharia-de-requisitos.md
     - Cronograma: visao/cronograma.md
     - Interação com cliente: visao/interacao.md
+    - Requisitos de Software: visao/requisitos-de-software.md
+    - DoR e DoD: visao/dor-e-dod.md
+    - Backlog do Produto: visao/backlog-do-produto.md
     - Lições Aprendidas: visao/licoes.md
   - Requisitos:
     - Funcionais: requisitos/requisitos-funcionais.md
     - Não Funcionais: requisitos/requisitos-nao-funcionais.md
-  - Backlog:
-    - Geral: backlog/geral.md
-    - MVP: backlog/mvp.md
-    - Mapeamento: backlog/mapeamento.md
+
+  - Evidências: evidencias/index.md
+
   - Entregas:
     - Unidade 1: entregas/unidade1.md
     - Unidade 2: entregas/unidade2.md
