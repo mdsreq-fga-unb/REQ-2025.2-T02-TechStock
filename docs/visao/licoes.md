@@ -40,3 +40,9 @@
 **Dificuldade**: Dificuldade em entender como os requisitos se comportam na prática.
 
 **Como foi superado**: Desenvolvemos um protótipo de baixo nível, trazendo assim uma ideia mais concreta de como o sistema poderia ficar.
+
+### Sprints Não Concluídas
+
+**Dificuldade**: Enfrentamos dificuldades na execução das sprints da Unidade 2, o que impactou o andamento planejado das atividades.
+
+**Como foi superado**: Enfrentamos dificuldades na execução das sprints da Unidade 2, o que impactou o andamento planejado das atividades.
