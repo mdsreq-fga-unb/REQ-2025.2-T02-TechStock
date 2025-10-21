@@ -1,6 +1,6 @@
-# INTERAÇÃO ENTRE EQUIPE E CLIENTE
+# 6 INTERAÇÃO ENTRE EQUIPE E CLIENTE
 
-## 5.1 Composição da Equipe
+## 6.1 Composição da Equipe
 
 | Papel  | Descrição | Responsável | Participantes |
 |--------|------------------|-------------------|---------|

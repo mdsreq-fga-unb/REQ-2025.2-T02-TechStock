@@ -64,10 +64,7 @@ nav:
     - DoR e DoD: visao/dor-e-dod.md
     - Backlog do Produto: visao/backlog-do-produto.md
     - Lições Aprendidas: visao/licoes.md
-  - Requisitos:
-    - Funcionais: requisitos/requisitos-funcionais.md
-    - Não Funcionais: requisitos/requisitos-nao-funcionais.md
-
+    - Referências Bibliográficas: visao/referencias-bibliograficas.md
   - Evidências: evidencias/index.md
 
   - Entregas:

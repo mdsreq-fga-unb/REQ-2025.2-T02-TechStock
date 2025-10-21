@@ -1,6 +1,6 @@
-# Cronograma e Entregas
+# 5 Cronograma e Entregas
 
-## 4. Cronograma do Projeto
+## 5.1 Cronograma do Projeto
 
 | **Sprint**   | **Início**     | **Fim**       | **Objetivo Principal**                         | **Entregas esperadas**                                                                 | **Validação do Cliente**                                                   |
 |----------|------------|-----------|---------------------------------------------|------------------------------------------------------------------------------------|------------------------------------------------------------------------|
