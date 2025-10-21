@@ -27,10 +27,16 @@
 
 **Dificuldade**: Entender como as técnicas de Priorização, como MoSCoW e Story Points seriam capazes de influenciar diretamente o planejamento e o desenvolvimento futuro do  Projeto. Houve dificuldade no início de entender este impacto real, que na prática poderia afetar o ritmo de desenvolvimento do projeto e até mesmo o cumprimento de prazos. 
 
- **Como foi superado**: Através de estudos da equipe, aulas ministradas pelo professor e dúvidas pertinentes levadas para discussões em sala de aula, fomos capazes de criar uma certa maturidade e entendimento em relação à esta fraqueza, assim conseguimos   superamos esse desafio.  
+**Como foi superado**: Através de estudos da equipe, aulas ministradas pelo professor e dúvidas pertinentes levadas para discussões em sala de aula, fomos capazes de criar uma certa maturidade e entendimento em relação à esta fraqueza, assim conseguimos   superamos esse desafio.  
 
 ### Definição do MVP 
 
 **Dificuldade**: Decidir dentro das nossas funcionalidades, quais acrescentariam maior valor de negócio a curto prazo para o nosso cliente, respeitando ao mesmo tempo a capacidade técnica de desenvolvimento e entrega da equipe. 
 
-**Como foi superado**: Reuniões de alinhamento entre a equipe, onde validamos a viabilidade técnica em conjunto. Além de, reuniões com o cliente em que pudemos entender mais sobre seus desejos e necessidades. Dessa forma, foi possível priorizar as necessidades vinculadas as funcionalidades que entregam maiores valores de negócio, mantendo a coerência entre o que é tecnicamente possível e relevante para o cliente.
+**Como foi superado***: Reuniões de alinhamento entre a equipe, onde validamos a viabilidade técnica em conjunto. Além de, reuniões com o cliente em que pudemos entender mais sobre seus desejos e necessidades. Dessa forma, foi possível priorizar as necessidades vinculadas as funcionalidades que entregam maiores valores de negócio, mantendo a coerência entre o que é tecnicamente possível e relevante para o cliente.
+
+### Requisitos Funcionais e Não Funcionais 
+
+**Dificuldade**: Dificuldade em entender como os requisitos se comportam na prática.
+
+**Como foi superado**: Desenvolvemos um protótipo de baixo nível, trazendo assim uma ideia mais concreta de como o sistema poderia ficar.
