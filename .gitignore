@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 .pnpm-store/
 
 # Builds
@@ -11,29 +12,43 @@ dist/
 .next/
 .out/
 coverage/
+.nyc_output/
 
 # Env
 .env
 .env.*
 !.env.example
+!.env.*.example
 
-# Editor
+# Editor/OS
 .vscode/
 .idea/
+*.swp
+*.swo
 .DS_Store
+Thumbs.db
 
 # Logs
 logs/
 *.log
 
 # Frontend
+frontend/node_modules/
 frontend/.cache/
 frontend/.vite/
+frontend/dist/
 
 # Backend
+backend/node_modules/
 backend/tmp/
 backend/.cache/
+backend/coverage/
 
 # Python/MkDocs caches
 __pycache__/
 .site/
+.pytest_cache/
+
+# Tooling caches
+.eslintcache
+.stylelintcache
