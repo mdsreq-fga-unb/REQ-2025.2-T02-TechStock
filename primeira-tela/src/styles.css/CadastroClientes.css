@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;700&family=Roboto:wght@100;300;400;500;700;900&family=Source+Sans+Pro:wght@200;300;400;600;700;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  outline: 0; 
+}
+
+/*body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,0.1);
+}*/
+
+.Container{
+  background-color: #EBEBEB;
+
+}
+
+.nav{
+  background-color: black;
+
+  
+}
+
+.SistemaDeGestao{
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.LogoCellVex{
+  display:flexbox;
+}
+.BotoesNavegacao{
+
+    border-radius: 5px;
+    background-color: #C4B4CC;
+    width: 143px;
+    height: 53px;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.Main{
+  display: flex;
+    flex-direction: column;
+    height: 50%;
+    width: 50%;
+    background-color: #EBEBEB;
+    flex-wrap: wrap;
+    align-content: space-around;
+    justify-content: center;
+    align-items: center;
+}
+.GCH{
+  font-size: 40px;
+  color: #72008b;
+  margin-top: 20px;
+}
+.BarraSuperior{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 20px;
+  background-color: white;
+  color: #72008b;
+  height: 100%;
+  width: 100%;
+  margin-top: 50px; 
+
+}
+
+.title {
+font-size: 22px;
+margin-bottom: 20px;
+font-weight: 600;
+}
+.actions-bar {
+display: flex;
+justify-content: space-between;
+margin-bottom: 20px;
+}
+.search-input {
+width: 300px;
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 6px;
+}
+.btn-primary {
+background: #7d2cff;
+border: none;
+color: #fff;
+padding: 10px 16px;
+border-radius: 6px;
+cursor: pointer;
+}
+.btn-primary:hover {
+background: #6619db;
+}
+.client-table {
+width: 100%;
+border-collapse: collapse;
+background: #fff;
+border-radius: 8px;
+overflow: hidden;
+}
+.client-table th {
+background: #f3eaff;
+padding: 12px;
+text-align: left;
+font-size: 14px;
+color: #333;
+}
+.client-table td {
+padding: 12px;
+border-top: 1px solid #eee;
+font-size: 14px;
+}
+.actions span {
+margin-right: 8px;
+cursor: pointer;
+}
