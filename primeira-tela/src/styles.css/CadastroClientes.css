@@ -29,22 +29,26 @@
 }
 
 .SistemaDeGestao{
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Inter', monospace;
+  color: black;
+  word-spacing: -5px; 
 }
 
 .LogoCellVex{
   display:flexbox;
+  font-weight: bold;
 }
 .BotoesNavegacao{
 
     border-radius: 5px;
     background-color: #C4B4CC;
-    width: 143px;
-    height: 53px;
+    width: 193px;
+    height: 50px;
     text-align: center;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    margin-top: -40px;
 }
 .Main{
   display: flex;
@@ -74,17 +78,39 @@
   margin-top: 50px; 
 
 }
-
 .title {
-font-size: 22px;
-margin-bottom: 20px;
+font-size: 20px;
+margin-top: 150px;
 font-weight: 600;
+margin-left: 100px;
+}
+.gerencie {
+font-size: 10px;
+font-weight: 600;
+margin-left: 100px;
+color: gray;
+}
+.Gestao {
+font-size: 10px;
+font-weight: 600;
+margin-left: 100px;
+color: gray;
+margin-bottom: -80px;
+}
+.Clientes {
+font-size: 20px;
+margin-top: 50px;
+font-weight: 600;
+margin-left: 100px;
 }
 .actions-bar {
 display: flex;
 justify-content: space-between;
-margin-bottom: 20px;
+margin-top: 40px;
+margin-bottom: 40px;
+margin-left: 95px;
 }
+
 .search-input {
 width: 300px;
 padding: 8px;

@@ -60,7 +60,7 @@ const Nome = () => {
     <div className ='Container'>
       <li className='BarraSuperior'>
         <div className='LogoCellVex' >
-          CellVEX <p className='SistemaDeGestao'>
+          CellVex <p className='SistemaDeGestao'>
             Sistema De Gestão</p></div>
         <div className='BotoesNavegacao'>
           Dashboard</div>
@@ -71,7 +71,13 @@ const Nome = () => {
         <div className='BotoesNavegacao' >Relatórios</div>
       </li>
 
+        <div className='Clientes' > </div>
+      <h2 className="Clientes">Clientes</h2>
+            <h2 className="gerencie">Gestão de clientes e histórico</h2> 
+        <div className='Gestao' > </div>
+
       <h2 className="title">Lista de Clientes</h2>
+            <h2 className="gerencie">Gerencie todos os produtos</h2> 
 
       <div className="actions-bar">
         <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
