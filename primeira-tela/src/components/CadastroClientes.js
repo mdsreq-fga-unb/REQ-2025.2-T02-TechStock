@@ -59,7 +59,7 @@ function CadastroClientes() {
           <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
           
           {/* ✅ botão agora navega para tela de cadastro */}
-          <button className="btn-primary" onClick={() => navigate("/NovoCadastro")}>
+          <button className="btn-primary" onClick={() => navigate("/clientes/novo")}>
             + Novo Cliente
           </button>
         </div>

@@ -35,7 +35,7 @@ function NovoCadastro() {
     setItensBD([...db, newClient]);
 
     alert("✅ Cliente cadastrado com sucesso!");
-    navigate("/clientes"); // volta para lista
+    navigate("/"); // volta para lista
   };
 
   return (
