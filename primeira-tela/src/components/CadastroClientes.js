@@ -1,89 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import '../styles.css/CadastroClientes.css';
+import { useNavigate } from 'react-router-dom';
 
+// Funções para salvar e buscar no LocalStorage
 const getItensBD = () => JSON.parse(localStorage.getItem('dbfunc')) ?? [];
 const setItensBD = itens => localStorage.setItem('dbfunc', JSON.stringify(itens));
 
-const Nome = () => {
-  const [itens, setItens] = useState([]);
-  const [clients] = useState([]); // Add this line
-  const [editId, setEditId] = useState(undefined);
-  const [form, setForm] = useState({ nome: '', funcao: '', salario: '' });
+function CadastroClientes() {
 
+  const navigate = useNavigate();
+
+  // Lista visível na tabela
+  const [clients, setClients] = useState([]);
+
+  // Carrega dados ao abrir a página
   useEffect(() => {
-    setItens(getItensBD());
+    setClients(getItensBD());
   }, []);
 
-  useEffect(() => {
-    setItensBD(itens);
-  }, [itens]);
-
-  const openModal = (edit = false, index = 0) => {
-    if (edit) {
-      setForm({
-        nome: itens[index].nome,
-        funcao: itens[index].funcao,
-        salario: itens[index].salario,
-      });
-      setEditId(index);
-    } else {
-      setForm({ nome: '', funcao: '', salario: '' });
-      setEditId(undefined);
-    }
+  // Função para deletar um cliente
+  const handleDelete = (index) => {
+    const novosItens = [...clients];
+    novosItens.splice(index, 1);
+    setClients(novosItens);
+    setItensBD(novosItens);
   };
 
-  const handleEdit = index => {
-    openModal(true, index);
-  };
-
-  const handleDelete = index => {
-    const newItens = [...itens];
-    newItens.splice(index, 1);
-    setItens(newItens);
-  };
-
-  const handleSave = e => {
-    e.preventDefault();
-    if (!form.nome || !form.funcao || !form.salario) return;
-    if (editId !== undefined) {
-      const newItens = [...itens];
-      newItens[editId] = { ...form };
-      setItens(newItens);
-    } else {
-      setItens([...itens, { ...form }]);
-    }
-    setEditId(undefined);
-    setForm({ nome: '', funcao: '', salario: '' });
+  // (Se quiser editar, depois criamos)
+  const handleEdit = (index) => {
+    alert("Editar cliente ID: " + clients[index].id);
   };
 
   return (
     <div className ='Container'>
-      <li className='BarraSuperior'>
-        <div className='LogoCellVex' >
-          CellVex <p className='SistemaDeGestao'>
-            Sistema De Gestão</p></div>
-        <div className='BotoesNavegacao'>
-          Dashboard</div>
-        <div className='BotoesNavegacao' >Produtos</div>
-        <div className='BotoesNavegacao' >Clientes</div>
-        <div className='BotoesNavegacao' >Fornecedores</div>
-        <div className='BotoesNavegacao' >Manutenção</div>
-        <div className='BotoesNavegacao' >Relatórios</div>
-      </li>
+      <div className='BarraSuperior'>
+        <div className='LogoCellVex'>
+          CellVex 
+          <p className='SistemaDeGestao'>Sistema De Gestão</p>
+        </div>
 
-        <div className='Clientes' > </div>
-      <h2 className="Clientes">Clientes</h2>
-            <h2 className="gerencie">Gestão de clientes e histórico</h2> 
-        <div className='Gestao' > </div>
-
-      <h2 className="title">Lista de Clientes</h2>
-            <h2 className="gerencie">Gerencie todos os produtos</h2> 
-
-      <div className="actions-bar">
-        <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
-        <button className="btn-primary" onClick={handleSave}>+ Novo Cliente</button>
+        <div className='BotoesNavegacao'>Dashboard</div>
+        <div className='BotoesNavegacao'>Produtos</div>
+        <div className='BotoesNavegacao'>Clientes</div>
+        <div className='BotoesNavegacao'>Fornecedores</div>
+        <div className='BotoesNavegacao'>Manutenção</div>
+        <div className='BotoesNavegacao'>Relatórios</div>
       </div>
 
+
+      <h2 className="Clientes">Clientes</h2>
+      <h2 className="gerencie-1">Gestão de clientes e histórico</h2> 
+
+      <div className='Gestao' > 
+        <h2 className="title">Lista de Clientes</h2>
+        <h2 className="gerencie-2">Gerencie todos os produtos</h2> 
+
+        <div className="actions-bar">
+          <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
+          
+          {/* ✅ botão agora navega para tela de cadastro */}
+          <button className="btn-primary" onClick={() => navigate("/NovoCadastro")}>
+            + Novo Cliente
+          </button>
+        </div>
+      </div>
+
+      {/* ✅ TABELA */}
       <table className="client-table">
         <thead>
           <tr>
@@ -98,8 +80,9 @@ const Nome = () => {
             <th>Ações</th>
           </tr>
         </thead>
+
         <tbody>
-          {clients.map((c) => (
+          {clients.map((c, index) => (
             <tr key={c.id}>
               <td>{c.id}</td>
               <td>{c.name}</td>
@@ -109,34 +92,19 @@ const Nome = () => {
               <td>{c.email}</td>
               <td>{c.type}</td>
               <td>{c.warranty}</td>
-              <td className="actions">⚙️ ✏️ 🗑️</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
 
-      <table >
-        <tbody>
-          {itens.map((item, index) => (
-            <tr key={index}>
-              <td>{item.nome}</td>
-              <td>{item.funcao}</td>
-              <td>R$ {item.salario}</td>
-              <td className="acao" >
-                <button
-                  onClick={() => handleEdit(index)}>
-                  Edit
-                </button>
-              </td>
-              <td className="acao">
-                <button  onClick={() => handleDelete(index)}>Delete</button>
+              {/* Ações */}
+              <td className="actions">
+                <span onClick={() => handleEdit(index)}>✏️</span>
+                <span onClick={() => handleDelete(index)}>🗑️</span>
               </td>
             </tr>
           ))}
         </tbody>
+
       </table>
     </div>
   );
-};
+}
 
-export default Nome;
+export default CadastroClientes;
