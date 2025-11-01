@@ -42,6 +42,9 @@ model celulares {
   nome_fornecedor        String    @db.VarChar(255)
   usuario_cadastro_id    Int?
   usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_by             Int?      @default(1)
+  updated_by             Int?      @default(1)
+  updated_at             DateTime? @updatedAt @db.Timestamptz(6)
 }
 
 model pecas {
@@ -55,4 +58,7 @@ model pecas {
   nome_fornecedor      String    @db.VarChar(255)
   usuario_cadastro_id  Int?
   usuario_cadastro     usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_by           Int?      @default(1)
+  updated_by           Int?      @default(1)
+  updated_at           DateTime? @updatedAt @db.Timestamptz(6)
 }

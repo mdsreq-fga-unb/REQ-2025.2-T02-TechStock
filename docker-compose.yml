@@ -25,11 +25,11 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: development
-      PORT: 3000
+      PORT: 8080
       CORS_ORIGIN: http://localhost:5173
       DATABASE_URL: postgresql://techstock:techstock@db:5432/techstock
     ports:
-      - "3000:3000"
+      - "8080:8080"
     volumes:
       - ./backend:/app
       - /app/node_modules
