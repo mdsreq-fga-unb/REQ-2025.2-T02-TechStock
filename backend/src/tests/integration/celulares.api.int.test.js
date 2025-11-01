@@ -47,6 +47,17 @@ describe('API /api/celulares', () => {
     expect(listRes.body.items.length).toBeGreaterThanOrEqual(1);
   });
 
+  test('POST IMEI duplicado retorna 409', async () => {
+    await request(app)
+      .post('/api/celulares')
+      .send({ modelo: 'A', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Compra' })
+      .expect(201);
+    await request(app)
+      .post('/api/celulares')
+      .send({ modelo: 'B', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Compra' })
+      .expect(409);
+  });
+
   test('GET by id 404 quando não existe', async () => {
     await request(app).get('/api/celulares/9999').expect(404);
   });
@@ -64,6 +75,19 @@ describe('API /api/celulares', () => {
       .expect(200);
 
     expect(updateRes.body.status).toBe('Vendido');
+  });
+
+  test('PUT validação falha (valor_compra negativo)', async () => {
+    const createRes = await request(app)
+      .post('/api/celulares')
+      .send({ modelo: 'Moto Z', imei: 'VAL123', nome_fornecedor: 'F', tipo: 'Compra' })
+      .expect(201);
+
+    const id = createRes.body.id;
+    await request(app)
+      .put(`/api/celulares/${id}`)
+      .send({ valor_compra: -10 })
+      .expect(400);
   });
 
   test('DELETE remove', async () => {
