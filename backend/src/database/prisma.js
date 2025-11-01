@@ -1,4 +1,10 @@
-const { PrismaClient } = require('@prisma/client');
+let PrismaClient;
+if (process.env.USE_SQLITE === '1') {
+  // Prisma client generated from prisma/schema.test.prisma with output set to @prisma/client-test
+  ({ PrismaClient } = require('@prisma/client-test'));
+} else {
+  ({ PrismaClient } = require('@prisma/client'));
+}
 
 let prisma;
 
