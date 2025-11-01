@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuarios {
+  id         Int         @id @default(autoincrement())
+  nome       String      @db.VarChar(255)
+  email      String      @unique @db.VarChar(255)
+  senha_hash String      @db.VarChar(255)
+  created_at DateTime?   @default(now()) @db.Timestamptz(6)
+  celulares  celulares[]
+  pecas      pecas[]
+}
+
+model clientes {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.VarChar(255)
+  cpf           String    @unique @db.VarChar(255)
+  telefone      String?   @db.VarChar(255)
+  email         String?   @db.VarChar(255)
+  tipo          String
+  data_cadastro DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model celulares {
+  id                     Int       @id @default(autoincrement())
+  modelo                 String    @db.VarChar(255)
+  imei                   String    @unique @db.VarChar(255)
+  cor                    String?   @db.VarChar(255)
+  capacidade             String?   @db.VarChar(255)
+  valor_compra           Decimal?  @db.Decimal(10, 2)
+  garantia_padrao_dias   Int       @default(365)
+  defeitos_identificados String?
+  tipo                   String
+  status                 String    @default("EmEstoque")
+  data_cadastro          DateTime? @default(now()) @db.Timestamptz(6)
+  nome_fornecedor        String    @db.VarChar(255)
+  usuario_cadastro_id    Int?
+  usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pecas {
+  id                   Int       @id @default(autoincrement())
+  nome                 String    @db.VarChar(255)
+  codigo_interno       String    @unique @db.VarChar(255)
+  compatibilidade      String?
+  quantidade           Int       @default(0)
+  garantia_padrao_dias Int       @default(90)
+  data_cadastro        DateTime? @default(now()) @db.Timestamptz(6)
+  nome_fornecedor      String    @db.VarChar(255)
+  usuario_cadastro_id  Int?
+  usuario_cadastro     usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

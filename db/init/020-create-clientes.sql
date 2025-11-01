@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS clientes (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  cpf VARCHAR(255) UNIQUE NOT NULL,
+  telefone VARCHAR(255),
+  email VARCHAR(255),
+  tipo tipo_cliente NOT NULL,
+  data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
