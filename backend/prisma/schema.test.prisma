@@ -15,6 +15,7 @@ model usuarios {
   senha_hash String
   created_at DateTime?   @default(now())
   celulares  celulares[]
+  pecas      pecas[]
 }
 
 model celulares {
@@ -32,4 +33,23 @@ model celulares {
   nome_fornecedor        String
   usuario_cadastro_id    Int?
   usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id])
+  created_by             Int?      @default(1)
+  updated_by             Int?      @default(1)
+  updated_at             DateTime? @updatedAt
+}
+
+model pecas {
+  id                   Int       @id @default(autoincrement())
+  nome                 String
+  codigo_interno       String    @unique
+  compatibilidade      String?
+  quantidade           Int       @default(0)
+  garantia_padrao_dias Int       @default(90)
+  data_cadastro        DateTime? @default(now())
+  nome_fornecedor      String
+  usuario_cadastro_id  Int?
+  usuario_cadastro     usuarios? @relation(fields: [usuario_cadastro_id], references: [id])
+  created_by           Int?      @default(1)
+  updated_by           Int?      @default(1)
+  updated_at           DateTime? @updatedAt
 }
