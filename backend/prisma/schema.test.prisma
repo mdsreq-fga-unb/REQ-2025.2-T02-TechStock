@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-test"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("TEST_DATABASE_URL")
+}
+
+model usuarios {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  email      String      @unique
+  senha_hash String
+  created_at DateTime?   @default(now())
+  celulares  celulares[]
+}
+
+model celulares {
+  id                     Int       @id @default(autoincrement())
+  modelo                 String
+  imei                   String    @unique
+  cor                    String?
+  capacidade             String?
+  valor_compra           Decimal?
+  garantia_padrao_dias   Int       @default(365)
+  defeitos_identificados String?
+  tipo                   String
+  status                 String    @default("EmEstoque")
+  data_cadastro          DateTime? @default(now())
+  nome_fornecedor        String
+  usuario_cadastro_id    Int?
+  usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id])
+}
