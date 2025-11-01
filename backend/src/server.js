@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const { pingDB } = require('./database/prisma');
 const swaggerUi = require('swagger-ui-express');
 const { swaggerSpec } = require('./config/swagger');
+const { attachUser } = require('./middlewares/auth');
 
 const app = express();
 
@@ -16,6 +17,7 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(attachUser);
 
 // Simple request log for visibility
 app.use((req, _res, next) => {

@@ -7,5 +7,8 @@ CREATE TABLE IF NOT EXISTS pecas (
   garantia_padrao_dias INT NOT NULL DEFAULT 90,
   data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   nome_fornecedor VARCHAR(255) NOT NULL,
-  usuario_cadastro_id INT REFERENCES usuarios(id)
+  usuario_cadastro_id INT REFERENCES usuarios(id),
+  created_by INT DEFAULT 1 REFERENCES usuarios(id),
+  updated_by INT DEFAULT 1 REFERENCES usuarios(id),
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
