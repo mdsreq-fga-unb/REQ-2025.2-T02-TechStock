@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import '../styles.css/NovoCadastro.css';
+import '../styles/NovoCadastro.css';
 
-const getItensBD = () => JSON.parse(localStorage.getItem('dbfunc')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbfunc', JSON.stringify(itens));
+const getItensBD = () => JSON.parse(localStorage.getItem('dbclientes')) ?? [];
+const setItensBD = itens => localStorage.setItem('dbclientes', JSON.stringify(itens));
 
 function NovoCadastro() {
 
@@ -34,18 +34,18 @@ function NovoCadastro() {
 
     setItensBD([...db, newClient]);
 
-    alert("✅ Cliente cadastrado com sucesso!");
+    alert("Cliente cadastrado com sucesso!");
     navigate("/"); // volta para lista
   };
 
   return (
     <div className="novo-container">
 
-      <h2>Novo Cliente</h2>
+      <h2>Adicionar Cliente</h2>
 
       <div className="form-box">
 
-        <label>Nome:</label>
+        <label>Nome Completo:</label>
         <input type="text" value={name} onChange={e => setName(e.target.value)} />
 
         <label>CPF:</label>

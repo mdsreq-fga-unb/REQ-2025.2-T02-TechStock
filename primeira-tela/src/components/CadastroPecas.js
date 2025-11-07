@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/CadastroClientes.css';
+import '../styles/NovoCadastroPecas.css';
 import { useNavigate } from 'react-router-dom';
 
 // Funções para salvar e buscar no LocalStorage
-const getItensBD = () => JSON.parse(localStorage.getItem('dbclientes')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbclientes', JSON.stringify(itens));
+const getItensBD = () => JSON.parse(localStorage.getItem('dbpecas')) ?? [];
+const setItensBD = itens => localStorage.setItem('dbpecas', JSON.stringify(itens));
 
-function CadastroClientes() {
+function CadastroPecas() {
 
   const navigate = useNavigate();
 
   // Lista visível na tabela
-  const [clients, setClients] = useState([]);
+  const [Pecas, setPecas] = useState([]);
 
   // Carrega dados ao abrir a página
   useEffect(() => {
-    setClients(getItensBD());
+    setPecas(getItensBD());
   }, []);
 
   // Função para deletar um cliente
   const handleDelete = (index) => {
-    const novosItens = [...clients];
+    const novosItens = [...Pecas];
     novosItens.splice(index, 1);
-    setClients(novosItens);
+    setPecas(novosItens);
     setItensBD(novosItens);
   };
 
   // (Se quiser editar, depois criamos)
-  const handleEdit = (index) => {
-    alert("Editar cliente ID: " + clients[index].id);
+  const handleEdit = (pecaId) => {
+    alert("Editar peça ID: " + Pecas[pecaId].id);
   };
 
   return (
@@ -48,19 +48,19 @@ function CadastroClientes() {
       </div>
 
 
-      <h2 className="Clientes">Clientes</h2>
-      <h2 className="gerencie-1">Gestão de clientes e histórico</h2> 
+      <h2 className="Clientes">Peças</h2>
+      <h2 className="gerencie-1">Controle de peças para manutenção</h2> 
 
       <div className='Gestao' > 
-        <h2 className="title">Lista de Clientes</h2>
+        <h2 className="title">Controle De Peças para Manutenção</h2>
         <h2 className="gerencie-2">Gerencie todos os produtos</h2> 
 
         <div className="actions-bar">
-          <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
+          <input type="text" placeholder="Buscar Produtos" className="search-input" />
           
           {/*botão agora navega para tela de cadastro */}
-          <button className="btn-primary" onClick={() => navigate("/clientes/novo")}>
-            + Novo Cliente
+          <button className="btn-primary" onClick={() => navigate("/pecas/novo")}>
+            + Nova Peça
           </button>
         </div>
       </div>
@@ -72,26 +72,28 @@ function CadastroClientes() {
             <th>ID</th>
             <th>Nome</th>
             <th>Data de cadastro</th>
-            <th>CPF</th>
-            <th>Telefone</th>
-            <th>E-mail</th>
-            <th>Tipo de Cliente</th>
+            <th>Código Interno</th>
+            <th>Compatibilidade</th>
+            <th>Nome Do Fornecedor</th>
+            <th>Quantidade</th>
             <th>Garantia</th>
+            <th> Preço </th>
             <th>Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          {clients.map((c, index) => (
+          {Pecas.map((c, index) => (
             <tr key={c.id}>
               <td>{c.id}</td>
               <td>{c.name}</td>
-              <td>{c.date}</td>
-              <td>{c.cpf}</td>
-              <td>{c.phone}</td>
-              <td>{c.email}</td>
-              <td>{c.type}</td>
+              <td>{c.dataCadastro}</td>
+              <td>{c.codigoInterno}</td>
+              <td>{c.compatibilidade}</td>
+              <td>{c.fornecedor}</td>
+              <td>{c.quantidade}</td>
               <td>{c.warranty}</td>
+              <td> R${c.preco ? parseFloat(c.preco).toFixed(2).replace('.', ','):'0,00' }</td>
 
               {/* Ações */}
               <td className="actions">
@@ -107,4 +109,4 @@ function CadastroClientes() {
   );
 }
 
-export default CadastroClientes;
+export default CadastroPecas;
