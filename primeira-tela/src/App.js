@@ -4,6 +4,8 @@ import NovoCadastro from "./components/NovoCadastro";
 import CadastroPecas from "./components/CadastroPecas";
 import React from "react";
 import NovoCadastroPecas from "./components/NovoCadastroPecas";
+import CadastroCelulares from "./components/CadastroCelulares";
+import NovoCadastroCelulares from "./components/NovoCadastroCelulares";
 
 export default function App() {
   return (
@@ -16,6 +18,9 @@ export default function App() {
         <Route path="/clientes/novo" element={<NovoCadastro />} />
         <Route path="/pecas" element={<CadastroPecas />} />
         <Route path="/pecas/novo" element={<NovoCadastroPecas />} /> 
+        <Route path="/celulares" element={<CadastroCelulares/>} />
+        <Route path="/celulares/novo" element={<NovoCadastroCelulares/>} />
+         
         
         
         {/* rota /NovoCadastro (antiga) não é mais necessária */}
