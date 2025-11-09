@@ -2,8 +2,8 @@ const clientesService = require('../services/clientes.service');
 
 async function list(req, res, next) {
   try {
-    const { page = 1, pageSize = 20, q } = req.query;
-    const data = await clientesService.list({ page: Number(page), pageSize: Number(pageSize), q });
+    const { page = 1, pageSize = 20, q, cpf, tipo } = req.query;
+    const data = await clientesService.list({ page: Number(page), pageSize: Number(pageSize), q, cpf, tipo });
     res.json(data);
   } catch (err) {
     next(err);
