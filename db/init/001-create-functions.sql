@@ -1,4 +1,4 @@
--- Funções utilitárias globais para triggers
+-- Global utility functions for triggers (runs first)
 
 -- Função para atualizar o campo updated_at em triggers BEFORE UPDATE
 CREATE OR REPLACE FUNCTION set_updated_at()
