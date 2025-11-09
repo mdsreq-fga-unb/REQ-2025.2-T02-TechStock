@@ -16,3 +16,18 @@ CREATE TABLE IF NOT EXISTS celulares (
   updated_by INT DEFAULT 1 REFERENCES usuarios(id),
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Atualiza automaticamente updated_at em cada UPDATE
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS celulares_set_updated_at ON celulares;
+CREATE TRIGGER celulares_set_updated_at
+BEFORE UPDATE ON celulares
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
