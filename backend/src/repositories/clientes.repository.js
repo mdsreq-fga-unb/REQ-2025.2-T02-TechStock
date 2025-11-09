@@ -44,14 +44,14 @@ async function getById(id) {
   return prisma.clientes.findUnique({ where: { id } });
 }
 
-async function create(data, userId) {
+async function create(data) {
   const prisma = getPrisma();
   const allowedCreate = ['nome', 'cpf', 'telefone', 'email', 'tipo'];
   const createData = pick(data, allowedCreate);
   return prisma.clientes.create({ data: createData });
 }
 
-async function update(id, data, userId) {
+async function update(id, data) {
   const prisma = getPrisma();
   const allowedUpdate = ['nome', 'telefone', 'email', 'tipo']; // cpf não deve ser alterado em regra
   const updateData = pick(data, allowedUpdate);
