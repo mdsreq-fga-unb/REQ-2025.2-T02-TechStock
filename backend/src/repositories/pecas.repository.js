@@ -12,6 +12,17 @@ function buildWhere(q) {
   };
 }
 
+function pick(obj, keys) {
+  const out = {};
+  if (!obj || typeof obj !== 'object') return out;
+  for (const k of keys) {
+    if (Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined) {
+      out[k] = obj[k];
+    }
+  }
+  return out;
+}
+
 async function list({ page = 1, pageSize = 20, q } = {}) {
   const prisma = getPrisma();
   const where = buildWhere(q);
@@ -29,12 +40,31 @@ async function getById(id) {
 
 async function create(data, userId) {
   const prisma = getPrisma();
-  return prisma.pecas.create({ data: { ...data, created_by: userId, updated_by: userId } });
+  const allowedCreateFields = [
+    'nome',
+    'codigo_interno',
+    'compatibilidade',
+    'quantidade',
+    'garantia_padrao_dias',
+    'nome_fornecedor',
+    'usuario_cadastro_id',
+  ];
+  const dataToCreate = pick(data, allowedCreateFields);
+  return prisma.pecas.create({ data: { ...dataToCreate, created_by: userId, updated_by: userId } });
 }
 
 async function update(id, data, userId) {
   const prisma = getPrisma();
-  return prisma.pecas.update({ where: { id }, data: { ...data, updated_by: userId } });
+  const allowedUpdateFields = [
+    'nome',
+    'codigo_interno',
+    'compatibilidade',
+    'quantidade',
+    'garantia_padrao_dias',
+    'nome_fornecedor',
+  ];
+  const dataToUpdate = pick(data, allowedUpdateFields);
+  return prisma.pecas.update({ where: { id }, data: { ...dataToUpdate, updated_by: userId } });
 }
 
 async function remove(id) {
