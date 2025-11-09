@@ -35,7 +35,7 @@ async function create(req, res, next) {
     const celular = await celularesService.create(req.body, req.user);
     res.status(201).json(serializeCelular(celular));
   } catch (err) {
-    if (err && err.code === 'P2002' && err.meta && err.meta.target && (Array.isArray(err.meta.target) ? err.meta.target.join(',') : String(err.meta.target)).includes('imei')) {
+    if (err && err.code === 'P2002' && err.meta?.target?.includes('imei')) {
       return res.status(409).json({ message: 'IMEI já cadastrado' });
     }
     next(err);
@@ -48,7 +48,7 @@ async function update(req, res, next) {
     const celular = await celularesService.update(id, req.body, req.user);
     res.json(serializeCelular(celular));
   } catch (err) {
-    if (err && err.code === 'P2002' && err.meta && err.meta.target && (Array.isArray(err.meta.target) ? err.meta.target.join(',') : String(err.meta.target)).includes('imei')) {
+    if (err && err.code === 'P2002' && err.meta?.target?.includes('imei')) {
       return res.status(409).json({ message: 'IMEI já cadastrado' });
     }
     next(err);

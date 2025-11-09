@@ -42,6 +42,12 @@ router.post('/usuarios', validate(['nome', 'email', 'senha']), usuariosControlle
  *       - in: query
  *         name: q
  *         schema: { type: string }
+ *       - in: query
+ *         name: cpf
+ *         schema: { type: string }
+ *       - in: query
+ *         name: tipo
+ *         schema: { type: string, enum: [CONSUMIDOR, REVENDEDOR, MANUTENCAO] }
  *     responses:
  *       200:
  *         description: Lista paginada
@@ -55,7 +61,7 @@ router.post('/usuarios', validate(['nome', 'email', 'senha']), usuariosControlle
  *                   cpf: "11122233344"
  *                   telefone: "11999990000"
  *                   email: "joao@exemplo.com"
- *                   tipo: "PF"
+ *                   tipo: "CONSUMIDOR"
  *                   data_cadastro: "2025-01-10T00:00:00.000Z"
  *   post:
  *     summary: Cria um cliente
@@ -99,7 +105,7 @@ router.post(
     body('email').optional().isEmail(),
   ],
   validateRequest,
-  clientesController.create, // delega ao controller (já trata P2002)
+  clientesController.create,
 );
 
 /**
@@ -124,7 +130,7 @@ router.post(
  *               cpf: "11122233344"
  *               telefone: "11999990000"
  *               email: "joao@exemplo.com"
- *               tipo: "PF"
+ *               tipo: "CONSUMIDOR"
  *               data_cadastro: "2025-01-10T00:00:00.000Z"
  *       404:
  *         description: Não encontrado
@@ -466,7 +472,7 @@ router.post(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  celularesController.create, // remove try/catch duplicado
+  celularesController.create,
 );
 router.put(
   '/celulares/:id',
@@ -478,13 +484,17 @@ router.put(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  celularesController.update, // remove try/catch duplicado
+  celularesController.update,
 );
 router.get('/celulares/:id', celularesController.getById);
 router.delete('/celulares/:id', celularesController.remove);
 router.get(
   '/pecas',
-  [query('page').optional().isInt({ min: 1 }).toInt(), query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(), query('q').optional().isString()],
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+  ],
   validateRequest,
   pecasController.list,
 );

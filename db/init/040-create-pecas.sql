@@ -14,14 +14,6 @@ CREATE TABLE IF NOT EXISTS pecas (
 );
 
 -- Trigger para manter updated_at em updates
-CREATE OR REPLACE FUNCTION set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 DROP TRIGGER IF EXISTS pecas_set_updated_at ON pecas;
 CREATE TRIGGER pecas_set_updated_at
 BEFORE UPDATE ON pecas

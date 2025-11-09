@@ -13,9 +13,20 @@ function buildWhere(q, filters = {}) {
       ],
     });
   }
-  if (filters.cpf) AND.push({ cpf: { contains: filters.cpf.trim(), mode: 'insensitive' } });
+  if (filters.cpf) AND.push({ cpf: { equals: filters.cpf.trim() } });
   if (filters.tipo) AND.push({ tipo: { equals: filters.tipo } });
   return AND.length ? { AND } : undefined;
+}
+
+function pick(obj, keys) {
+  const out = {};
+  if (!obj || typeof obj !== 'object') return out;
+  for (const k of keys) {
+    if (Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined) {
+      out[k] = obj[k];
+    }
+  }
+  return out;
 }
 
 async function list({ page = 1, pageSize = 20, q, cpf, tipo } = {}) {
@@ -36,14 +47,14 @@ async function getById(id) {
 async function create(data, userId) {
   const prisma = getPrisma();
   const allowedCreate = ['nome', 'cpf', 'telefone', 'email', 'tipo'];
-  const createData = Object.fromEntries(Object.entries(data).filter(([k, v]) => allowedCreate.includes(k) && v !== undefined));
+  const createData = pick(data, allowedCreate);
   return prisma.clientes.create({ data: createData });
 }
 
 async function update(id, data, userId) {
   const prisma = getPrisma();
   const allowedUpdate = ['nome', 'telefone', 'email', 'tipo']; // cpf não deve ser alterado em regra
-  const updateData = Object.fromEntries(Object.entries(data).filter(([k, v]) => allowedUpdate.includes(k) && v !== undefined));
+  const updateData = pick(data, allowedUpdate);
   return prisma.clientes.update({ where: { id }, data: updateData });
 }
 
