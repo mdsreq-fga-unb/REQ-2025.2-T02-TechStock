@@ -3,9 +3,11 @@ const { getPrisma } = require('../database/prisma');
 const usuariosController = require('../controllers/usuarios.controller');
 const celularesController = require('../controllers/celulares.controller');
 const pecasController = require('../controllers/pecas.controller');
+const clientesController = require('../controllers/clientes.controller');
 const { validate } = require('../middlewares/validate');
 const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
+const { isValidCPF } = require('../validators/cpf');
 
 const router = Router();
 
@@ -23,6 +25,156 @@ router.get('/', async (req, res) => {
 // Usuarios
 router.get('/usuarios', usuariosController.list);
 router.post('/usuarios', validate(['nome', 'email', 'senha']), usuariosController.create);
+
+/**
+ * @swagger
+ * /api/clientes:
+ *   get:
+ *     summary: Lista clientes
+ *     tags: [Clientes]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Lista paginada
+ *         content:
+ *           application/json:
+ *             example:
+ *               meta: { page: 1, pageSize: 20, total: 1 }
+ *               items:
+ *                 - id: 1
+ *                   nome: "João da Silva"
+ *                   cpf: "11122233344"
+ *                   telefone: "11999990000"
+ *                   email: "joao@exemplo.com"
+ *                   tipo: "PF"
+ *                   data_cadastro: "2025-01-10T00:00:00.000Z"
+ *   post:
+ *     summary: Cria um cliente
+ *     tags: [Clientes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nome, cpf, tipo]
+ *             properties:
+ *               nome: { type: string }
+ *               cpf: { type: string }
+ *               telefone: { type: string }
+ *               email: { type: string }
+ *               tipo: { type: string }
+ *     responses:
+ *       201: { description: Criado }
+ *       409: { description: CPF já cadastrado }
+ */
+router.get(
+  '/clientes',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+    query('cpf').optional().isString(),
+    query('tipo').optional().isIn(['CONSUMIDOR', 'REVENDEDOR', 'MANUTENCAO']),
+  ],
+  validateRequest,
+  clientesController.list,
+);
+router.post(
+  '/clientes',
+  [
+    body('nome').isString().notEmpty(),
+    body('cpf').isString().notEmpty().custom(isValidCPF).withMessage('CPF inválido'),
+    body('tipo').isIn(['CONSUMIDOR', 'REVENDEDOR', 'MANUTENCAO']),
+    body('telefone').optional().isString(),
+    body('email').optional().isEmail(),
+  ],
+  validateRequest,
+  clientesController.create, // delega ao controller (já trata P2002)
+);
+
+/**
+ * @swagger
+ * /api/clientes/{id}:
+ *   get:
+ *     summary: Detalha um cliente
+ *     tags: [Clientes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               nome: "João da Silva"
+ *               cpf: "11122233344"
+ *               telefone: "11999990000"
+ *               email: "joao@exemplo.com"
+ *               tipo: "PF"
+ *               data_cadastro: "2025-01-10T00:00:00.000Z"
+ *       404:
+ *         description: Não encontrado
+ *         content:
+ *           application/json:
+ *             example: { message: "Cliente não encontrado" }
+ *   put:
+ *     summary: Atualiza um cliente
+ *     tags: [Clientes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { type: object }
+ *     responses:
+ *       200: { description: OK }
+ *       404: { description: Não encontrado }
+ *       409: { description: CPF já cadastrado }
+ *   delete:
+ *     summary: Remove um cliente
+ *     tags: [Clientes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       204: { description: Sem conteúdo }
+ *       404: { description: Não encontrado }
+ */
+router.get('/clientes/:id', clientesController.getById);
+router.put(
+  '/clientes/:id',
+  [
+    param('id').isInt().toInt(),
+    body('nome').optional().isString(),
+    body('telefone').optional().isString(),
+    body('email').optional().isEmail(),
+    body('tipo').optional().isIn(['CONSUMIDOR', 'REVENDEDOR', 'MANUTENCAO']),
+    body('cpf').optional().custom(isValidCPF).withMessage('CPF inválido'),
+  ],
+  validateRequest,
+  clientesController.update,
+);
+router.delete('/clientes/:id', clientesController.remove);
 
 /**
  * @swagger
@@ -314,16 +466,7 @@ router.post(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  async (req, res, next) => {
-    try {
-      await celularesController.create(req, res, next);
-    } catch (e) {
-      if (e && e.code === 'P2002' && e.meta && e.meta.target && e.meta.target.includes('imei')) {
-        return res.status(409).json({ message: 'IMEI já cadastrado' });
-      }
-      return next(e);
-    }
-  },
+  celularesController.create, // remove try/catch duplicado
 );
 router.put(
   '/celulares/:id',
@@ -335,16 +478,7 @@ router.put(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  async (req, res, next) => {
-    try {
-      await celularesController.update(req, res, next);
-    } catch (e) {
-      if (e && e.code === 'P2002' && e.meta && e.meta.target && e.meta.target.includes('imei')) {
-        return res.status(409).json({ message: 'IMEI já cadastrado' });
-      }
-      return next(e);
-    }
-  },
+  celularesController.update, // remove try/catch duplicado
 );
 router.get('/celulares/:id', celularesController.getById);
 router.delete('/celulares/:id', celularesController.remove);
@@ -365,16 +499,7 @@ router.post(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  async (req, res, next) => {
-    try {
-      await pecasController.create(req, res, next);
-    } catch (e) {
-      if (e && e.code === 'P2002' && e.meta && e.meta.target && e.meta.target.includes('codigo_interno')) {
-        return res.status(409).json({ message: 'Código interno já cadastrado' });
-      }
-      return next(e);
-    }
-  },
+  pecasController.create, // remove duplicação
 );
 router.put(
   '/pecas/:id',
