@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS celulares (
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Trigger para manter updated_at em updates
+-- Trigger to maintain updated_at on updates
 DROP TRIGGER IF EXISTS celulares_set_updated_at ON celulares;
 CREATE TRIGGER celulares_set_updated_at
 BEFORE UPDATE ON celulares

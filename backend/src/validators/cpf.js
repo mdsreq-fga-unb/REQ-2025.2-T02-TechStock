@@ -1,7 +1,7 @@
 function isValidCPF(value) {
   const cpf = String(value || '').replace(/\D/g, '');
   if (!cpf || cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false; // todos iguais
+  if (/^(\d)\1{10}$/.test(cpf)) return false; // all digits equal
   const calcDigit = (base) => {
     let sum = 0;
     for (let i = 0; i < base.length; i += 1) {
