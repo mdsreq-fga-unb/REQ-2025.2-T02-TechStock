@@ -8,12 +8,12 @@ async function getById(id) {
   return clientesRepository.getById(id);
 }
 
-async function create(data, user) {
-  return clientesRepository.create(data, user?.id || 1);
+async function create(data) {
+  return clientesRepository.create(data);
 }
 
-async function update(id, data, user) {
-  return clientesRepository.update(id, data, user?.id || 1);
+async function update(id, data) {
+  return clientesRepository.update(id, data);
 }
 
 async function remove(id) {
