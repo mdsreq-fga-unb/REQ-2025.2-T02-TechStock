@@ -166,7 +166,7 @@ router.post(
  *       204: { description: Sem conteúdo }
  *       404: { description: Não encontrado }
  */
-router.get('/clientes/:id', clientesController.getById);
+router.get('/clientes/:id', [param('id').isInt().toInt()], validateRequest, clientesController.getById);
 router.put(
   '/clientes/:id',
   [
@@ -180,7 +180,7 @@ router.put(
   validateRequest,
   clientesController.update,
 );
-router.delete('/clientes/:id', clientesController.remove);
+router.delete('/clientes/:id', [param('id').isInt().toInt()], validateRequest, clientesController.remove);
 
 /**
  * @swagger
@@ -486,8 +486,8 @@ router.put(
   validateRequest,
   celularesController.update,
 );
-router.get('/celulares/:id', celularesController.getById);
-router.delete('/celulares/:id', celularesController.remove);
+router.get('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.getById);
+router.delete('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.remove);
 router.get(
   '/pecas',
   [
@@ -498,7 +498,7 @@ router.get(
   validateRequest,
   pecasController.list,
 );
-router.get('/pecas/:id', pecasController.getById);
+router.get('/pecas/:id', [param('id').isInt().toInt()], validateRequest, pecasController.getById);
 router.post(
   '/pecas',
   [
@@ -521,6 +521,6 @@ router.put(
   validateRequest,
   pecasController.update,
 );
-router.delete('/pecas/:id', pecasController.remove);
+router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, pecasController.remove);
 
 module.exports = router;

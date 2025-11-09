@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS pecas (
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Trigger para manter updated_at em updates
+-- Trigger to maintain updated_at on updates
 DROP TRIGGER IF EXISTS pecas_set_updated_at ON pecas;
 CREATE TRIGGER pecas_set_updated_at
 BEFORE UPDATE ON pecas
