@@ -18,6 +18,16 @@ model usuarios {
   pecas      pecas[]
 }
 
+model clientes {
+  id            Int       @id @default(autoincrement())
+  nome          String
+  cpf           String    @unique
+  telefone      String?
+  email         String?
+  tipo          String
+  data_cadastro DateTime? @default(now())
+}
+
 model celulares {
   id                     Int       @id @default(autoincrement())
   modelo                 String

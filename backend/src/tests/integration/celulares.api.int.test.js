@@ -22,7 +22,8 @@ async function ensureUsuario() {
   const prisma = getPrisma();
   const count = await prisma.usuarios.count();
   if (count === 0) {
-    await prisma.usuarios.create({ data: { nome: 'Admin', email: 'admin@test.local', senha_hash: 'x' } });
+    const email = `admin+${Date.now()}@test.local`;
+    await prisma.usuarios.create({ data: { nome: 'Admin', email, senha_hash: 'x' } });
   }
 }
 
