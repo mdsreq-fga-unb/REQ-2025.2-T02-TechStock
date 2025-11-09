@@ -23,7 +23,7 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const created = await clientesService.create(req.body, req.user);
+    const created = await clientesService.create(req.body);
     res.status(201).json(created);
   } catch (err) {
     if (err && err.code === 'P2002' && err.meta?.target?.includes('cpf')) {
@@ -36,7 +36,7 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const id = Number(req.params.id);
-    const updated = await clientesService.update(id, req.body, req.user);
+    const updated = await clientesService.update(id, req.body);
     res.json(updated);
   } catch (err) {
     if (err && err.code === 'P2002' && err.meta?.target?.includes('cpf')) {

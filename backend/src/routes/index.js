@@ -509,7 +509,7 @@ router.post(
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
-  pecasController.create, // remove duplicação
+  pecasController.create,
 );
 router.put(
   '/pecas/:id',

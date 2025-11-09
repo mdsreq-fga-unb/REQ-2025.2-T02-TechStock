@@ -23,17 +23,17 @@ describe('clientes.service', () => {
     expect(item.id).toBe(1);
   });
 
-  test('create usa user.id', async () => {
+  test('create delega sem user', async () => {
     repo.create.mockResolvedValue({ id: 2 });
-    const created = await service.create({ nome: 'A' }, { id: 10 });
-    expect(repo.create).toHaveBeenCalledWith({ nome: 'A' }, 10);
+    const created = await service.create({ nome: 'A' });
+    expect(repo.create).toHaveBeenCalledWith({ nome: 'A' });
     expect(created.id).toBe(2);
   });
 
-  test('update usa user.id', async () => {
+  test('update delega sem user', async () => {
     repo.update.mockResolvedValue({ id: 3 });
-    const updated = await service.update(3, { nome: 'B' }, { id: 11 });
-    expect(repo.update).toHaveBeenCalledWith(3, { nome: 'B' }, 11);
+    const updated = await service.update(3, { nome: 'B' });
+    expect(repo.update).toHaveBeenCalledWith(3, { nome: 'B' });
     expect(updated.id).toBe(3);
   });
 
