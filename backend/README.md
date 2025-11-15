@@ -22,7 +22,7 @@ API base para o TechStock usando Express e Prisma (PostgreSQL).
 7. Rode a API em dev:
    - `npm run dev`
 
-A API ficará em `http://localhost:3000` e o healthcheck em `/health`.
+A API ficará em `http://localhost:8080` e o healthcheck em `/health`. A documentação Swagger estará em `/docs`.
 
 ## Scripts úteis
 - `npm run dev` — inicia o servidor com nodemon

@@ -3,17 +3,21 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const { pingDB } = require('./database/prisma');
+const swaggerUi = require('swagger-ui-express');
+const { swaggerSpec } = require('./config/swagger');
+const { attachUser } = require('./middlewares/auth');
 
 const app = express();
 
 // Config
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
 // Middlewares
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(attachUser);
 
 // Simple request log for visibility
 app.use((req, _res, next) => {
@@ -22,6 +26,9 @@ app.use((req, _res, next) => {
   }
   next();
 });
+
+// Swagger docs
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Healthcheck
 app.get('/health', async (req, res) => {
@@ -52,4 +59,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Swagger docs available at http://localhost:${PORT}/docs`);
 });
