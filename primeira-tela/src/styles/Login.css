@@ -1,0 +1,127 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* ======== CONTAINER (FUNDO) ======== */
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(217,168,245,0.35), rgba(239,216,255,0.1)),
+    radial-gradient(circle at 80% 70%, rgba(217,168,245,0.35), rgba(239,216,255,0.1));
+}
+
+
+/* ======== FORMULÁRIO ======== */
+
+.FormularioLogin {
+  width: 480px;
+  background: #F6F6F6;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0px 10px 35px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ======== LOGO ======== */
+
+.Logo {
+  text-align: center;
+  color: #A018C4;
+  font-size: 28px;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+
+/* ======== GRUPOS DE INPUT ======== */
+
+.BotaoUseraname,
+.BotaoPassword {
+  margin-bottom: 18px;
+}
+
+.BotaoUseraname h4,
+.BotaoPassword h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #333333;
+}
+
+
+/* ======== INPUTS ======== */
+
+.FormularioLogin input[type="email"],
+.FormularioLogin input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #D6D6D6;
+  outline: none;
+  font-size: 14px;
+  background: white;
+}
+
+.FormularioLogin input::placeholder {
+  color: #A5A5A5;
+}
+
+
+/* ======== BOTÃO ======== */
+
+.BotaoEntrarNoSistema {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #A018C4;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.BotaoEntrarNoSistema:hover {
+  background: #8d12aa;
+}
+
+
+/* ======== CHECKBOX + TEXTO ======== */
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+  color: #333333;
+}
+
+label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+
+/* ======== LINK: ESQUECEU A SENHA ======== */
+
+label a {
+  margin-left: auto;
+  text-decoration: none;
+  font-size: 13px;
+  color: #9B4FBF;
+}
+
+label a:hover {
+  text-decoration: underline;
+}
