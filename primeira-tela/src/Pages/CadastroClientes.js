@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CadastroClientes.css';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Funções para salvar e buscar no LocalStorage
 const getItensBD = () => JSON.parse(localStorage.getItem('dbclientes')) ?? [];
@@ -39,13 +39,13 @@ function CadastroClientes() {
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
         </div>
 
-        <div className='BotoesNavegacao'>Dashboard</div>
-        <div className='BotoesNavegacao'>Produtos</div>
-        <div className='BotoesNavegacao'>Clientes</div>
-        <div className='BotoesNavegacao'>Fornecedores</div>
-        <div className='BotoesNavegacao'>Manutenção</div>
-        <div className='BotoesNavegacao'>Relatórios</div>
-      </div>
+       <div className='BotoesNavegacao'>Dashboard</div>
+               <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+               <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
+               <div className='BotoesNavegacao'>Fornecedores</div>
+               <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
+               <div className='BotoesNavegacao'>Relatórios</div>
+             </div>
 
 
       <h2 className="Clientes">Clientes</h2>

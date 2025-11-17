@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CadastroClientes from "./components/CadastroClientes";
-import NovoCadastro from "./components/NovoCadastro";
-import CadastroPecas from "./components/CadastroPecas";
+import CadastroClientes from "./Pages/CadastroClientes";
+import NovoCadastro from "./Pages/NovoCadastro";
+import CadastroPecas from "./Pages/CadastroPecas";
 import React from "react";
-import NovoCadastroPecas from "./components/NovoCadastroPecas";
-import CadastroCelulares from "./components/CadastroCelulares";
-import NovoCadastroCelulares from "./components/NovoCadastroCelulares";
+import NovoCadastroPecas from "./Pages/NovoCadastroPecas";
+import CadastroCelulares from "./Pages/CadastroCelulares";
+import NovoCadastroCelulares from "./Pages/NovoCadastroCelulares";
+import Login from "./Pages/Login";
 
 export default function App() {
   return (
@@ -20,10 +21,9 @@ export default function App() {
         <Route path="/pecas/novo" element={<NovoCadastroPecas />} /> 
         <Route path="/celulares" element={<CadastroCelulares/>} />
         <Route path="/celulares/novo" element={<NovoCadastroCelulares/>} />
-         
+        <Route path="/login" element={<Login/>} />
         
         
-        {/* rota /NovoCadastro (antiga) não é mais necessária */}
       </Routes>
     </BrowserRouter>
   );
