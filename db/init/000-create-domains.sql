@@ -50,19 +50,3 @@ BEGIN
     CREATE TYPE public.tipo_evento_celular AS ENUM ('OrdemServicoCriada', 'OrdemServicoAtualizada', 'OrdemServicoConcluida', 'OrdemServicoPecaRegistrada');
   END IF;
 END $$;
-
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
-    WHERE t.typname = 'tipo_evento_celular' AND n.nspname = 'public'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_enum e WHERE e.enumlabel = 'OrdemServicoPecaRegistrada' AND e.enumtypid = (
-        SELECT t.oid FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE t.typname = 'tipo_evento_celular' AND n.nspname = 'public'
-      )
-    ) THEN
-      ALTER TYPE public.tipo_evento_celular ADD VALUE IF NOT EXISTS 'OrdemServicoPecaRegistrada';
-    END IF;
-  END IF;
-END $$;
