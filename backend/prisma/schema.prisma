@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StatusOrdemServico {
+  EmAndamento
+  Concluido
+}
+
+enum TipoEventoCelular {
+  OrdemServicoCriada
+  OrdemServicoAtualizada
+  OrdemServicoConcluida
+  OrdemServicoPecaRegistrada
+}
+
 model usuarios {
   id         Int         @id @default(autoincrement())
   nome       String      @db.VarChar(255)
@@ -25,6 +37,8 @@ model clientes {
   email         String?   @db.VarChar(255)
   tipo          String
   data_cadastro DateTime? @default(now()) @db.Timestamptz(6)
+
+  ordens_servico ordens_servico[]
 }
 
 model celulares {
@@ -45,6 +59,9 @@ model celulares {
   created_by             Int?      @default(1)
   updated_by             Int?      @default(1)
   updated_at             DateTime? @db.Timestamptz(6)
+
+  ordens_servico ordens_servico[]
+  historico       celulares_historico[]
 }
 
 model pecas {
@@ -61,4 +78,52 @@ model pecas {
   created_by           Int?      @default(1)
   updated_by           Int?      @default(1)
   updated_at           DateTime? @db.Timestamptz(6)
+
+  ordens_servico_usos ordens_servico_pecas[]
+}
+
+model ordens_servico {
+  id                Int                 @id @default(autoincrement())
+  cliente_id        Int
+  celular_id        Int
+  descricao         String?
+  status            StatusOrdemServico  @default(EmAndamento)
+  data_abertura     DateTime?           @default(now()) @db.Timestamptz(6)
+  data_conclusao    DateTime?           @db.Timestamptz(6)
+  garantia_dias     Int?
+  garantia_validade DateTime?           @db.Timestamptz(6)
+  observacoes       String?
+  created_by        Int?                @default(1)
+  updated_by        Int?                @default(1)
+  updated_at        DateTime?           @db.Timestamptz(6)
+
+  cliente clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  celular celulares @relation(fields: [celular_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  historico celulares_historico[]
+  pecas_utilizadas ordens_servico_pecas[]
+}
+
+model celulares_historico {
+  id               Int               @id @default(autoincrement())
+  celular_id       Int
+  ordem_servico_id Int?
+  tipo_evento      TipoEventoCelular
+  descricao        String
+  data_evento      DateTime?         @default(now()) @db.Timestamptz(6)
+
+  celular       celulares      @relation(fields: [celular_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ordem_servico ordens_servico? @relation(fields: [ordem_servico_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+}
+
+model ordens_servico_pecas {
+  id               Int             @id @default(autoincrement())
+  ordem_servico_id Int
+  peca_id          Int
+  quantidade       Int
+  data_uso         DateTime?       @default(now()) @db.Timestamptz(6)
+
+  ordem_servico ordens_servico @relation(fields: [ordem_servico_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  peca          pecas           @relation(fields: [peca_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([ordem_servico_id, peca_id], name: "ordem_servico_peca_unique")
 }

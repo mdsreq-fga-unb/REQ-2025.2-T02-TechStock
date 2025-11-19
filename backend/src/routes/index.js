@@ -4,6 +4,7 @@ const usuariosController = require('../controllers/usuarios.controller');
 const celularesController = require('../controllers/celulares.controller');
 const pecasController = require('../controllers/pecas.controller');
 const clientesController = require('../controllers/clientes.controller');
+const ordensServicoController = require('../controllers/ordens-servico.controller');
 const { validate } = require('../middlewares/validate');
 const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
@@ -522,5 +523,235 @@ router.put(
   pecasController.update,
 );
 router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, pecasController.remove);
+
+/**
+ * @swagger
+ * /api/ordens-servico:
+ *   get:
+ *     summary: Lista ordens de serviço
+ *     tags: [OrdensServico]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [EmAndamento, Concluido] }
+ *       - in: query
+ *         name: cliente_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: celular_id
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista paginada de ordens de serviço
+ *         content:
+ *           application/json:
+ *             example:
+ *               meta: { page: 1, pageSize: 20, total: 1 }
+ *               items:
+ *                 - id: 10
+ *                   cliente_id: 1
+ *                   celular_id: 2
+ *                   status: "EmAndamento"
+ *                   descricao: "Troca de tela"
+ *                   data_abertura: "2025-01-20T10:00:00.000Z"
+ *                   cliente: { id: 1, nome: "João" }
+ *                   celular: { id: 2, modelo: "iPhone 12" }
+ *   post:
+ *     summary: Cria uma ordem de serviço
+ *     tags: [OrdensServico]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [cliente_id, celular_id]
+ *             properties:
+ *               cliente_id: { type: integer }
+ *               celular_id: { type: integer }
+ *               descricao: { type: string }
+ *               observacoes: { type: string }
+ *               garantia_dias: { type: integer }
+ *     responses:
+ *       201:
+ *         description: Criado
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 10
+ *               status: "EmAndamento"
+ *               cliente_id: 1
+ *               celular_id: 2
+ *               historico:
+ *                 - id: 33
+ *                   tipo_evento: "OrdemServicoCriada"
+ *                   descricao: "Ordem de serviço #10 criada (status EmAndamento)."
+ */
+/**
+ * @swagger
+ * /api/ordens-servico/{id}:
+ *   get:
+ *     summary: Detalha uma ordem de serviço
+ *     tags: [OrdensServico]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 10
+ *               status: "EmAndamento"
+ *               descricao: "Troca de tela"
+ *               cliente: { id: 1, nome: "João" }
+ *               celular: { id: 2, modelo: "iPhone 12" }
+ *               pecas_utilizadas:
+ *                 - peca: { id: 7, nome: "Tela iPhone", codigo_interno: "TELA-01" }
+ *                   quantidade: 2
+ *                   data_uso: "2025-01-21T10:00:00.000Z"
+ *               historico:
+ *                 - id: 33
+ *                   tipo_evento: "OrdemServicoCriada"
+ *                   descricao: "Ordem de serviço #10 criada (status EmAndamento)."
+ *       404: { description: Não encontrada }
+ *   patch:
+ *     summary: Atualiza uma ordem de serviço (status, garantia, observações)
+ *     tags: [OrdensServico]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status: { type: string, enum: [EmAndamento, Concluido] }
+ *               garantia_dias: { type: integer }
+ *               garantia_validade: { type: string, format: date-time }
+ *               observacoes: { type: string }
+ *     responses:
+ *       200: { description: OK }
+ *       404: { description: Não encontrada }
+ */
+
+/**
+ * @swagger
+ * /api/ordens-servico/{id}/pecas:
+ *   post:
+ *     summary: Registra peças utilizadas em uma ordem de serviço
+ *     tags: [OrdensServico]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [itens]
+ *             properties:
+ *               itens:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [peca_id, quantidade]
+ *                   properties:
+ *                     peca_id: { type: integer }
+ *                     quantidade: { type: integer, minimum: 1 }
+ *           example:
+ *             itens:
+ *               - peca_id: 1
+ *                 quantidade: 2
+ *               - peca_id: 2
+ *                 quantidade: 1
+ *     responses:
+ *       200:
+ *         description: Ordem atualizada com as peças utilizadas
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 10
+ *               pecas_utilizadas:
+ *                 - peca: { id: 7, nome: "Tela iPhone", codigo_interno: "TELA-01" }
+ *                   quantidade: 2
+ *                   data_uso: "2025-01-21T10:00:00.000Z"
+ *       400:
+ *         description: Estoque insuficiente ou dados inválidos
+ *       404:
+ *         description: Ordem de serviço ou peça não encontrada
+ */
+
+router.get(
+  '/ordens-servico',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+    query('status').optional().isIn(['EmAndamento', 'Concluido']),
+    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoController.list,
+);
+router.post(
+  '/ordens-servico',
+  [
+    body('cliente_id').isInt({ min: 1 }).toInt(),
+    body('celular_id').isInt({ min: 1 }).toInt(),
+    body('descricao').optional().isString(),
+    body('observacoes').optional().isString(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  ordensServicoController.create,
+);
+router.get('/ordens-servico/:id', [param('id').isInt().toInt()], validateRequest, ordensServicoController.getById);
+router.patch(
+  '/ordens-servico/:id',
+  [
+    param('id').isInt().toInt(),
+    body('status').optional().isIn(['EmAndamento', 'Concluido']),
+    body('descricao').optional().isString(),
+    body('observacoes').optional().isString(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+    body('data_conclusao').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  ordensServicoController.update,
+);
+router.post(
+  '/ordens-servico/:id/pecas',
+  [
+    param('id').isInt().toInt(),
+    body('itens').isArray({ min: 1 }),
+    body('itens.*.peca_id').isInt({ min: 1 }).toInt(),
+    body('itens.*.quantidade').isInt({ min: 1 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoController.registrarPecas,
+);
 
 module.exports = router;
