@@ -151,17 +151,29 @@ async function update(id, data, user) {
     await ordensRepository.update(id, updates, userId, tx);
 
     if (concluindo) {
-      const garantiaInfo = updates.garantia_dias ? ` com garantia de ${updates.garantia_dias} dias` : '';
-      const dataConclusaoStr = updates.data_conclusao instanceof Date ? updates.data_conclusao.toLocaleString() : String(updates.data_conclusao);
+      const garantiaInfo = updates.garantia_dias
+        ? ` com garantia de ${updates.garantia_dias} dias`
+        : '';
+      const dataConclusaoStr = formatDataConclusao(updates.data_conclusao);
       await historicoRepository.addEvent(
         {
           celular_id: atual.celular_id,
           ordem_servico_id: id,
           tipo_evento: EVENTOS.CONCLUIDA,
-          descricao: `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
+          descricao:
+            `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
         },
         tx,
       );
+    function formatDataConclusao(data) {
+      if (data instanceof Date) {
+        return data.toLocaleString();
+      }
+      if (typeof data === 'string' && !isNaN(Date.parse(data))) {
+        return new Date(data).toLocaleString();
+      }
+      return String(data);
+    }
     } else if (data.status && data.status !== atual.status) {
       await historicoRepository.addEvent(
         {
@@ -250,8 +262,10 @@ async function registrarPecas(id, itens, user) {
     const descricao = Array.from(agregados.entries())
       .map(([pecaId, quantidade]) => {
         const peca = pecasMap.get(pecaId);
-        const nome = peca ? peca.nome : `Peça ${pecaId}`;
-        return `${nome} x${quantidade}`;
+        if (!peca) {
+          throw new Error(`Invariante violada: peça ${pecaId} não encontrada ao construir a descrição.`);
+        }
+        return `${peca.nome} x${quantidade}`;
       })
       .join(', ');
 
