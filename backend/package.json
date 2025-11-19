@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "npm run test:prepare && jest --coverage",
-    "test:unit": "npm run test:prepare && jest --coverage --runTestsByPath src/tests/unit",
-    "test:integration": "npm run test:prepare && jest --coverage --runTestsByPath src/tests/integration",
+    "test": "npm run test:prepare && jest --coverage --runInBand",
+    "test:unit": "npm run test:prepare && jest --coverage --runInBand --runTestsByPath src/tests/unit",
+    "test:integration": "npm run test:prepare && jest --coverage --runInBand --runTestsByPath src/tests/integration",
     "test:watch": "npm run test:prepare && jest --watch",
     "test:prepare": "cross-env TEST_DATABASE_URL=\"file:./dev-test.db\" prisma generate --schema=prisma/schema.test.prisma && cross-env TEST_DATABASE_URL=\"file:./dev-test.db\" prisma db push --schema=prisma/schema.test.prisma && node -e \"console.log('Test client ready')\"",
     "test:clear-cache": "jest --clearCache",

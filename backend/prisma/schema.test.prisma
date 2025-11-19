@@ -26,6 +26,8 @@ model clientes {
   email         String?
   tipo          String
   data_cadastro DateTime? @default(now())
+
+  ordens_servico ordens_servico[]
 }
 
 model celulares {
@@ -46,6 +48,9 @@ model celulares {
   created_by             Int?      @default(1)
   updated_by             Int?      @default(1)
   updated_at             DateTime? @updatedAt
+
+  ordens_servico ordens_servico[]
+  historico       celulares_historico[]
 }
 
 model pecas {
@@ -62,4 +67,52 @@ model pecas {
   created_by           Int?      @default(1)
   updated_by           Int?      @default(1)
   updated_at           DateTime? @updatedAt
+
+  ordens_servico_usos ordens_servico_pecas[]
+}
+
+model ordens_servico {
+  id                Int                 @id @default(autoincrement())
+  cliente_id        Int
+  celular_id        Int
+  descricao         String?
+  status            String              @default("EmAndamento")
+  data_abertura     DateTime?           @default(now())
+  data_conclusao    DateTime?
+  garantia_dias     Int?
+  garantia_validade DateTime?
+  observacoes       String?
+  created_by        Int?                @default(1)
+  updated_by        Int?                @default(1)
+  updated_at        DateTime?           @updatedAt
+
+  cliente clientes @relation(fields: [cliente_id], references: [id])
+  celular celulares @relation(fields: [celular_id], references: [id])
+  historico celulares_historico[]
+  pecas_utilizadas ordens_servico_pecas[]
+}
+
+model celulares_historico {
+  id               Int               @id @default(autoincrement())
+  celular_id       Int
+  ordem_servico_id Int?
+  tipo_evento      String
+  descricao        String
+  data_evento      DateTime?         @default(now())
+
+  celular       celulares      @relation(fields: [celular_id], references: [id])
+  ordem_servico ordens_servico? @relation(fields: [ordem_servico_id], references: [id])
+}
+
+model ordens_servico_pecas {
+  id               Int             @id @default(autoincrement())
+  ordem_servico_id Int
+  peca_id          Int
+  quantidade       Int
+  data_uso         DateTime?       @default(now())
+
+  ordem_servico ordens_servico @relation(fields: [ordem_servico_id], references: [id])
+  peca          pecas           @relation(fields: [peca_id], references: [id])
+
+  @@unique([ordem_servico_id, peca_id], name: "ordem_servico_peca_unique")
 }
