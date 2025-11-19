@@ -132,8 +132,10 @@ async function update(id, data, user) {
     updates.garantia_dias = null;
     updates.garantia_validade = null;
   } else {
-    if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
-    if (data.garantia_validade) updates.garantia_validade = normalizeDate(data.garantia_validade);
+    if (atual.status === STATUS.CONCLUIDO) {
+      if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
+      if (data.garantia_validade) updates.garantia_validade = normalizeDate(data.garantia_validade);
+    }
   }
 
   if (Object.keys(updates).length === 0) {
@@ -150,12 +152,13 @@ async function update(id, data, user) {
 
     if (concluindo) {
       const garantiaInfo = updates.garantia_dias ? ` com garantia de ${updates.garantia_dias} dias` : '';
+      const dataConclusaoStr = updates.data_conclusao instanceof Date ? updates.data_conclusao.toLocaleString() : String(updates.data_conclusao);
       await historicoRepository.addEvent(
         {
           celular_id: atual.celular_id,
           ordem_servico_id: id,
           tipo_evento: EVENTOS.CONCLUIDA,
-          descricao: `Ordem de serviço #${id} concluída em ${updates.data_conclusao.toISOString()}${garantiaInfo}.`,
+          descricao: `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
         },
         tx,
       );
