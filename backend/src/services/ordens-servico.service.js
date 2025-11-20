@@ -28,10 +28,10 @@ async function ensureClienteExists(clienteId) {
 
 function formatDataConclusao(data) {
   if (data instanceof Date) {
-    return data.toLocaleString();
+    return data.toLocaleString('pt-BR');
   }
   if (typeof data === 'string' && !Number.isNaN(Date.parse(data))) {
-    return new Date(data).toLocaleString();
+    return new Date(data).toLocaleString('pt-BR');
   }
   return String(data);
 }
