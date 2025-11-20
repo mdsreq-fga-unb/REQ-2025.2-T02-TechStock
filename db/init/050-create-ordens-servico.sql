@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS ordens_servico (
   id SERIAL PRIMARY KEY,
-  cliente_id INT NOT NULL REFERENCES clientes(id),
-  celular_id INT NOT NULL REFERENCES celulares(id),
+  cliente_id INT NOT NULL REFERENCES clientes(id) ON DELETE RESTRICT,
+  celular_id INT NOT NULL REFERENCES celulares(id) ON DELETE RESTRICT,
   descricao TEXT,
   status status_ordem_servico NOT NULL DEFAULT 'EmAndamento',
   data_abertura TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS celulares_historico_ordem_idx ON celulares_historico(
 CREATE TABLE IF NOT EXISTS ordens_servico_pecas (
   id SERIAL PRIMARY KEY,
   ordem_servico_id INT NOT NULL REFERENCES ordens_servico(id) ON DELETE CASCADE,
-  peca_id INT NOT NULL REFERENCES pecas(id),
+  peca_id INT NOT NULL REFERENCES pecas(id) ON DELETE RESTRICT,
   quantidade INT NOT NULL CHECK (quantidade > 0),
   data_uso TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (ordem_servico_id, peca_id)
