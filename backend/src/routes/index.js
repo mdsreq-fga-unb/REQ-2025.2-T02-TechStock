@@ -596,6 +596,33 @@ router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, peca
  *                   tipo_evento: "OrdemServicoCriada"
  *                   descricao: "Ordem de serviço #10 criada (status EmAndamento)."
  */
+router.get(
+  '/ordens-servico',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+    query('status').optional().isIn(['EmAndamento', 'Concluido']),
+    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoController.list,
+);
+router.post(
+  '/ordens-servico',
+  [
+    body('cliente_id').isInt({ min: 1 }).toInt(),
+    body('celular_id').isInt({ min: 1 }).toInt(),
+    body('descricao').optional().isString(),
+    body('observacoes').optional().isString(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  ordensServicoController.create,
+);
+
 /**
  * @swagger
  * /api/ordens-servico/{id}:
@@ -627,6 +654,12 @@ router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, peca
  *                   tipo_evento: "OrdemServicoCriada"
  *                   descricao: "Ordem de serviço #10 criada (status EmAndamento)."
  *       404: { description: Não encontrada }
+ */
+router.get('/ordens-servico/:id', [param('id').isInt().toInt()], validateRequest, ordensServicoController.getById);
+
+/**
+ * @swagger
+ * /api/ordens-servico/{id}:
  *   patch:
  *     summary: Atualiza uma ordem de serviço (status, garantia, observações)
  *     tags: [OrdensServico]
@@ -650,6 +683,20 @@ router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, peca
  *       200: { description: OK }
  *       404: { description: Não encontrada }
  */
+router.patch(
+  '/ordens-servico/:id',
+  [
+    param('id').isInt().toInt(),
+    body('status').optional().isIn(['EmAndamento', 'Concluido']),
+    body('descricao').optional().isString(),
+    body('observacoes').optional().isString(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+    body('data_conclusao').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  ordensServicoController.update,
+);
 
 /**
  * @swagger
@@ -700,48 +747,6 @@ router.delete('/pecas/:id', [param('id').isInt().toInt()], validateRequest, peca
  *       404:
  *         description: Ordem de serviço ou peça não encontrada
  */
-
-router.get(
-  '/ordens-servico',
-  [
-    query('page').optional().isInt({ min: 1 }).toInt(),
-    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
-    query('q').optional().isString(),
-    query('status').optional().isIn(['EmAndamento', 'Concluido']),
-    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
-    query('celular_id').optional().isInt({ min: 1 }).toInt(),
-  ],
-  validateRequest,
-  ordensServicoController.list,
-);
-router.post(
-  '/ordens-servico',
-  [
-    body('cliente_id').isInt({ min: 1 }).toInt(),
-    body('celular_id').isInt({ min: 1 }).toInt(),
-    body('descricao').optional().isString(),
-    body('observacoes').optional().isString(),
-    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
-    body('garantia_validade').optional().isISO8601().toDate(),
-  ],
-  validateRequest,
-  ordensServicoController.create,
-);
-router.get('/ordens-servico/:id', [param('id').isInt().toInt()], validateRequest, ordensServicoController.getById);
-router.patch(
-  '/ordens-servico/:id',
-  [
-    param('id').isInt().toInt(),
-    body('status').optional().isIn(['EmAndamento', 'Concluido']),
-    body('descricao').optional().isString(),
-    body('observacoes').optional().isString(),
-    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
-    body('garantia_validade').optional().isISO8601().toDate(),
-    body('data_conclusao').optional().isISO8601().toDate(),
-  ],
-  validateRequest,
-  ordensServicoController.update,
-);
 router.post(
   '/ordens-servico/:id/pecas',
   [

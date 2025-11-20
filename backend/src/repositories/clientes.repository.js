@@ -1,4 +1,5 @@
 const { getPrisma } = require('../database/prisma');
+const { pick } = require('../utils/pick');
 
 function buildWhere(q, filters = {}) {
   const AND = [];
@@ -18,16 +19,6 @@ function buildWhere(q, filters = {}) {
   return AND.length ? { AND } : undefined;
 }
 
-function pick(obj, keys) {
-  const out = {};
-  if (!obj || typeof obj !== 'object') return out;
-  for (const k of keys) {
-    if (Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined) {
-      out[k] = obj[k];
-    }
-  }
-  return out;
-}
 
 async function list({ page = 1, pageSize = 20, q, cpf, tipo } = {}) {
   const prisma = getPrisma();
