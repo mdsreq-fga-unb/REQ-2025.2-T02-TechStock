@@ -187,16 +187,6 @@ async function update(id, data, user) {
     }
   });
 
-function formatDataConclusao(data) {
-  if (data instanceof Date) {
-    return data.toLocaleString();
-  }
-  if (typeof data === 'string' && !Number.isNaN(Date.parse(data))) {
-    return new Date(data).toLocaleString();
-  }
-  return String(data);
-}
-
   return ordensRepository.getById(id);
 }
 
