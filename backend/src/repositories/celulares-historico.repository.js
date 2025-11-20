@@ -1,10 +1,9 @@
 const { getPrisma } = require('../database/prisma');
+const { pick } = require('../utils/pick');
 
 function getClient(tx) {
   return tx || getPrisma();
 }
-
-const { pick } = require('../utils/pick');
 
 async function addEvent(data, tx) {
   const prisma = getClient(tx);
