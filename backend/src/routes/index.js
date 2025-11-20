@@ -679,6 +679,8 @@ router.get('/ordens-servico/:id', [param('id').isInt().toInt()], validateRequest
  *               garantia_dias: { type: integer }
  *               garantia_validade: { type: string, format: date-time }
  *               observacoes: { type: string }
+ *               descricao: { type: string }
+ *               data_conclusao: { type: string, format: date-time }
  *     responses:
  *       200: { description: OK }
  *       404: { description: Não encontrada }

@@ -26,6 +26,16 @@ async function ensureClienteExists(clienteId) {
   return cliente;
 }
 
+function formatDataConclusao(data) {
+  if (data instanceof Date) {
+    return data.toLocaleString();
+  }
+  if (typeof data === 'string' && !Number.isNaN(Date.parse(data))) {
+    return new Date(data).toLocaleString();
+  }
+  return String(data);
+}
+
 async function ensureCelularExists(celularId) {
   const celular = await celularesRepository.getById(celularId);
   if (!celular) {
