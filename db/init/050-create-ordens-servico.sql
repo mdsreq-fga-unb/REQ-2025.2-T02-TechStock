@@ -44,14 +44,3 @@ CREATE TABLE IF NOT EXISTS ordens_servico_pecas (
 CREATE INDEX IF NOT EXISTS ordens_servico_pecas_ordem_idx ON ordens_servico_pecas(ordem_servico_id);
 CREATE INDEX IF NOT EXISTS ordens_servico_pecas_peca_idx ON ordens_servico_pecas(peca_id);
 
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'ordens_servico_pecas'
-      AND column_name = 'created_at'
-  ) THEN
-    EXECUTE 'ALTER TABLE ordens_servico_pecas RENAME COLUMN created_at TO data_uso';
-  END IF;
-END $$;

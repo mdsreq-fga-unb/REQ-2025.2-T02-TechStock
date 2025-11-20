@@ -3,15 +3,15 @@ const ordensService = require('../services/ordens-servico.service');
 async function list(req, res, next) {
   try {
     const { page = 1, pageSize = 20, q, status, cliente_id, celular_id } = req.query;
-    const parsedClienteId = cliente_id !== undefined ? Number(cliente_id) : undefined;
-    const parsedCelularId = celular_id !== undefined ? Number(celular_id) : undefined;
+    const clienteId = cliente_id !== undefined ? Number(cliente_id) : undefined;
+    const celularId = celular_id !== undefined ? Number(celular_id) : undefined;
     const data = await ordensService.list({
       page: Number(page),
       pageSize: Number(pageSize),
       q,
       status,
-      cliente_id: parsedClienteId,
-      celular_id: parsedCelularId,
+      cliente_id: clienteId,
+      celular_id: celularId,
     });
     res.json(data);
   } catch (err) {
