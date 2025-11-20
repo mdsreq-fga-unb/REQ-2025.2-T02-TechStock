@@ -1,4 +1,5 @@
 const { getPrisma } = require('../database/prisma');
+const { pick } = require('../utils/pick');
 
 const LIST_INCLUDE = { cliente: true, celular: true };
 const DETAIL_INCLUDE = {
@@ -61,16 +62,6 @@ function buildWhere(q, filters = {}) {
   return AND.length ? { AND } : undefined;
 }
 
-function pick(obj, keys) {
-  const out = {};
-  if (!obj || typeof obj !== 'object') return out;
-  for (const key of keys) {
-    if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key] !== undefined) {
-      out[key] = obj[key];
-    }
-  }
-  return out;
-}
 
 async function list({ page = 1, pageSize = 20, q, filters } = {}) {
   const prisma = getClient();

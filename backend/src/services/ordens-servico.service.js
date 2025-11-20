@@ -160,20 +160,10 @@ async function update(id, data, user) {
           celular_id: atual.celular_id,
           ordem_servico_id: id,
           tipo_evento: EVENTOS.CONCLUIDA,
-          descricao:
-            `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
+          descricao: `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
         },
         tx,
       );
-    function formatDataConclusao(data) {
-      if (data instanceof Date) {
-        return data.toLocaleString();
-      }
-      if (typeof data === 'string' && !isNaN(Date.parse(data))) {
-        return new Date(data).toLocaleString();
-      }
-      return String(data);
-    }
     } else if (data.status && data.status !== atual.status) {
       await historicoRepository.addEvent(
         {
@@ -186,6 +176,16 @@ async function update(id, data, user) {
       );
     }
   });
+
+function formatDataConclusao(data) {
+  if (data instanceof Date) {
+    return data.toLocaleString();
+  }
+  if (typeof data === 'string' && !Number.isNaN(Date.parse(data))) {
+    return new Date(data).toLocaleString();
+  }
+  return String(data);
+}
 
   return ordensRepository.getById(id);
 }

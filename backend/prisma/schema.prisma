@@ -11,8 +11,8 @@ model usuarios {
   id         Int         @id @default(autoincrement())
   nome       String      @db.VarChar(255)
   email      String      @unique @db.VarChar(255)
-  created_at DateTime?   @default(now()) @db.Timestamptz(6)
   senha_hash String      @db.VarChar(255)
+  created_at DateTime?   @default(now()) @db.Timestamptz(6)
   celulares  celulares[]
   pecas      pecas[]
 }
@@ -41,10 +41,10 @@ model celulares {
   data_cadastro          DateTime? @default(now()) @db.Timestamptz(6)
   nome_fornecedor        String    @db.VarChar(255)
   usuario_cadastro_id    Int?
-  created_by             Int?      @default(1)
-  updated_at             DateTime? @db.Timestamptz(6)
-  updated_by             Int?      @default(1)
   usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_by             Int?      @default(1)
+  updated_by             Int?      @default(1)
+  updated_at             DateTime? @db.Timestamptz(6)
 }
 
 model pecas {
@@ -57,8 +57,8 @@ model pecas {
   data_cadastro        DateTime? @default(now()) @db.Timestamptz(6)
   nome_fornecedor      String    @db.VarChar(255)
   usuario_cadastro_id  Int?
-  created_by           Int?      @default(1)
-  updated_at           DateTime? @db.Timestamptz(6)
-  updated_by           Int?      @default(1)
   usuario_cadastro     usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_by           Int?      @default(1)
+  updated_by           Int?      @default(1)
+  updated_at           DateTime? @db.Timestamptz(6)
 }
