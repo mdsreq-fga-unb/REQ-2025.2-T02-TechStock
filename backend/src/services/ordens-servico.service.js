@@ -145,6 +145,13 @@ async function update(id, data, user) {
     if (atual.status === STATUS.CONCLUIDO) {
       if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
       if (data.garantia_validade) updates.garantia_validade = normalizeDate(data.garantia_validade);
+      if (
+        updates.garantia_dias !== undefined &&
+        !updates.garantia_validade &&
+        atual.data_conclusao
+      ) {
+        updates.garantia_validade = addDays(atual.data_conclusao, updates.garantia_dias);
+      }
     }
   }
 
@@ -190,6 +197,15 @@ async function update(id, data, user) {
   return ordensRepository.getById(id);
 }
 
+/**
+ * Aggregates quantities for each unique peca_id in the itens array.
+ *
+ * If duplicate peca_id values are present, their quantities are summed.
+ * Throws an error if any item is invalid (missing or non-positive peca_id/quantidade).
+ *
+ * @param {Array<{peca_id: number, quantidade: number}>} itens - Array of item objects.
+ * @returns {Map<number, number>} Map of peca_id to total quantity.
+ */
 function aggregateItens(itens) {
   if (!Array.isArray(itens) || itens.length === 0) {
     const err = new Error('Informe ao menos uma peça para registrar');
