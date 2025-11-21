@@ -39,11 +39,11 @@ function NovoCadastro() {
   };
 
   return (
-    <div className="novo-container">
+    <div className="novo-container-clientes">
 
       <h2>Adicionar Cliente</h2>
 
-      <div className="form-box">
+      <div className="form-box-clientes">
 
         <label>Nome Completo:</label>
         <input type="text" value={name} onChange={e => setName(e.target.value)} />

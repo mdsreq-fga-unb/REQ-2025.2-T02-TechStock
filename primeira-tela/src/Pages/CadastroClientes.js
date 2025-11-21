@@ -39,13 +39,13 @@ function CadastroClientes() {
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
         </div>
 
-       <div className='BotoesNavegacao'>Dashboard</div>
+              <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
                <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
                <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
                <div className='BotoesNavegacao'>Fornecedores</div>
                <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
                <div className='BotoesNavegacao'>Relatórios</div>
-             </div>
+         </div>
 
 
       <h2 className="Clientes">Clientes</h2>

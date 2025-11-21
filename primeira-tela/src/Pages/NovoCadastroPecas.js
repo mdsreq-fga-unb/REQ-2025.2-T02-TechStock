@@ -52,11 +52,11 @@ function NovoCadastroPecas() {
     };
 
   return (
-    <div className="novo-container">
+    <div className="novo-container-pecas">
 
       <h2>Nova Peça</h2>
 
-      <div className="form-box">
+      <div className="form-box-pecas">
         {/* Caixa de Mensagem Customizada (Substituindo alert) */}
             {message && (
                 <div className={`message-box ${message.includes("sucesso") ? 'bg-green-500' : 'bg-red-500'} text-white p-3 rounded-lg shadow-md mb-4 flex justify-between items-center`}>

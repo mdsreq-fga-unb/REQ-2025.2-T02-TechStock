@@ -1,0 +1,255 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+.Container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #fcfcfc;
+}
+
+.BarraSuperior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding: inherit;
+}
+
+.LogoCellVex {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  font-size: 24px;
+  color: #820ad1;
+}
+
+
+.SistemaDeGestao {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  font-weight: normal;
+}
+
+.BotoesNavegacao {
+  background-color: #f0e6f7;
+  color: #820ad1;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+
+/* --- Layout do Dashboard --- */
+.ConteudoDashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.GradeMetricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.CartaoMetrica {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.CabecalhoCartao {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: #666;
+  font-size: 14px;
+}
+
+.IconeFundoRoxo {
+  background-color: #820ad1;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ValorGrande {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 15px 0;
+  color: #000;
+}
+
+.TextoCrescimento {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.TextoCrescimento.positivo { color: #10b981; }
+.TextoCrescimento.negativo { color: #ef4444; } 
+
+.TextoCinza {
+  color: #888;
+  font-weight: normal;
+}
+
+/* --- 2. Listas (Meio) --- */
+.GradeListas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px;
+}
+
+.CartaoLista {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 350px;
+}
+
+.TituloSecao {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.TituloSecao h3 { margin: 0; font-size: 16px; color: #000; }
+.TituloSecao p { margin: 2px 0 0 0; font-size: 12px; color: #888; }
+
+.IconeQuadradoPequeno {
+  background-color: #820ad1;
+  color: white;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.ListaConteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ItemLista {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.ItemLista strong { display: block; color: #333; }
+.ItemLista p { margin: 2px 0 0 0; color: #666; }
+.TextoCinzaPequeno { font-size: 11px; color: #999; }
+
+.BadgeStatus {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+}
+.BadgeStatus.Roxo { background-color: #820ad1; }
+.BadgeStatus.Verde { background-color: #10b981; }
+
+.BadgePequeno {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 5px;
+  color: white;
+  background-color: #820ad1;
+}
+.BadgePequeno.Verde { background-color: #10b981; }
+.BadgePequeno.Roxo { background-color: #a855f7; }
+
+.LinhaTitulo { display: flex; align-items: center; }
+.PrecoManutencao { font-weight: bold; color: #333; }
+
+.GradeAlertas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.CartaoAlerta {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.TextoVermelho { color: #ef4444; }
+.TextoRoxo { color: #820ad1; }
+.SubtituloAlerta { font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 20px; margin-left: 40px;}
+
+.ItemBarraWrapper { margin-bottom: 15px; }
+
+.BarraInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.BarraFundo {
+  width: 100%;
+  height: 8px;
+  background-color: #f3e8ff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.BarraProgresso {
+  height: 100%;
+  border-radius: 4px;
+}
+.BarraProgresso.Roxo { background-color: #820ad1; }
+.BarraProgresso.Vermelho { background-color: #ef4444; }
+
+.ItemAlertaGarantia {
+  margin-bottom: 15px;
+}
+
+.InfoGarantia {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.BadgeUrgente { background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.BadgeAtiva { background: #820ad1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+
+.TextoDireitaPequeno {
+  text-align: right;
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 4px;
+}
