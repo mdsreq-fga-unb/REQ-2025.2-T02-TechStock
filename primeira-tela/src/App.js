@@ -7,6 +7,7 @@ import NovoCadastroPecas from "./Pages/NovoCadastroPecas";
 import CadastroCelulares from "./Pages/CadastroCelulares";
 import NovoCadastroCelulares from "./Pages/NovoCadastroCelulares";
 import Login from "./Pages/Login";
+import Dashboard from "./Pages/Dashboards";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/celulares" element={<CadastroCelulares/>} />
         <Route path="/celulares/novo" element={<NovoCadastroCelulares/>} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/dashboards" element={<Dashboard/>} />
         
         
       </Routes>

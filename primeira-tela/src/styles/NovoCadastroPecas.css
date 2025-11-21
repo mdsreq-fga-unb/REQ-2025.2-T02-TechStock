@@ -1,4 +1,4 @@
-.novo-container {
+.novo-container-pecas {
   width: 60%;
   margin: 6px auto;
   background: #ffffff;
@@ -8,14 +8,14 @@
   box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
 }
 
-.form-box {
+.form-box-pecas {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
-.form-box input,
-.form-box select {
+.form-box-pecas input,
+.form-box-pecas select {
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
