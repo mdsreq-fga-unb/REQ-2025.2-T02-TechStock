@@ -7,7 +7,31 @@ BEGIN
     SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
     WHERE t.typname = 'tipo_cliente' AND n.nspname = 'public'
   ) THEN
-    CREATE TYPE public.tipo_cliente AS ENUM ('PF', 'PJ');
+    CREATE TYPE public.tipo_cliente AS ENUM ('PF', 'PJ', 'CONSUMIDOR', 'REVENDEDOR', 'MANUTENCAO');
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'tipo_cliente' AND n.nspname = 'public'
+  ) THEN
+    BEGIN
+      ALTER TYPE public.tipo_cliente ADD VALUE 'CONSUMIDOR';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_cliente ADD VALUE 'REVENDEDOR';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_cliente ADD VALUE 'MANUTENCAO';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
   END IF;
 END $$;
 

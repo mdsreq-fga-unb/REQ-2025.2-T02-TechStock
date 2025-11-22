@@ -1,35 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CadastroCelulares.css';
 import { Link, useNavigate } from 'react-router-dom';
-
-
-// Funções para salvar e buscar no LocalStorage
-const getItensBD = () => JSON.parse(localStorage.getItem('dbcelulares')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbcelulares', JSON.stringify(itens));
+import { celularesApi } from '../services/api';
 
 function CadastroCelulares() {
-
   const navigate = useNavigate();
+  const [celulares, setCelulares] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
 
-  // Lista visível na tabela
-  const [celular, setCelular] = useState([]);
-
-  // Carrega dados ao abrir a página
   useEffect(() => {
-    setCelular(getItensBD());
-  }, []);
+    const timer = setTimeout(() => setSearch(searchInput), 400);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    celularesApi
+      .list(search ? { q: search } : {})
+      .then((data) => {
+        if (!active) return;
+        setCelulares(data?.items || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message || 'Não foi possível carregar os celulares.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [search]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Deseja remover este aparelho?')) return;
+    try {
+      await celularesApi.remove(id);
+      setCelulares((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert(err.message || 'Erro ao remover celular.');
+    }
+  };
 
 
    const handleEdit = (id) => {
     navigate('/celulares/novo', { state: { editId: id } });
-  };
-
-  const handleDelete = (id) => {
-    if (!window.confirm('Confirma exclusão deste Celular?')) return;
-    const db = getItensBD();
-    const novo = db.filter(item => item.id !== id);
-    setCelular(novo);
-    setItensBD(novo);
   };
  
   return (
@@ -58,7 +79,13 @@ function CadastroCelulares() {
         <h2 className="gerencie-2">Gerencie todos os Celulares</h2> 
 
         <div className="actions-bar">
-          <input type="text" placeholder="Buscar Celulares..." className="search-input" />
+          <input
+            type="text"
+            placeholder="Buscar celulares..."
+            className="search-input"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
           
           {/*botão agora navega para tela de cadastro */}
           <button className="btn-primary" onClick={() => navigate("/celulares/novo")}>
@@ -77,36 +104,57 @@ function CadastroCelulares() {
             <th>IMEI</th>
             <th>Cor</th>
             <th>Capacidade</th>
-            <th>Estado</th>
+            <th>Status</th>
             <th>Valor de Compra</th>
-            <th>Garantia</th>
+            <th>Garantia padrão (dias)</th>
             <th>Defeitos Identificados</th>
             <th>Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          {celular.map((c, index) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.modelo}</td>
-              <td>{c.datacadastro}</td>
-              <td>{c.imei}</td>
-              <td>{c.cor}</td>
-              <td>{c.capacidade}</td>
-              <td>{c.estado}</td>
-              <td>R${c.valorcompra ? parseFloat(c.valorcompra).toFixed(2).replace('.', ','):'0,00' }</td>
-              <td>{c.warranty}</td>
-              <td>{c.defeito}</td>
-              
-
-              {/* Ações */}
-              <td className="actions">
-                <span onClick={() => handleEdit(c.id)}>✏️</span>
-                <span onClick={() => handleDelete(c.id)}>🗑️</span>
-              </td>
+          {error && (
+            <tr>
+              <td colSpan={11} className="error-row">{error}</td>
             </tr>
-          ))}
+          )}
+          {loading && !error && (
+            <tr>
+              <td colSpan={11}>Carregando...</td>
+            </tr>
+          )}
+          {!loading && !error && celulares.length === 0 && (
+            <tr>
+              <td colSpan={11}>Nenhum aparelho encontrado.</td>
+            </tr>
+          )}
+          {!loading && !error &&
+            celulares.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.modelo}</td>
+                <td>
+                  {item.data_cadastro
+                    ? new Date(item.data_cadastro).toLocaleDateString('pt-BR')
+                    : '-'}
+                </td>
+                <td>{item.imei}</td>
+                <td>{item.cor || '-'}</td>
+                <td>{item.capacidade || '-'}</td>
+                <td>{item.status}</td>
+                <td>
+                  {item.valor_compra
+                    ? `R$ ${Number(item.valor_compra).toFixed(2).replace('.', ',')}`
+                    : '-'}
+                </td>
+                <td>{item.garantia_padrao_dias ?? '-'}</td>
+                <td>{item.defeitos_identificados || '-'}</td>
+                <td className="actions">
+                  <span onClick={() => handleEdit(item.id)}>✏️</span>
+                  <span onClick={() => handleDelete(item.id)}>🗑️</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
 
       </table>

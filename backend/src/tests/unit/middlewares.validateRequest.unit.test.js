@@ -20,7 +20,7 @@ describe('middleware validateRequest', () => {
     const next = jest.fn();
     validateRequest(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Validation error', errors: [{ msg: 'error' }] });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Erro de validação: error', errors: [{ msg: 'error' }] });
     expect(next).not.toHaveBeenCalled();
   });
 

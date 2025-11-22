@@ -36,6 +36,7 @@ logs/
 frontend/node_modules/
 frontend/.cache/
 frontend/.vite/
+frontend/.env
 frontend/dist/
 
 # Backend

@@ -116,4 +116,9 @@ async function update(id, data, userId, tx) {
   return prisma.ordens_servico.update({ where: { id }, data: { ...payload, updated_by: userId } });
 }
 
-module.exports = { list, getById, create, update };
+async function remove(id, tx) {
+  const prisma = getClient(tx);
+  return prisma.ordens_servico.delete({ where: { id } });
+}
+
+module.exports = { list, getById, create, update, remove };

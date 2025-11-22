@@ -1,35 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/NovoCadastroPecas.css';
 import { Link, useNavigate } from 'react-router-dom';
-
-// Funções para salvar e buscar no LocalStorage
-const getItensBD = () => JSON.parse(localStorage.getItem('dbpecas')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbpecas', JSON.stringify(itens));
+import { pecasApi } from '../services/api';
 
 function CadastroPecas() {
-
   const navigate = useNavigate();
+  const [pecas, setPecas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
 
-  // Lista visível na tabela
-  const [Pecas, setPecas] = useState([]);
-
-  // Carrega dados ao abrir a página
   useEffect(() => {
-    setPecas(getItensBD());
-  }, []);
+    const timer = setTimeout(() => setSearch(searchInput), 400);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    pecasApi
+      .list(search ? { q: search } : {})
+      .then((data) => {
+        if (!active) return;
+        setPecas(data?.items || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message || 'Não foi possível carregar as peças.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [search]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Deseja remover esta peça?')) return;
+    try {
+      await pecasApi.remove(id);
+      setPecas((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert(err.message || 'Erro ao remover peça.');
+    }
+  };
 
   const handleEdit = (id) => {
     navigate('/pecas/novo', { state: { editId: id } });
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm('Confirma exclusão desta peça?')) return;
-    const db = getItensBD();
-    const novo = db.filter(item => item.id !== id);
-    setPecas(novo);
-    setItensBD(novo);
-  };
 
   return (
     <div className ='Container'>
@@ -57,7 +79,13 @@ function CadastroPecas() {
         <h2 className="gerencie-2">Gerencie todos os produtos</h2> 
 
         <div className="actions-bar">
-          <input type="text" placeholder="Buscar Produtos" className="search-input" />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou código"
+            className="search-input"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
           
           {/*botão agora navega para tela de cadastro */}
           <button className="btn-primary" onClick={() => navigate("/pecas/novo")}>
@@ -75,34 +103,50 @@ function CadastroPecas() {
             <th>Data de cadastro</th>
             <th>Código Interno</th>
             <th>Compatibilidade</th>
-            <th>Nome Do Fornecedor</th>
+            <th>Nome do Fornecedor</th>
             <th>Quantidade</th>
-            <th>Garantia</th>
-            <th> Preço </th>
+            <th>Garantia (dias)</th>
             <th>Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          {Pecas.map((c, index) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.name}</td>
-              <td>{c.dataCadastro}</td>
-              <td>{c.codigoInterno}</td>
-              <td>{c.compatibilidade}</td>
-              <td>{c.fornecedor}</td>
-              <td>{c.quantidade}</td>
-              <td>{c.warranty}</td>
-              <td> R${c.preco ? parseFloat(c.preco).toFixed(2).replace('.', ','):'0,00' }</td>
-
-              {/* Ações */}
-              <td className="actions">
-                <span onClick={() => handleEdit(c.id)}>✏️</span>
-                <span onClick={() => handleDelete(c.id)}>🗑️</span>
-              </td>
+          {error && (
+            <tr>
+              <td colSpan={8} className="error-row">{error}</td>
             </tr>
-          ))}
+          )}
+          {loading && !error && (
+            <tr>
+              <td colSpan={8}>Carregando...</td>
+            </tr>
+          )}
+          {!loading && !error && pecas.length === 0 && (
+            <tr>
+              <td colSpan={8}>Nenhuma peça encontrada.</td>
+            </tr>
+          )}
+          {!loading && !error &&
+            pecas.map((peca) => (
+              <tr key={peca.id}>
+                <td>{peca.id}</td>
+                <td>{peca.nome}</td>
+                <td>
+                  {peca.data_cadastro
+                    ? new Date(peca.data_cadastro).toLocaleDateString('pt-BR')
+                    : '-'}
+                </td>
+                <td>{peca.codigo_interno}</td>
+                <td>{peca.compatibilidade || '-'}</td>
+                <td>{peca.nome_fornecedor}</td>
+                <td>{peca.quantidade}</td>
+                <td>{peca.garantia_padrao_dias ?? '-'}</td>
+                <td className="actions">
+                  <span onClick={() => handleEdit(peca.id)}>✏️</span>
+                  <span onClick={() => handleDelete(peca.id)}>🗑️</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
 
       </table>

@@ -227,7 +227,7 @@ router.delete('/clientes/:id', [param('id').isInt().toInt()], validateRequest, c
  *                   valor_compra: 3500.00
  *                   garantia_padrao_dias: 365
  *                   defeitos_identificados: null
- *                   tipo: "Compra"
+ *                   tipo: "Novo"
  *                   status: "EmEstoque"
  *                   data_cadastro: "2025-01-01T00:00:00.000Z"
  *                   nome_fornecedor: "Fornecedor X"
@@ -286,7 +286,7 @@ router.delete('/clientes/:id', [param('id').isInt().toInt()], validateRequest, c
  *               valor_compra: 3500.00
  *               garantia_padrao_dias: 365
  *               defeitos_identificados: null
- *               tipo: "Compra"
+ *               tipo: "Novo"
  *               status: "EmEstoque"
  *               data_cadastro: "2025-01-01T00:00:00.000Z"
  *               nome_fornecedor: "Fornecedor X"
@@ -660,6 +660,17 @@ router.get('/ordens-servico/:id', [param('id').isInt().toInt()], validateRequest
 /**
  * @swagger
  * /api/ordens-servico/{id}:
+ *   delete:
+ *     summary: Remove uma ordem de serviço
+ *     tags: [OrdensServico]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       204: { description: Removida com sucesso }
+ *       404: { description: Não encontrada }
  *   patch:
  *     summary: Atualiza uma ordem de serviço (status, garantia, observações)
  *     tags: [OrdensServico]
@@ -698,6 +709,13 @@ router.patch(
   ],
   validateRequest,
   ordensServicoController.update,
+);
+
+router.delete(
+  '/ordens-servico/:id',
+  [param('id').isInt().toInt()],
+  validateRequest,
+  ordensServicoController.remove,
 );
 
 /**
