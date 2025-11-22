@@ -75,4 +75,17 @@ async function registrarPecas(req, res, next) {
   }
 }
 
-module.exports = { list, getById, create, update, registrarPecas };
+async function remove(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const removed = await ordensService.remove(id, req.user);
+    if (!removed) {
+      return res.status(404).json({ message: 'Ordem de serviço não encontrada' });
+    }
+    return res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { list, getById, create, update, registrarPecas, remove };

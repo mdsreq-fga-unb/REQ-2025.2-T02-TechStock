@@ -35,7 +35,7 @@ describe('celulares.controller', () => {
   test('create 201 com retorno', async () => {
     service.create.mockResolvedValue({ id: 1 });
     const { req, res, next } = createMocks();
-    req.body = { modelo: 'A', imei: '123', nome_fornecedor: 'F', tipo: 'Compra' };
+    req.body = { modelo: 'A', imei: '123', nome_fornecedor: 'F', tipo: 'Novo' };
     await controller.create(req, res, next);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ id: 1 });

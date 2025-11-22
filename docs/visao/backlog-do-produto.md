@@ -9,11 +9,10 @@
 **Critérios de aceitação:**
 
 - [ ] Permitir cadastrar um novo celular com os campos: modelo, IMEI (único), cor, capacidade, estado, valor de compra, garantia e defeitos identificados. 
-- [ ] Permitir cadastrar uma nova peça com os campos: nome, código interno (único), compatibilidade, quantidade e fornecedor. 
 - [ ] Validar campos obrigatórios e exibir mensagem de erro quando houver dados ausentes ou duplicados (ex.: IMEI ou código interno). 
 - [ ] Permitir editar e excluir registros de celulares e peças. 
 - [ ] Registrar automaticamente a data, hora e o usuário responsável pelo cadastro ou alteração. 
-- [ ] Exibir uma listagem de celulares e peças com opções de busca e filtros (por modelo, código interno, fornecedor, estado, etc.). 
+- [ ] Exibir uma listagem de celulares com opções de busca e filtros (por modelo, código interno, fornecedor, estado, etc.). 
 - [ ] Armazenar os dados de forma segura e integrá-los ao módulo de controle de estoque.
 
 **US02 – Cadastrar Peças (RF2):** Como Administrador, eu quero cadastrar as informacoes das pecas de reposição (nome, código interno, garantia, compatibilidade, quantia e fornecedor) para manter o estoque preciso e organizado dos itens disponíveis para manutenção e venda.
