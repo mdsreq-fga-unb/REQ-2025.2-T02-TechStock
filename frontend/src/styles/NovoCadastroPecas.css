@@ -1,0 +1,41 @@
+.novo-container-pecas {
+  width: 60%;
+  margin: 6px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid #72008b;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+}
+
+.form-box-pecas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-box-pecas input,
+.form-box-pecas select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-primary {
+  background: #7d2cff;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #c4c4c4;
+  color: black;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
