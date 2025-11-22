@@ -8,6 +8,8 @@ import CadastroCelulares from "./Pages/CadastroCelulares";
 import NovoCadastroCelulares from "./Pages/NovoCadastroCelulares";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboards";
+import OrdemDeServico from "./Pages/OrdemDeServico";
+import NovoOS from "./Pages/NovoOrdemDeServico";
 
 export default function App() {
   return (
@@ -24,7 +26,8 @@ export default function App() {
         <Route path="/celulares/novo" element={<NovoCadastroCelulares/>} />
         <Route path="/login" element={<Login/>} />
         <Route path="/dashboards" element={<Dashboard/>} />
-        
+        <Route path="/ordemdeservico" element={<OrdemDeServico/>} />
+        <Route path="/novaOS" element={<NovoOS/>} />
         
       </Routes>
     </BrowserRouter>
