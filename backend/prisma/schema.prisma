@@ -158,3 +158,15 @@ enum TipoEventoCelular {
 
   @@map("tipo_evento_celular")
 }
+
+model vendas {
+  id                Int        @id @default(autoincrement())
+  data_venda        DateTime
+  cliente_id         Int?       
+  cliente           clientes?  @relation(fields: [cliente_id], references: [id])
+  celular_id         Int
+  celular           celulares  @relation(fields: [celular_id], references: [id])
+  usuario_cadastro_id    Int?
+  usuario_cadastro       usuarios? @relation(fields: [usuario_cadastro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  garantia_dias        Int        @default(365)
+}
