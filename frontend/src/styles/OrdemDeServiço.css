@@ -1,0 +1,148 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+.Container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #fcfcfc;
+}
+
+.BarraSuperior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding: inherit;
+}
+
+.LogoCellVex {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  font-size: 24px;
+  color: #820ad1;
+}
+
+
+.SistemaDeGestao {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  font-weight: normal;
+}
+
+.BotoesNavegacao {
+  background-color: #f0e6f7;
+  color: #820ad1;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+
+/* --- Layout do Dashboard --- */
+.ConteudoDashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.GradeMetricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.CartaoMetrica {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.CabecalhoCartao {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: #666;
+  font-size: 14px;
+}
+
+.IconeFundoRoxo {
+  background-color: #820ad1;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ValorGrande {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 15px 0;
+  color: #000;
+}
+
+.TextoCrescimento {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.TextoCrescimento.positivo { color: #10b981; }
+.TextoCrescimento.negativo { color: #ef4444; } 
+
+.TextoCinza {
+  color: #888;
+  font-weight: normal;
+}
+
+/* --- 2. Listas (Meio) --- */
+.GradeListas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px;
+}
+
+.CartaoLista {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 350px;
+}
+
+.TituloSecao {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.TituloSecao h3 { margin: 0; font-size: 16px; color: #000; }
+.TituloSecao p { margin: 2px 0 0 0; font-size: 12px; color: #888; }
+
+.IconeQuadradoPequeno {
+  background-color: #820ad1;
+  color: white;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: bold;
+}

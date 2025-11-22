@@ -73,7 +73,7 @@ function NovoCadastro() {
 
         <button className="btn-primary" onClick={handleSave}>Salvar Cliente</button>
 
-        <button className="btn-secondary" onClick={() => navigate("/clientes")}>Cancelar</button>
+        <button className="btn-secondary" onClick={() => navigate("/")}>Cancelar</button>
 
       </div>
 

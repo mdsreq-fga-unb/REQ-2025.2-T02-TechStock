@@ -19,19 +19,19 @@ function CadastroCelulares() {
     setCelular(getItensBD());
   }, []);
 
-  // Função para deletar um cliente
-  const handleDelete = (index) => {
-    const novosItens = [...celular];
-    novosItens.splice(index, 1);
-    setCelular(novosItens);
-    setItensBD(novosItens);
+
+   const handleEdit = (id) => {
+    navigate('/celulares/novo', { state: { editId: id } });
   };
 
-  // (Se quiser editar, depois criamos)
-  const handleEdit = (index) => {
-    alert("Editar celulares ID: " + celular[index].id);
+  const handleDelete = (id) => {
+    if (!window.confirm('Confirma exclusão deste Celular?')) return;
+    const db = getItensBD();
+    const novo = db.filter(item => item.id !== id);
+    setCelular(novo);
+    setItensBD(novo);
   };
-
+ 
   return (
     <div className ='Container'>
       <div className='BarraSuperior'>
@@ -40,6 +40,7 @@ function CadastroCelulares() {
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
         </div>
 
+                <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
                 <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
                 <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
                 <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
@@ -101,8 +102,8 @@ function CadastroCelulares() {
 
               {/* Ações */}
               <td className="actions">
-                <span onClick={() => handleEdit(index)}>✏️</span>
-                <span onClick={() => handleDelete(index)}>🗑️</span>
+                <span onClick={() => handleEdit(c.id)}>✏️</span>
+                <span onClick={() => handleDelete(c.id)}>🗑️</span>
               </td>
             </tr>
           ))}
