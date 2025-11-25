@@ -4,28 +4,90 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp } from 'lucide-react';
 import '../styles/OrdemDeServiço.css';
 import { dadosDoSistema } from './dados';
+import { ordensServicoApi } from '../services/api';
 
-const getItensBD = () => JSON.parse(localStorage.getItem('dbOS')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbOS', JSON.stringify(itens));
+const STATUS_OPTIONS = [
+  { value: '', label: 'Todos os status' },
+  { value: 'EmAndamento', label: 'Em andamento' },
+  { value: 'Concluido', label: 'Concluídas' },
+];
+
+function formatDate(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('pt-BR');
+}
 
 const OrdensServico = () => {
   const navigate = useNavigate();
-  const [ordemdeservico, setOrdemDeServico] = useState([]);
+  const [ordens, setOrdens] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
-    setOrdemDeServico(getItensBD());
-  }, []);
+    const timer = setTimeout(() => setSearch(searchInput), 400);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    ordensServicoApi
+      .list({ q: search || undefined, status: statusFilter || undefined, pageSize: 50 })
+      .then((data) => {
+        if (!active) return;
+        setOrdens(data?.items || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message || 'Não foi possível carregar as ordens de serviço.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [search, statusFilter]);
 
   const handleEdit = (id) => {
     navigate('/novaOS', { state: { editId: id } });
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm('Confirma exclusão desta Ordem de Serviço?')) return;
-    const db = getItensBD();
-    const novo = db.filter(item => item.id !== id);
-    setItensBD(novo);
-    setOrdemDeServico(novo);
+  const handleToggleStatus = async (ordem) => {
+    const nextStatus = ordem.status === 'EmAndamento' ? 'Concluido' : 'EmAndamento';
+    const confirmMessage =
+      nextStatus === 'Concluido'
+        ? 'Deseja marcar esta ordem como concluída?'
+        : 'Deseja reabrir esta ordem?';
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      await ordensServicoApi.update(ordem.id, {
+        status: nextStatus,
+        data_conclusao: nextStatus === 'Concluido' ? new Date().toISOString() : undefined,
+      });
+      setOrdens((prev) => prev.map((item) => (item.id === ordem.id ? { ...item, status: nextStatus } : item)));
+    } catch (err) {
+      alert(err.message || 'Não foi possível atualizar a ordem.');
+    }
+  };
+
+  const handleDelete = async (ordem) => {
+    const confirmMessage = `Excluir a OS #${ordem.id}? Essa ação não pode ser desfeita.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      await ordensServicoApi.remove(ordem.id);
+      setOrdens((prev) => prev.filter((item) => item.id !== ordem.id));
+    } catch (err) {
+      alert(err.message || 'Não foi possível excluir a ordem.');
+    }
   };
 
   const renderIcone = (nome) => {
@@ -77,7 +139,25 @@ const OrdensServico = () => {
         <h2 className="gerencie-2">Gerencie todas as ordens</h2>
 
         <div className="actions-bar">
-          <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
+          <input
+            type="text"
+            placeholder="Buscar por descrição ou observações..."
+            className="search-input"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
+
+          <select
+            className="search-input"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
 
           <button className="btn-primary" onClick={() => navigate("/novaOS")}>+ Nova OS</button>
         </div>
@@ -87,33 +167,54 @@ const OrdensServico = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nome</th>
-            <th>Data de cadastro</th>
+            <th>Cliente</th>
+            <th>Celular</th>
+            <th>Data de abertura</th>
             <th>Descrição</th>
-            <th>Valor</th>
             <th>Status</th>
-            <th>Teste</th>
+            <th>Garantia (dias)</th>
             <th>Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          {ordemdeservico.map((c, index) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.nome}</td>
-              <td>{c.dataCadastro}</td>
-              <td>{c.descricao}</td>
-              <td>{c.valor}</td>
-              <td>{c.status}</td>
-              <td>{c.teste}</td>
-              
-              <td className="actions">
-                <span onClick={() => handleEdit(c.id)}>✏️</span>
-                <span onClick={() => handleDelete(c.id)}>🗑️</span>
-              </td>
+          {error && (
+            <tr>
+              <td colSpan={8} className="error-row">{error}</td>
             </tr>
-          ))}
+          )}
+          {loading && !error && (
+            <tr>
+              <td colSpan={8}>Carregando...</td>
+            </tr>
+          )}
+          {!loading && !error && ordens.length === 0 && (
+            <tr>
+              <td colSpan={8}>Nenhuma ordem encontrada.</td>
+            </tr>
+          )}
+          {!loading && !error &&
+            ordens.map((ordem) => (
+              <tr key={ordem.id}>
+                <td>{ordem.id}</td>
+                <td>{ordem.cliente?.nome || '-'}</td>
+                <td>{ordem.celular?.modelo || '-'}</td>
+                <td>{formatDate(ordem.data_abertura)}</td>
+                <td>{ordem.descricao || '-'}</td>
+                <td>{ordem.status === 'Concluido' ? 'Concluída' : 'Em andamento'}</td>
+                <td>{ordem.garantia_dias ?? '-'}</td>
+                <td className="actions">
+                  <span title="Editar" onClick={() => handleEdit(ordem.id)}>✏️</span>
+                  <span
+                    title={ordem.status === 'EmAndamento' ? 'Concluir ordem' : 'Reabrir ordem'}
+                    onClick={() => handleToggleStatus(ordem)}
+                  >
+                    {ordem.status === 'EmAndamento' ? '✅' : '↩️'}
+                  </span>
+                  <span title="Excluir" onClick={() => handleDelete(ordem)}>🗑️</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
 
       </table>

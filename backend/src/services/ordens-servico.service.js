@@ -299,4 +299,18 @@ async function registrarPecas(id, itens, user) {
   return ordensRepository.getById(id);
 }
 
-module.exports = { list, getById, create, update, registrarPecas, STATUS };
+async function remove(id) {
+  const atual = await ordensRepository.getById(id);
+  if (!atual) {
+    return null;
+  }
+
+  const prisma = getPrisma();
+  await prisma.$transaction(async (tx) => {
+    await ordensRepository.remove(id, tx);
+  });
+
+  return atual;
+}
+
+module.exports = { list, getById, create, update, registrarPecas, remove, STATUS };

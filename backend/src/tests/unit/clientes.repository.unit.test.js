@@ -10,26 +10,29 @@ describe('clientes.repository', () => {
   test('list retorna meta e items', async () => {
     const prisma = prismaModule.getPrisma();
     prisma.clientes.count.mockResolvedValue(1);
-    prisma.clientes.findMany.mockResolvedValue([{ id: 1, nome: 'João' }]);
+    prisma.clientes.findMany.mockResolvedValue([{ id: 1, nome: 'João', cpf: '12345678901' }]);
     const res = await repo.list({ page: 1, pageSize: 10, q: 'Jo' });
     expect(prisma.clientes.count).toHaveBeenCalled();
     expect(prisma.clientes.findMany).toHaveBeenCalled();
     expect(res.items.length).toBe(1);
+    expect(res.items[0].cpf).toBe('123.456.789-01');
   });
 
   test('getById retorna item', async () => {
     const prisma = prismaModule.getPrisma();
-    prisma.clientes.findUnique.mockResolvedValue({ id: 2 });
+    prisma.clientes.findUnique.mockResolvedValue({ id: 2, cpf: '98765432100' });
     const item = await repo.getById(2);
     expect(item.id).toBe(2);
+    expect(item.cpf).toBe('987.654.321-00');
   });
 
   test('create filtra campos permitidos', async () => {
     const prisma = prismaModule.getPrisma();
-    prisma.clientes.create.mockResolvedValue({ id: 3 });
-    const created = await repo.create({ nome: 'Ana', cpf: '123', email: 'a@a.com', tipo: 'PF', malicioso: 'x' });
-    expect(prisma.clientes.create).toHaveBeenCalledWith({ data: { nome: 'Ana', cpf: '123', email: 'a@a.com', tipo: 'PF' } });
+    prisma.clientes.create.mockResolvedValue({ id: 3, cpf: '12345678901' });
+    const created = await repo.create({ nome: 'Ana', cpf: '123.456.789-01', email: 'a@a.com', tipo: 'PF', malicioso: 'x' });
+    expect(prisma.clientes.create).toHaveBeenCalledWith({ data: { nome: 'Ana', cpf: '12345678901', email: 'a@a.com', tipo: 'PF' } });
     expect(created.id).toBe(3);
+    expect(created.cpf).toBe('123.456.789-01');
   });
 
   test('update filtra campos permitidos e ignora cpf', async () => {

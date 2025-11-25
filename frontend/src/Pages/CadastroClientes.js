@@ -1,35 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CadastroClientes.css';
 import { Link, useNavigate } from 'react-router-dom';
-
-// Funções para salvar e buscar no LocalStorage
-const getItensBD = () => JSON.parse(localStorage.getItem('dbclientes')) ?? [];
-const setItensBD = itens => localStorage.setItem('dbclientes', JSON.stringify(itens));
+import { clientesApi } from '../services/api';
 
 function CadastroClientes() {
-
   const navigate = useNavigate();
-
-  // Lista visível na tabela
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
 
-  // Carrega dados ao abrir a página
   useEffect(() => {
-    setClients(getItensBD());
-  }, []);
+    const handler = setTimeout(() => setSearch(searchInput), 400);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    clientesApi
+      .list(search ? { q: search } : {})
+      .then((data) => {
+        if (!active) return;
+        setClients(data?.items || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message || 'Não foi possível carregar os clientes.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [search]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Deseja realmente remover este cliente?')) return;
+    try {
+      await clientesApi.remove(id);
+      setClients((prev) => prev.filter((client) => client.id !== id));
+    } catch (err) {
+      alert(err.message || 'Erro ao remover cliente.');
+    }
+  };
 
     const handleEdit = (id) => {
     navigate('/clientes/novo', { state: { editId: id } });
   };
-
-  const handleDelete = (id) => {
-    if (!window.confirm('Confirma exclusão deste Cliente?')) return;
-    const db = getItensBD();
-    const novo = db.filter(item => item.id !== id);
-    setClients(novo);
-    setItensBD(novo);
-  };
-
   
   return (
     <div className ='Container'>
@@ -56,7 +77,13 @@ function CadastroClientes() {
         <h2 className="gerencie-2">Gerencie todos os produtos</h2> 
 
         <div className="actions-bar">
-          <input type="text" placeholder="Buscar por nome, telefone ou email..." className="search-input" />
+          <input
+            type="text"
+            placeholder="Buscar por nome, telefone ou email..."
+            className="search-input"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
           
           {/*botão agora navega para tela de cadastro */}
           <button className="btn-primary" onClick={() => navigate("/clientes/novo")}>
@@ -76,30 +103,46 @@ function CadastroClientes() {
             <th>Telefone</th>
             <th>E-mail</th>
             <th>Tipo de Cliente</th>
-            <th>Garantia</th>
             <th>Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          {clients.map((c, index) => (
-            <tr key={c.id || index }>
-              <td>{c.id}</td>
-              <td>{c.name}</td>
-              <td>{c.date}</td>
-              <td>{c.cpf}</td>
-              <td>{c.phone}</td>
-              <td>{c.email}</td>
-              <td>{c.type}</td>
-              <td>{c.warranty}</td>
-
-              {/* Ações */}
-              <td className="actions">
-                <span onClick={() => handleEdit(c.id)}>✏️</span>
-                <span onClick={() => handleDelete(c.id)}>🗑️</span>
-              </td>
+          {error && (
+            <tr>
+              <td colSpan={8} className="error-row">{error}</td>
             </tr>
-          ))}
+          )}
+          {loading && !error && (
+            <tr>
+              <td colSpan={8}>Carregando...</td>
+            </tr>
+          )}
+          {!loading && !error && clients.length === 0 && (
+            <tr>
+              <td colSpan={8}>Nenhum cliente encontrado.</td>
+            </tr>
+          )}
+          {!loading && !error &&
+            clients.map((client) => (
+              <tr key={client.id}>
+                <td>{client.id}</td>
+                <td>{client.nome}</td>
+                <td>
+                  {client.data_cadastro
+                    ? new Date(client.data_cadastro).toLocaleDateString('pt-BR')
+                    : '-'}
+                </td>
+                <td>{client.cpf}</td>
+                <td>{client.telefone || '-'}</td>
+                <td>{client.email || '-'}</td>
+                <td>{client.tipo}</td>
+                <td className="actions">
+                  <span onClick={() => handleEdit(client.id)}>✏️</span>
+                  <span onClick={() => handleDelete(client.id)}>🗑️</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
 
       </table>
