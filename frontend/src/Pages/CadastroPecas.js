@@ -18,17 +18,17 @@ function CadastroPecas() {
     setPecas(getItensBD());
   }, []);
 
-  // Função para deletar um cliente
-  const handleDelete = (index) => {
-    const novosItens = [...Pecas];
-    novosItens.splice(index, 1);
-    setPecas(novosItens);
-    setItensBD(novosItens);
+
+  const handleEdit = (id) => {
+    navigate('/pecas/novo', { state: { editId: id } });
   };
 
-  // (Se quiser editar, depois criamos)
-  const handleEdit = (pecaId) => {
-    alert("Editar peça ID: " + Pecas[pecaId].id);
+  const handleDelete = (id) => {
+    if (!window.confirm('Confirma exclusão desta peça?')) return;
+    const db = getItensBD();
+    const novo = db.filter(item => item.id !== id);
+    setPecas(novo);
+    setItensBD(novo);
   };
 
   return (
@@ -39,13 +39,14 @@ function CadastroPecas() {
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
         </div>
 
-       <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-        <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-        <div className='BotoesNavegacao'>Fornecedores</div>
-        <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
-        <div className='BotoesNavegacao'>Relatórios</div>
-         </div>
+           <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
+          <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
+          <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+          <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
+          <div className='BotoesNavegacao'>Fornecedores</div>
+          <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
+          <div className='BotoesNavegacao'>Relatórios</div>
+                 </div>
 
 
       <h2 className="Clientes">Peças</h2>
@@ -97,8 +98,8 @@ function CadastroPecas() {
 
               {/* Ações */}
               <td className="actions">
-                <span onClick={() => handleEdit(index)}>✏️</span>
-                <span onClick={() => handleDelete(index)}>🗑️</span>
+                <span onClick={() => handleEdit(c.id)}>✏️</span>
+                <span onClick={() => handleDelete(c.id)}>🗑️</span>
               </td>
             </tr>
           ))}

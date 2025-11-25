@@ -97,7 +97,7 @@ function NovoCadastroCelulares() {
 
         <button className="btn-primary" onClick={handleSave}>Salvar Celular</button>
 
-        <button className="btn-secondary" onClick={() => navigate("/celulares/novo")}>Cancelar</button>
+        <button className="btn-secondary" onClick={() => navigate("/celulares")}>Cancelar</button>
 
       </div>
 
