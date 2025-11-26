@@ -5,6 +5,7 @@ const celularesController = require('../controllers/celulares.controller');
 const pecasController = require('../controllers/pecas.controller');
 const clientesController = require('../controllers/clientes.controller');
 const ordensServicoController = require('../controllers/ordens-servico.controller');
+const dashboardsController = require('../controllers/dashboards.controller');
 const { validate } = require('../middlewares/validate');
 const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
@@ -24,6 +25,8 @@ router.get('/', async (req, res) => {
   ]);
   res.json({ name: 'TechStock API', version: 'v1', counts: { usuarios: u, celulares: c, pecas: p } });
 });
+
+router.get('/dashboard/resumo', dashboardsController.getResumo);
 
 // Usuarios
 router.get('/usuarios', usuariosController.list);

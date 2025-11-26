@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp } from 'lucide-react';
 import '../styles/OrdemDeServiço.css';
-import { dadosDoSistema } from './dados';
-import { ordensServicoApi } from '../services/api';
+import { dashboardsApi, ordensServicoApi } from '../services/api';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
@@ -27,6 +26,28 @@ const OrdensServico = () => {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [metricas, setMetricas] = useState([]);
+  const [metricasLoading, setMetricasLoading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    dashboardsApi
+      .getResumo()
+      .then((payload) => {
+        if (!active) return;
+        setMetricas(payload?.metricas || []);
+      })
+      .catch(() => {
+        if (!active) return;
+        setMetricas([]);
+      })
+      .finally(() => {
+        if (active) setMetricasLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setSearch(searchInput), 400);
@@ -119,7 +140,7 @@ const OrdensServico = () => {
 
       <div className='ConteudoDashboard'>
         <div className='GradeMetricas'>
-          {dadosDoSistema.metricas.map((metrica) => (
+          {metricas.map((metrica) => (
             <div key={metrica.id} className='CartaoMetrica'>
               <div className='CabecalhoCartao'>
                 <span>{metrica.titulo}</span>
@@ -131,6 +152,9 @@ const OrdensServico = () => {
               </div>
             </div>
           ))}
+          {!metricasLoading && !metricas.length && (
+            <div className='CartaoMetrica'>Indicadores indisponíveis.</div>
+          )}
         </div>
       </div>
 
