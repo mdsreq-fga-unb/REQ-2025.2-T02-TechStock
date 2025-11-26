@@ -44,4 +44,24 @@ function serializeVendaList(list = []) {
   return list.map(serializeVenda);
 }
 
-module.exports = { serializeCelular, serializeList, serializeVenda, serializeVendaList, toPlainDecimal };
+function serializeMovimentacao(mov) {
+  if (!mov) return mov;
+  return {
+    ...mov,
+    data_movimentacao: toISODate(mov.data_movimentacao),
+  };
+}
+
+function serializeMovimentacaoList(list = []) {
+  return list.map(serializeMovimentacao);
+}
+
+module.exports = {
+  serializeCelular,
+  serializeList,
+  serializeVenda,
+  serializeVendaList,
+  serializeMovimentacao,
+  serializeMovimentacaoList,
+  toPlainDecimal,
+};
