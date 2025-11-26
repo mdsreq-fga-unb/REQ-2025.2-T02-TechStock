@@ -1,5 +1,9 @@
 const { getPrisma } = require('../database/prisma');
 
+function getClient(tx) {
+  return tx || getPrisma();
+}
+
 function buildWhere(q, filters = {}) {
   const AND = [];
 
@@ -38,7 +42,7 @@ function pick(obj, keys) {
 }
 
 async function list({ page = 1, pageSize = 20, q, filters } = {}) {
-  const prisma = getPrisma();
+  const prisma = getClient();
   const where = buildWhere(q, filters);
   const [total, items] = await Promise.all([
     prisma.celulares.count({ where }),
@@ -52,13 +56,13 @@ async function list({ page = 1, pageSize = 20, q, filters } = {}) {
   return { meta: { page, pageSize, total }, items };
 }
 
-async function getById(id) {
-  const prisma = getPrisma();
+async function getById(id, tx) {
+  const prisma = getClient(tx);
   return prisma.celulares.findUnique({ where: { id } });
 }
 
-async function create(data, userId) {
-  const prisma = getPrisma();
+async function create(data, userId, tx) {
+  const prisma = getClient(tx);
   const allowedCreateFields = [
     'modelo',
     'imei',
@@ -76,8 +80,8 @@ async function create(data, userId) {
   return prisma.celulares.create({ data: { ...dataToCreate, created_by: userId, updated_by: userId } });
 }
 
-async function update(id, data, userId) {
-  const prisma = getPrisma();
+async function update(id, data, userId, tx) {
+  const prisma = getClient(tx);
   const allowedUpdateFields = [
     'modelo',
     'imei',
@@ -94,8 +98,8 @@ async function update(id, data, userId) {
   return prisma.celulares.update({ where: { id }, data: { ...dataToUpdate, updated_by: userId } });
 }
 
-async function remove(id) {
-  const prisma = getPrisma();
+async function remove(id, tx) {
+  const prisma = getClient(tx);
   await prisma.celulares.delete({ where: { id } });
 }
 

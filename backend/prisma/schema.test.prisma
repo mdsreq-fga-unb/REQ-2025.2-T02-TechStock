@@ -28,6 +28,7 @@ model clientes {
   data_cadastro DateTime? @default(now())
 
   ordens_servico ordens_servico[]
+  vendas         vendas[]
 }
 
 model celulares {
@@ -51,6 +52,7 @@ model celulares {
 
   ordens_servico ordens_servico[]
   historico       celulares_historico[]
+  vendas          vendas[]
 }
 
 model pecas {
@@ -115,4 +117,21 @@ model ordens_servico_pecas {
   peca          pecas           @relation(fields: [peca_id], references: [id])
 
   @@unique([ordem_servico_id, peca_id], name: "ordem_servico_peca_unique")
+}
+
+model vendas {
+  id               Int      @id @default(autoincrement())
+  cliente_id       Int
+  celular_id       Int
+  data_venda       DateTime? @default(now())
+  valor_venda      Decimal?
+  garantia_dias    Int?
+  garantia_validade DateTime?
+  observacoes      String?
+  created_by       Int?     @default(1)
+  updated_by       Int?     @default(1)
+  updated_at       DateTime? @updatedAt
+
+  cliente clientes @relation(fields: [cliente_id], references: [id])
+  celular celulares @relation(fields: [celular_id], references: [id])
 }

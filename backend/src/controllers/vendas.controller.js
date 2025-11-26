@@ -1,10 +1,19 @@
 const vendasService = require('../services/vendas.service');
+const { serializeVenda, serializeVendaList } = require('../utils/serialization');
 
 async function list(req, res, next) {
     try {
-        const { page = 1, pageSize = 20, q } = req.query;
-        const data = await vendasService.list({ page: Number(page), pageSize: Number(pageSize), q });
-        res.json(data);
+        const { page = 1, pageSize = 20, q, cliente_id, celular_id, data_inicio, data_fim } = req.query;
+        const data = await vendasService.list({
+            page: Number(page),
+            pageSize: Number(pageSize),
+            q,
+            cliente_id: cliente_id != null ? Number(cliente_id) : undefined,
+            celular_id: celular_id != null ? Number(celular_id) : undefined,
+            dataInicio: data_inicio,
+            dataFim: data_fim,
+        });
+        res.json({ meta: data.meta, items: serializeVendaList(data.items) });
     } catch (err) {
         next(err);
     }
@@ -15,7 +24,7 @@ async function getById(req, res, next) {
         const id = Number(req.params.id);
         const venda = await vendasService.getById(id);
         if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
-        res.json(venda);
+        res.json(serializeVenda(venda));
     } catch (err) {
         next(err);
     }
@@ -24,11 +33,8 @@ async function getById(req, res, next) {
 async function create(req, res, next) {
     try {
         const venda = await vendasService.create(req.body, req.user);
-        res.status(201).json(venda);
+        res.status(201).json(serializeVenda(venda));
     } catch (err) {
-        if (err && err.code === 'P2002' && err.meta?.target?.includes('codigo_interno')) {
-            return res.status(409).json({ message: 'Código interno já cadastrado' });
-        }
         next(err);
     }
 }
@@ -37,11 +43,9 @@ async function update(req, res, next) {
     try {
         const id = Number(req.params.id);
         const venda = await vendasService.update(id, req.body, req.user);
-        res.json(venda);
+        if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
+        res.json(serializeVenda(venda));
     } catch (err) {
-        if (err && err.code === 'P2002' && err.meta?.target?.includes('codigo_interno')) {
-            return res.status(409).json({ message: 'Código interno já cadastrado' });
-        }
         next(err);
     }
 }
@@ -49,7 +53,8 @@ async function update(req, res, next) {
 async function remove(req, res, next) {
     try {
         const id = Number(req.params.id);
-        await vendasService.remove(id);
+        const venda = await vendasService.remove(id, req.user);
+        if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
         res.status(204).send();
     } catch (err) {
         next(err);
