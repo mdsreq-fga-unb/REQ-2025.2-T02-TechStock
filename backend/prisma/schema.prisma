@@ -15,6 +15,7 @@ model usuarios {
   created_at DateTime?   @default(now()) @db.Timestamptz(6)
   celulares  celulares[]
   pecas      pecas[]
+  movimentacoes movimentacoes_estoque[]
 }
 
 model clientes {
@@ -52,6 +53,7 @@ model celulares {
   ordens_servico ordens_servico[]
   historico       celulares_historico[]
   vendas          vendas[]
+  movimentacoes   movimentacoes_estoque[]
 }
 
 model pecas {
@@ -70,6 +72,7 @@ model pecas {
   updated_at           DateTime? @db.Timestamptz(6)
 
   ordens_servico_usos ordens_servico_pecas[]
+  movimentacoes       movimentacoes_estoque[]
 }
 
 model ordens_servico {
@@ -176,4 +179,38 @@ model vendas {
 
   cliente clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   celular celulares @relation(fields: [celular_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model movimentacoes_estoque {
+  id              Int                        @id @default(autoincrement())
+  tipo_item       TipoItemEstoque
+  tipo_operacao   TipoMovimentacaoEstoque
+  celular_id      Int?
+  peca_id         Int?
+  quantidade      Int
+  saldo_resultante Int?
+  observacoes     String?                   @db.Text
+  data_movimentacao DateTime?               @default(now()) @db.Timestamptz(6)
+  usuario_id      Int
+
+  usuario usuarios @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  celular celulares? @relation(fields: [celular_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  peca     pecas?    @relation(fields: [peca_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([tipo_item], name: "movimentacoes_tipo_item_idx")
+  @@index([tipo_operacao], name: "movimentacoes_tipo_operacao_idx")
+  @@index([usuario_id], name: "movimentacoes_usuario_idx")
+  @@index([data_movimentacao], name: "movimentacoes_data_idx")
+}
+
+enum TipoMovimentacaoEstoque {
+  COMPRA
+  VENDA
+  DEVOLUCAO
+  CONSERTO
+}
+
+enum TipoItemEstoque {
+  CELULAR
+  PECA
 }

@@ -1,4 +1,11 @@
-const { serializeCelular, serializeList, serializeVenda, serializeVendaList } = require('../../utils/serialization');
+const {
+  serializeCelular,
+  serializeList,
+  serializeVenda,
+  serializeVendaList,
+  serializeMovimentacao,
+  serializeMovimentacaoList,
+} = require('../../utils/serialization');
 
 describe('utils/serialization', () => {
   test('serializeCelular converte Decimal para number e data para ISO', () => {
@@ -32,5 +39,17 @@ describe('utils/serialization', () => {
     const list = [{ valor_venda: { toNumber: () => 1 } }, { valor_venda: { toNumber: () => 2 } }];
     const result = serializeVendaList(list);
     expect(result.map((v) => v.valor_venda)).toEqual([1, 2]);
+  });
+
+  test('serializeMovimentacao converte data', () => {
+    const movimento = { data_movimentacao: '2024-03-01T10:00:00.000Z', tipo_item: 'PECA' };
+    const result = serializeMovimentacao(movimento);
+    expect(result.data_movimentacao).toBe('2024-03-01T10:00:00.000Z');
+  });
+
+  test('serializeMovimentacaoList mapeia lista', () => {
+    const list = [{ data_movimentacao: '2024-01-01T00:00:00.000Z' }];
+    const result = serializeMovimentacaoList(list);
+    expect(result).toHaveLength(1);
   });
 });

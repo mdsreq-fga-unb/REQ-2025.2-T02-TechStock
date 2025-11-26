@@ -16,6 +16,7 @@ model usuarios {
   created_at DateTime?   @default(now())
   celulares  celulares[]
   pecas      pecas[]
+  movimentacoes movimentacoes_estoque[]
 }
 
 model clientes {
@@ -53,6 +54,7 @@ model celulares {
   ordens_servico ordens_servico[]
   historico       celulares_historico[]
   vendas          vendas[]
+  movimentacoes   movimentacoes_estoque[]
 }
 
 model pecas {
@@ -71,6 +73,7 @@ model pecas {
   updated_at           DateTime? @updatedAt
 
   ordens_servico_usos ordens_servico_pecas[]
+  movimentacoes       movimentacoes_estoque[]
 }
 
 model ordens_servico {
@@ -134,4 +137,21 @@ model vendas {
 
   cliente clientes @relation(fields: [cliente_id], references: [id])
   celular celulares @relation(fields: [celular_id], references: [id])
+}
+
+model movimentacoes_estoque {
+  id                Int       @id @default(autoincrement())
+  tipo_item         String
+  tipo_operacao     String
+  celular_id        Int?
+  peca_id           Int?
+  quantidade        Int
+  saldo_resultante  Int?
+  observacoes       String?
+  data_movimentacao DateTime? @default(now())
+  usuario_id        Int
+
+  usuario usuarios @relation(fields: [usuario_id], references: [id])
+  celular celulares? @relation(fields: [celular_id], references: [id])
+  peca     pecas?    @relation(fields: [peca_id], references: [id])
 }
