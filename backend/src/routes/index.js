@@ -9,6 +9,7 @@ const { validate } = require('../middlewares/validate');
 const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
 const { isValidCPF } = require('../validators/cpf');
+const vendasController = require('../controllers/vendas.controller');
 
 const router = Router();
 
@@ -777,6 +778,67 @@ router.post(
   ],
   validateRequest,
   ordensServicoController.registrarPecas,
+);
+
+// Vendas
+router.get(
+  '/vendas',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+    query('data_inicio').optional().isISO8601().toDate(),
+    query('data_fim').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  vendasController.list,
+);
+
+router.get(
+  '/vendas/:id',
+  [param('id').isInt().toInt()],
+  validateRequest,
+  vendasController.getById,
+);
+
+router.post(
+  '/vendas',
+  [
+    body('data_venda').isISO8601().toDate(),
+    body('cliente_id').isInt({ min: 1 }).toInt(),
+    body('celular_id').isInt({ min: 1 }).toInt(),
+    body('valor_venda').isFloat({ gt: 0 }).toFloat(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+    body('observacoes').optional().isString(),
+  ],
+  validateRequest,
+  vendasController.create,
+);
+
+router.put(
+  '/vendas/:id',
+  [
+    param('id').isInt().toInt(),
+    body('data_venda').optional().isISO8601().toDate(),
+    body('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    body('celular_id').optional().isInt({ min: 1 }).toInt(),
+    body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
+    body('valor_venda').optional().isFloat({ gt: 0 }).toFloat(),
+    body('garantia_validade').optional().isISO8601().toDate(),
+    body('observacoes').optional().isString(),
+  ],
+  validateRequest,
+  vendasController.update,
+);
+
+router.delete(
+  '/vendas/:id',
+  [param('id').isInt().toInt()],
+  validateRequest,
+  vendasController.remove,
 );
 
 module.exports = router;

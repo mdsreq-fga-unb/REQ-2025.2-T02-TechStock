@@ -27,6 +27,7 @@ model clientes {
   data_cadastro DateTime?    @default(now()) @db.Timestamptz(6)
 
   ordens_servico ordens_servico[]
+  vendas         vendas[]
 }
 
 model celulares {
@@ -50,6 +51,7 @@ model celulares {
 
   ordens_servico ordens_servico[]
   historico       celulares_historico[]
+  vendas          vendas[]
 }
 
 model pecas {
@@ -157,4 +159,21 @@ enum TipoEventoCelular {
   OrdemServicoPecaRegistrada
 
   @@map("tipo_evento_celular")
+}
+
+model vendas {
+  id               Int       @id @default(autoincrement())
+  cliente_id       Int
+  celular_id       Int
+  data_venda       DateTime? @default(now()) @db.Timestamptz(6)
+  valor_venda      Decimal?  @db.Decimal(10, 2)
+  garantia_dias    Int?
+  garantia_validade DateTime? @db.Timestamptz(6)
+  observacoes      String?   @db.Text
+  created_by       Int?      @default(1)
+  updated_by       Int?      @default(1)
+  updated_at       DateTime? @db.Timestamptz(6)
+
+  cliente clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  celular celulares @relation(fields: [celular_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
