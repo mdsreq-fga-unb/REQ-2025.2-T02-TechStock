@@ -10,6 +10,7 @@ const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
 const { isValidCPF } = require('../validators/cpf');
 const vendasController = require('../controllers/vendas.controller');
+const movimentacoesEstoqueController = require('../controllers/movimentacoes-estoque.controller');
 
 const router = Router();
 
@@ -839,6 +840,58 @@ router.delete(
   [param('id').isInt().toInt()],
   validateRequest,
   vendasController.remove,
+);
+
+// Movimentações de estoque
+router.get(
+  '/movimentacoes-estoque',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('tipo_item').optional().isIn(['CELULAR', 'PECA']),
+    query('tipo_operacao').optional().isIn(['COMPRA', 'VENDA', 'DEVOLUCAO', 'CONSERTO']),
+    query('usuario_id').optional().isInt({ min: 1 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+    query('peca_id').optional().isInt({ min: 1 }).toInt(),
+    query('data_inicio').optional().isISO8601().toDate(),
+    query('data_fim').optional().isISO8601().toDate(),
+  ],
+  validateRequest,
+  movimentacoesEstoqueController.list,
+);
+
+router.get(
+  '/movimentacoes-estoque/:id',
+  [param('id').isInt({ min: 1 }).toInt()],
+  validateRequest,
+  movimentacoesEstoqueController.getById,
+);
+
+router.post(
+  '/movimentacoes-estoque',
+  [
+    body('tipo_item').isIn(['CELULAR', 'PECA']),
+    body('tipo_operacao').isIn(['COMPRA', 'VENDA', 'DEVOLUCAO', 'CONSERTO']),
+    body('quantidade').optional().isInt({ min: 1 }).toInt(),
+    body('celular_id')
+      .if(body('tipo_item').equals('CELULAR'))
+      .exists()
+      .withMessage('celular_id é obrigatório para tipo_item CELULAR')
+      .bail()
+      .isInt({ min: 1 })
+      .toInt(),
+    body('peca_id')
+      .if(body('tipo_item').equals('PECA'))
+      .exists()
+      .withMessage('peca_id é obrigatório para tipo_item PECA')
+      .bail()
+      .isInt({ min: 1 })
+      .toInt(),
+    body('data_movimentacao').optional().isISO8601().toDate(),
+    body('observacoes').optional().isString(),
+  ],
+  validateRequest,
+  movimentacoesEstoqueController.create,
 );
 
 module.exports = router;

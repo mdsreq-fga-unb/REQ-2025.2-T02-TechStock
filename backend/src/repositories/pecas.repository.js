@@ -1,5 +1,9 @@
 const { getPrisma } = require('../database/prisma');
 
+function getClient(tx) {
+  return tx || getPrisma();
+}
+
 function buildWhere(q) {
   if (!q || !q.trim()) return undefined;
   const contains = q.trim();
@@ -24,7 +28,7 @@ function pick(obj, keys) {
 }
 
 async function list({ page = 1, pageSize = 20, q } = {}) {
-  const prisma = getPrisma();
+  const prisma = getClient();
   const where = buildWhere(q);
   const [total, items] = await Promise.all([
     prisma.pecas.count({ where }),
@@ -33,13 +37,13 @@ async function list({ page = 1, pageSize = 20, q } = {}) {
   return { meta: { page, pageSize, total }, items };
 }
 
-async function getById(id) {
-  const prisma = getPrisma();
+async function getById(id, tx) {
+  const prisma = getClient(tx);
   return prisma.pecas.findUnique({ where: { id } });
 }
 
-async function create(data, userId) {
-  const prisma = getPrisma();
+async function create(data, userId, tx) {
+  const prisma = getClient(tx);
   const allowedCreateFields = [
     'nome',
     'codigo_interno',
@@ -53,8 +57,8 @@ async function create(data, userId) {
   return prisma.pecas.create({ data: { ...dataToCreate, created_by: userId, updated_by: userId } });
 }
 
-async function update(id, data, userId) {
-  const prisma = getPrisma();
+async function update(id, data, userId, tx) {
+  const prisma = getClient(tx);
   const allowedUpdateFields = [
     'nome',
     'codigo_interno',
@@ -67,8 +71,8 @@ async function update(id, data, userId) {
   return prisma.pecas.update({ where: { id }, data: { ...dataToUpdate, updated_by: userId } });
 }
 
-async function remove(id) {
-  const prisma = getPrisma();
+async function remove(id, tx) {
+  const prisma = getClient(tx);
   await prisma.pecas.delete({ where: { id } });
 }
 
