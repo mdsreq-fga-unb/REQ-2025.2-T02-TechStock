@@ -1,11 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'; 
 import { Package, Users, Wrench, TrendingUp, Settings, AlertCircle, ShieldCheck } from 'lucide-react';
 import '../styles/Dashboards.css';
-import { dadosDoSistema } from './dados';
+import { dashboardsApi } from '../services/api';
 
 
 const Dashboard = () => {
+  const [dados, setDados] = useState({
+    metricas: [],
+    vendasRecentes: [],
+    filaManutencao: [],
+    ordensServico: [],
+    estoqueBaixo: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    dashboardsApi
+      .getResumo()
+      .then((payload) => {
+        if (!active) return;
+        setDados({
+          metricas: payload?.metricas || [],
+          vendasRecentes: payload?.vendasRecentes || [],
+          filaManutencao: payload?.filaManutencao || [],
+          ordensServico: payload?.ordensServico || [],
+          estoqueBaixo: payload?.estoqueBaixo || [],
+        });
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message || 'Não foi possível carregar os dados do dashboard.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
   
   // Função auxiliar para renderizar ícones dinamicamente
   const renderIcone = (nome) => {
@@ -35,8 +73,10 @@ const Dashboard = () => {
           <div className='BotoesNavegacao'>Relatórios</div>
                  </div>
       <div className='ConteudoDashboard'>
+        {error && <div className='AlertaErro'>{error}</div>}
+        {!error && loading && <div className='AlertaInfo'>Carregando indicadores...</div>}
         <div className='GradeMetricas'>
-          {dadosDoSistema.metricas.map((metrica) => (
+          {dados.metricas.map((metrica) => (
             <div key={metrica.id} className='CartaoMetrica'>
               <div className='CabecalhoCartao'>
                 <span>{metrica.titulo}</span>
@@ -48,6 +88,9 @@ const Dashboard = () => {
               </div>
             </div>
           ))}
+          {!loading && !dados.metricas.length && !error && (
+            <div className='CartaoMetrica'>Nenhum indicador disponível.</div>
+          )}
         </div>
         <div className='GradeListas'>          
           <div className='CartaoLista'>
@@ -59,7 +102,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className='ListaConteudo'>
-              {dadosDoSistema.vendasRecentes.map((venda) => (
+              {dados.vendasRecentes.map((venda) => (
                 <div key={venda.id} className='ItemLista'>
                   <div>
                     <strong>{venda.cliente}</strong>
@@ -71,6 +114,9 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
+              {!loading && !dados.vendasRecentes.length && !error && (
+                <p className='TextoCinzaPequeno'>Nenhuma venda registrada.</p>
+              )}
             </div>
           </div>
 
@@ -83,7 +129,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className='ListaConteudo'>
-              {dadosDoSistema.filaManutencao.map((manut) => (
+              {dados.filaManutencao.map((manut) => (
                 <div key={manut.id} className='ItemLista'>
                   <div>
                     <div className='LinhaTitulo'>
@@ -96,6 +142,9 @@ const Dashboard = () => {
                   <div className='PrecoManutencao'>{manut.valor}</div>
                 </div>
               ))}
+              {!loading && !dados.filaManutencao.length && !error && (
+                <p className='TextoCinzaPequeno'>Nenhum serviço em andamento.</p>
+              )}
             </div>
           </div>
 
@@ -108,7 +157,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className='ListaConteudo'>
-              {dadosDoSistema.ordensServico.map((os) => (
+              {dados.ordensServico.map((os) => (
                 <div key={os.id} className='ItemLista'>
                   <div>
                     <strong>{os.id}</strong>
@@ -118,6 +167,9 @@ const Dashboard = () => {
                   <span className={`BadgeStatus ${os.status === 'Concluído' ? 'Verde' : 'Roxo'}`}>{os.status}</span>
                 </div>
               ))}
+              {!loading && !dados.ordensServico.length && !error && (
+                <p className='TextoCinzaPequeno'>Nenhuma ordem recente encontrada.</p>
+              )}
             </div>
           </div>
         </div>
@@ -131,7 +183,7 @@ const Dashboard = () => {
             <p className='SubtituloAlerta'>Itens com quantidade baixa</p>
             
             <div className='ListaBarras'>
-              {dadosDoSistema.estoqueBaixo.map((item, index) => (
+              {dados.estoqueBaixo.map((item, index) => (
                 <div key={index} className='ItemBarraWrapper'>
                    <div className='BarraInfo'>
                       <strong>{item.item}</strong>
@@ -142,6 +194,9 @@ const Dashboard = () => {
                    </div>
                 </div>
               ))}
+              {!loading && !dados.estoqueBaixo.length && !error && (
+                <p className='TextoCinzaPequeno'>Estoque saudável no momento.</p>
+              )}
             </div>
           </div>
 

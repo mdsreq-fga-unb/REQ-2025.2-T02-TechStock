@@ -72,4 +72,8 @@ export const ordensServicoApi = {
   registrarPecas: (id, itens) => apiFetch(`/ordens-servico/${id}/pecas`, { method: 'POST', body: { itens } }),
 };
 
+export const dashboardsApi = {
+  getResumo: () => apiFetch('/dashboard/resumo'),
+};
+
 export default apiFetch;
