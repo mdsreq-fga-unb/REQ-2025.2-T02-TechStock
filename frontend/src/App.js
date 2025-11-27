@@ -10,6 +10,7 @@ import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboards";
 import OrdemDeServico from "./Pages/OrdemDeServico";
 import NovoOS from "./Pages/NovoOrdemDeServico";
+import vendas from "./Pages/Vendas"
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/dashboards" element={<Dashboard/>} />
         <Route path="/ordemdeservico" element={<OrdemDeServico/>} />
         <Route path="/novaOS" element={<NovoOS/>} />
+        <Route path="/vendas" element={<Vendas/>} />
         
       </Routes>
     </BrowserRouter>
