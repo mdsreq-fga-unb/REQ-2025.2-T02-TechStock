@@ -3,6 +3,7 @@ const clientesRepository = require('../repositories/clientes.repository');
 const celularesRepository = require('../repositories/celulares.repository');
 const historicoRepository = require('../repositories/celulares-historico.repository');
 const { getPrisma } = require('../database/prisma');
+const garantiasService = require('./garantias.service');
 
 const STATUS = {
   EM_ANDAMENTO: 'EmAndamento',
@@ -181,6 +182,23 @@ async function update(id, data, user) {
         },
         tx,
       );
+      const garantiaDias =
+        updates.garantia_dias ??
+        data.garantia_dias ??
+        atual.garantia_dias ??
+        garantiasService.DEFAULT_PRAZOS[garantiasService.TipoGarantia.SERVICO];
+      await garantiasService.registrarGarantia(
+        {
+          origemTipo: garantiasService.GarantiaOrigem.ORDEM_SERVICO,
+          origemId: id,
+          clienteId: atual.cliente_id,
+          celularId: atual.celular_id,
+          tipoGarantia: garantiasService.TipoGarantia.SERVICO,
+          prazoDias: garantiaDias,
+          dataInicio: updates.data_conclusao,
+        },
+        { tx, userId, descricao: `Garantia de serviço vinculada à OS #${id}.` },
+      );
     } else if (data.status && data.status !== atual.status) {
       await historicoRepository.addEvent(
         {
@@ -190,6 +208,27 @@ async function update(id, data, user) {
           descricao: `Ordem de serviço #${id} atualizada para status ${data.status}.`,
         },
         tx,
+      );
+    }
+
+    if (!concluindo && retornando) {
+      await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.ORDEM_SERVICO, id, { tx });
+    } else if (!concluindo && targetStatus === STATUS.CONCLUIDO && (data.garantia_dias !== undefined || data.garantia_validade || data.data_conclusao)) {
+      const garantiaDias =
+        data.garantia_dias ??
+        atual.garantia_dias ??
+        garantiasService.DEFAULT_PRAZOS[garantiasService.TipoGarantia.SERVICO];
+      await garantiasService.registrarGarantia(
+        {
+          origemTipo: garantiasService.GarantiaOrigem.ORDEM_SERVICO,
+          origemId: id,
+          clienteId: atual.cliente_id,
+          celularId: atual.celular_id,
+          tipoGarantia: garantiasService.TipoGarantia.SERVICO,
+          prazoDias: garantiaDias,
+          dataInicio: updates.data_conclusao || atual.data_conclusao,
+        },
+        { tx, userId, descricao: `Garantia de serviço atualizada para OS #${id}.` },
       );
     }
   });
@@ -308,6 +347,7 @@ async function remove(id) {
   const prisma = getPrisma();
   await prisma.$transaction(async (tx) => {
     await ordensRepository.remove(id, tx);
+    await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.ORDEM_SERVICO, id, { tx });
   });
 
   return atual;

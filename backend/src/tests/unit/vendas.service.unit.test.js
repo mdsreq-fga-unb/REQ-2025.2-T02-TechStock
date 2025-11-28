@@ -9,11 +9,19 @@ jest.mock('../../repositories/celulares.repository', () => ({
   update: jest.fn(),
 }));
 jest.mock('../../database/prisma', () => ({ getPrisma: jest.fn() }));
+jest.mock('../../services/garantias.service', () => ({
+  registrarGarantia: jest.fn().mockResolvedValue({}),
+  cancelarPorOrigem: jest.fn().mockResolvedValue(null),
+  TipoGarantia: { PRODUTO: 'PRODUTO', SERVICO: 'SERVICO' },
+  GarantiaOrigem: { VENDA: 'VENDA', ORDEM_SERVICO: 'ORDEM_SERVICO' },
+  DEFAULT_PRAZOS: { PRODUTO: 365, SERVICO: 90 },
+}));
 
 const service = require('../../services/vendas.service');
 const vendasRepo = require('../../repositories/vendas.repository');
 const celularesRepo = require('../../repositories/celulares.repository');
 const { getPrisma } = require('../../database/prisma');
+const garantiasService = require('../../services/garantias.service');
 
 describe('vendas.service', () => {
   let prisma;
@@ -80,6 +88,10 @@ describe('vendas.service', () => {
       tx,
     );
     expect(celularesRepo.update).toHaveBeenCalledWith(2, { status: 'Vendido' }, 9, tx);
+    expect(garantiasService.registrarGarantia).toHaveBeenCalledWith(
+      expect.objectContaining({ origemTipo: garantiasService.GarantiaOrigem.VENDA, origemId: 55, clienteId: 1, celularId: 2 }),
+      expect.objectContaining({ tx, userId: 9 }),
+    );
     expect(venda.id).toBe(55);
   });
 
@@ -101,7 +113,14 @@ describe('vendas.service', () => {
     vendasRepo.getById.mockResolvedValueOnce(atual);
     const novoCelular = { id: 3, status: 'EmEstoque', garantia_padrao_dias: 60 };
     tx.celulares.findUnique.mockResolvedValueOnce(novoCelular);
-    vendasRepo.update.mockResolvedValue({ id: 7, celular_id: 3 });
+    vendasRepo.update.mockResolvedValue({
+      id: 7,
+      cliente_id: 1,
+      celular_id: 3,
+      garantia_dias: 45,
+      data_venda: new Date('2024-01-05T00:00:00.000Z'),
+      observacoes: 'Atualizada',
+    });
 
     const result = await service.update(7, { celular_id: 3 }, { id: 4 });
 
@@ -113,7 +132,11 @@ describe('vendas.service', () => {
     );
     expect(celularesRepo.update).toHaveBeenNthCalledWith(1, 2, { status: 'EmEstoque' }, 4, tx);
     expect(celularesRepo.update).toHaveBeenNthCalledWith(2, 3, { status: 'Vendido' }, 4, tx);
-    expect(result).toEqual({ id: 7, celular_id: 3 });
+    expect(result).toEqual(expect.objectContaining({ id: 7, celular_id: 3 }));
+    expect(garantiasService.registrarGarantia).toHaveBeenCalledWith(
+      expect.objectContaining({ origemId: 7, clienteId: 1, celularId: 3, prazoDias: 45 }),
+      expect.objectContaining({ tx, userId: 4 }),
+    );
   });
 
   test('update retorna null quando venda não existe', async () => {
@@ -132,6 +155,11 @@ describe('vendas.service', () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(vendasRepo.remove).toHaveBeenCalledWith(8, tx);
     expect(celularesRepo.update).toHaveBeenCalledWith(2, { status: 'EmEstoque' }, 3, tx);
+    expect(garantiasService.cancelarPorOrigem).toHaveBeenCalledWith(
+      garantiasService.GarantiaOrigem.VENDA,
+      8,
+      { tx },
+    );
     expect(result).toEqual({ id: 8, celular_id: 2 });
   });
 

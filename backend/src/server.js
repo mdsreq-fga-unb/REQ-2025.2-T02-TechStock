@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const { pingDB } = require('./database/prisma');
 const swaggerUi = require('swagger-ui-express');
 const { swaggerSpec } = require('./config/swagger');
-const { attachUser } = require('./middlewares/auth');
+const { attachUser, ensureAuthenticated } = require('./middlewares/auth');
 
 const app = express();
 
@@ -42,6 +42,12 @@ app.get('/health', async (req, res) => {
 
 // API routes
 const apiRouter = require('./routes');
+app.use('/api', (req, res, next) => {
+  if (req.path.startsWith('/auth')) {
+    return next();
+  }
+  return ensureAuthenticated(req, res, next);
+});
 app.use('/api', apiRouter);
 
 // 404

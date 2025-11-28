@@ -19,7 +19,10 @@ describe('usuarios.repository', () => {
     const prisma = prismaModule.getPrisma();
     prisma.usuarios.create.mockResolvedValue({ id: 3 });
     const created = await repo.create({ nome: 'Ana', email: 'a@a.com', senha_hash: 'x' });
-    expect(prisma.usuarios.create).toHaveBeenCalledWith({ data: { nome: 'Ana', email: 'a@a.com', senha_hash: 'x' } });
+    expect(prisma.usuarios.create).toHaveBeenCalledWith({
+      data: { nome: 'Ana', email: 'a@a.com', senha_hash: 'x' },
+      select: { id: true, nome: true, email: true, created_at: true },
+    });
     expect(created.id).toBe(3);
   });
 });

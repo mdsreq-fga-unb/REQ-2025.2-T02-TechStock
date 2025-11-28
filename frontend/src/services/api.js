@@ -1,5 +1,22 @@
 const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8080/api').replace(/\/$/, '');
 
+const defaultTokenProvider = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem('authToken');
+  } catch (_) {
+    return null;
+  }
+};
+
+let tokenProvider = defaultTokenProvider;
+let unauthorizedHandler = null;
+
+export function setApiAuthHandlers({ tokenProvider: provider, onUnauthorized } = {}) {
+  tokenProvider = provider || defaultTokenProvider;
+  unauthorizedHandler = onUnauthorized || null;
+}
+
 async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
   const config = { ...options };
@@ -7,6 +24,11 @@ async function apiFetch(path, options = {}) {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
   };
+
+  const token = tokenProvider ? tokenProvider() : null;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
   if (options.body && typeof options.body !== 'string') {
     config.body = JSON.stringify(options.body);
@@ -23,6 +45,9 @@ async function apiFetch(path, options = {}) {
     const error = new Error(payload?.message || 'Erro ao comunicar com o servidor');
     error.status = response.status;
     error.payload = payload;
+    if (response.status === 401 && typeof unauthorizedHandler === 'function') {
+      unauthorizedHandler(error);
+    }
     throw error;
   }
 
@@ -82,6 +107,10 @@ export const vendasApi = {
 
 export const dashboardsApi = {
   getResumo: () => apiFetch('/dashboard/resumo'),
+};
+
+export const authApi = {
+  login: (payload) => apiFetch('/auth/login', { method: 'POST', body: payload }),
 };
 
 export default apiFetch;

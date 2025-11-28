@@ -8,6 +8,13 @@ jest.mock('../../repositories/clientes.repository', () => ({ getById: jest.fn() 
 jest.mock('../../repositories/celulares.repository', () => ({ getById: jest.fn() }));
 jest.mock('../../repositories/celulares-historico.repository', () => ({ addEvent: jest.fn() }));
 jest.mock('../../database/prisma', () => ({ getPrisma: jest.fn() }));
+jest.mock('../../services/garantias.service', () => ({
+  registrarGarantia: jest.fn().mockResolvedValue({}),
+  cancelarPorOrigem: jest.fn().mockResolvedValue(null),
+  DEFAULT_PRAZOS: { PRODUTO: 365, SERVICO: 90 },
+  TipoGarantia: { PRODUTO: 'PRODUTO', SERVICO: 'SERVICO' },
+  GarantiaOrigem: { VENDA: 'VENDA', ORDEM_SERVICO: 'ORDEM_SERVICO' },
+}));
 
 const service = require('../../services/ordens-servico.service');
 const ordensRepo = require('../../repositories/ordens-servico.repository');
@@ -15,6 +22,7 @@ const clientesRepo = require('../../repositories/clientes.repository');
 const celularesRepo = require('../../repositories/celulares.repository');
 const historicoRepo = require('../../repositories/celulares-historico.repository');
 const { getPrisma } = require('../../database/prisma');
+const garantiasService = require('../../services/garantias.service');
 
 describe('ordens-servico.service', () => {
   let prisma;
@@ -54,7 +62,7 @@ describe('ordens-servico.service', () => {
 
   test('update conclui ordem, define garantia e registra histórico', async () => {
     ordensRepo.getById
-      .mockResolvedValueOnce({ id: 20, status: service.STATUS.EM_ANDAMENTO, celular_id: 9 })
+      .mockResolvedValueOnce({ id: 20, status: service.STATUS.EM_ANDAMENTO, celular_id: 9, cliente_id: 4 })
       .mockResolvedValueOnce({ id: 20, status: service.STATUS.CONCLUIDO, historico: [] });
     ordensRepo.update.mockResolvedValue({ id: 20 });
 
@@ -72,11 +80,16 @@ describe('ordens-servico.service', () => {
       tx,
     );
     expect(result.status).toBe(service.STATUS.CONCLUIDO);
+    expect(garantiasService.registrarGarantia).toHaveBeenCalledWith(
+      expect.objectContaining({ origemTipo: garantiasService.GarantiaOrigem.ORDEM_SERVICO, origemId: 20, clienteId: 4, celularId: 9 }),
+      expect.objectContaining({ tx }),
+    );
   });
 
   test('update rejeita garantia sem concluir', async () => {
-    ordensRepo.getById.mockResolvedValue({ id: 5, status: service.STATUS.EM_ANDAMENTO, celular_id: 1 });
+    ordensRepo.getById.mockResolvedValue({ id: 5, status: service.STATUS.EM_ANDAMENTO, celular_id: 1, cliente_id: 7 });
     await expect(service.update(5, { garantia_dias: 10 }, { id: 1 })).rejects.toThrow('Garantia só pode ser registrada ao concluir a ordem');
+    expect(garantiasService.registrarGarantia).not.toHaveBeenCalled();
   });
 
   test('registrarPecas debita estoque e define data_uso', async () => {

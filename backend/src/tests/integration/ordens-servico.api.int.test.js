@@ -1,20 +1,21 @@
 const request = require('supertest');
-const express = require('express');
 
 process.env.USE_SQLITE = '1';
 process.env.TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || 'file:./dev-test.db';
 
-const apiRouter = require('../../routes');
 const { getPrisma } = require('../../database/prisma');
+const { buildTestApp } = require('../utils/test-app');
+const { getAuthToken } = require('../utils/test-auth');
 
-const app = express();
-app.use(express.json());
-app.use('/api', apiRouter);
+const app = buildTestApp();
+let authToken;
+const withAuth = (req) => req.set('Authorization', `Bearer ${authToken}`);
 
 async function resetDB() {
   const prisma = getPrisma();
   await prisma.$executeRawUnsafe('DELETE FROM celulares_historico');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico_pecas');
+  await prisma.$executeRawUnsafe('DELETE FROM garantias');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico');
   await prisma.$executeRawUnsafe("DELETE FROM pecas WHERE codigo_interno LIKE 'OS-TEST-%'");
   await prisma.$executeRawUnsafe("DELETE FROM celulares WHERE modelo LIKE 'Modelo-%'");
@@ -87,6 +88,7 @@ describe('API /api/ordens-servico', () => {
   beforeAll(async () => {
     await ensureUsuario();
     await resetDB();
+    authToken = await getAuthToken(app);
   });
 
   beforeEach(async () => {
@@ -99,8 +101,8 @@ describe('API /api/ordens-servico', () => {
 
   test('POST cria OS vinculada e adiciona histórico', async () => {
     const { cliente, celular } = await seedClienteCelular();
-    const response = await request(app)
-      .post('/api/ordens-servico')
+    const response = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de tela' })
       .expect(201);
 
@@ -111,38 +113,38 @@ describe('API /api/ordens-servico', () => {
 
   test('GET lista com filtros por status e cliente', async () => {
     const { cliente, celular } = await seedClienteCelular();
-    const aberta = await request(app)
-      .post('/api/ordens-servico')
+    const aberta = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Bateria' })
       .expect(201);
 
-    const concluida = await request(app)
-      .post('/api/ordens-servico')
+    const concluida = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Tela' })
       .expect(201);
 
-    await request(app)
-      .patch(`/api/ordens-servico/${concluida.body.id}`)
+    await withAuth(request(app)
+      .patch(`/api/ordens-servico/${concluida.body.id}`))
       .send({ status: 'Concluido', garantia_dias: 30 })
       .expect(200);
 
-    const listStatus = await request(app).get('/api/ordens-servico?status=Concluido').expect(200);
+    const listStatus = await withAuth(request(app).get('/api/ordens-servico?status=Concluido')).expect(200);
     expect(listStatus.body.items.find((item) => item.id === concluida.body.id)).toBeTruthy();
     expect(listStatus.body.items.find((item) => item.id === aberta.body.id)).toBeFalsy();
 
-    const listCliente = await request(app).get(`/api/ordens-servico?cliente_id=${cliente.id}`).expect(200);
+    const listCliente = await withAuth(request(app).get(`/api/ordens-servico?cliente_id=${cliente.id}`)).expect(200);
     expect(listCliente.body.items.length).toBeGreaterThanOrEqual(2);
   });
 
   test('PATCH conclui ordem, registra garantia e histórico', async () => {
     const { cliente, celular } = await seedClienteCelular();
-    const ordem = await request(app)
-      .post('/api/ordens-servico')
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Placa' })
       .expect(201);
 
-    const patch = await request(app)
-      .patch(`/api/ordens-servico/${ordem.body.id}`)
+    const patch = await withAuth(request(app)
+      .patch(`/api/ordens-servico/${ordem.body.id}`))
       .send({ status: 'Concluido', garantia_dias: 45 })
       .expect(200);
 
@@ -153,24 +155,24 @@ describe('API /api/ordens-servico', () => {
 
     const prisma = getPrisma();
     const historicoCount = await prisma.celulares_historico.count({ where: { ordem_servico_id: ordem.body.id } });
-    expect(historicoCount).toBe(2);
+    expect(historicoCount).toBe(3);
   });
 
   test('PATCH impede garantia sem concluir', async () => {
     const { cliente, celular } = await seedClienteCelular();
-    const ordem = await request(app)
-      .post('/api/ordens-servico')
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Limpeza' })
       .expect(201);
 
-    await request(app).patch(`/api/ordens-servico/${ordem.body.id}`).send({ garantia_dias: 10 }).expect(400);
+    await withAuth(request(app).patch(`/api/ordens-servico/${ordem.body.id}`)).send({ garantia_dias: 10 }).expect(400);
   });
 
   test('POST rejeita cliente inexistente', async () => {
     const { celular } = await seedClienteCelular();
     const inexistente = 999999;
-    await request(app)
-      .post('/api/ordens-servico')
+    await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: inexistente, celular_id: celular.id, descricao: 'Bateria' })
       .expect(404);
   });
@@ -178,13 +180,13 @@ describe('API /api/ordens-servico', () => {
   test('POST /ordens-servico/:id/pecas registra peças e desconta estoque', async () => {
     const { cliente, celular } = await seedClienteCelular();
     const peca = await seedPeca(5);
-    const ordem = await request(app)
-      .post('/api/ordens-servico')
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de bateria' })
       .expect(201);
 
-    const registro = await request(app)
-      .post(`/api/ordens-servico/${ordem.body.id}/pecas`)
+    const registro = await withAuth(request(app)
+      .post(`/api/ordens-servico/${ordem.body.id}/pecas`))
       .send({ itens: [{ peca_id: peca.id, quantidade: 2 }] })
       .expect(200);
 
@@ -204,13 +206,13 @@ describe('API /api/ordens-servico', () => {
   test('POST /ordens-servico/:id/pecas agrega itens repetidos e valida estoque', async () => {
     const { cliente, celular } = await seedClienteCelular();
     const peca = await seedPeca(10);
-    const ordem = await request(app)
-      .post('/api/ordens-servico')
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca completa' })
       .expect(201);
 
-    const registro = await request(app)
-      .post(`/api/ordens-servico/${ordem.body.id}/pecas`)
+    const registro = await withAuth(request(app)
+      .post(`/api/ordens-servico/${ordem.body.id}/pecas`))
       .send({
         itens: [
           { peca_id: peca.id, quantidade: 1 },
@@ -232,13 +234,13 @@ describe('API /api/ordens-servico', () => {
   test('POST /ordens-servico/:id/pecas retorna 400 quando estoque é insuficiente', async () => {
     const { cliente, celular } = await seedClienteCelular();
     const peca = await seedPeca(1);
-    const ordem = await request(app)
-      .post('/api/ordens-servico')
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
       .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de conector' })
       .expect(201);
 
-    await request(app)
-      .post(`/api/ordens-servico/${ordem.body.id}/pecas`)
+    await withAuth(request(app)
+      .post(`/api/ordens-servico/${ordem.body.id}/pecas`))
       .send({ itens: [{ peca_id: peca.id, quantidade: 5 }] })
       .expect(400);
   });
