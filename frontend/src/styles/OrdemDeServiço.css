@@ -146,3 +146,12 @@ body {
   border-radius: 6px;
   font-weight: bold;
 }
+.btn-secondary-os {
+  background: #7d2cff;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}

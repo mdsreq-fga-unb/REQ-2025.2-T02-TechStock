@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/vendas.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { vendas } from '../vendas';
+import { vendasApi } from '../services/api';
 
-function vendas() {
+function Vendas() {
   const navigate = useNavigate();
-  const [celulares, setCelulares] = useState([]);
+  const [vendas, setVendas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -20,15 +20,15 @@ function vendas() {
     let active = true;
     setLoading(true);
     setError('');
-    celularesApi
+    vendasApi
       .list(search ? { q: search } : {})
       .then((data) => {
         if (!active) return;
-        setCelulares(data?.items || []);
+        setVendas(data?.items || []);
       })
       .catch((err) => {
         if (!active) return;
-        setError(err.message || 'Não foi possível carregar os celulares.');
+        setError(err.message || 'Não foi possível carregar as vendas.');
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -39,13 +39,18 @@ function vendas() {
   }, [search]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Deseja remover este aparelho?')) return;
+    if (!window.confirm('Deseja remover esta venda?')) return;
     try {
-      await celularesApi.remove(id);
-      setCelulares((prev) => prev.filter((item) => item.id !== id));
+      await vendasApi.remove(id);
+      setVendas((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      alert(err.message || 'Erro ao remover celular.');
+      alert(err.message || 'Erro ao remover venda.');
     }
+  };
+
+  const handleEdit = (id) => {
+    // Navegar para edição (rota não implementada aqui, ajustar se existir)
+    navigate('/vendas/novo', { state: { editId: id } });
   };
 
 
@@ -68,24 +73,24 @@ function vendas() {
           </div>
 
 
-      <h2 className="Clientes">Celul</h2>
-      <h2 className="gerencie-1">Gestão de celulares</h2> 
+      <h2 className="Clientes">Vendas</h2>
+      <h2 className="gerencie-1">Gestão de Vendas</h2> 
 
       <div className='Gestao' > 
-        <h2 className="title">Registro e Controle de Celulares</h2>
-        <h2 className="gerencie-2">Gerencie todos os Celulares</h2> 
+        <h2 className="title">Registro e Controle de Vendas</h2>
+        <h2 className="gerencie-2">Gerencie todas as Vendas</h2> 
 
         <div className="actions-bar">
           <input
             type="text"
-            placeholder="Buscar celulares..."
+            placeholder="Buscar vendas..."
             className="search-input"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
           
           {/*botão agora navega para tela de cadastro */}
-          <button className="btn-primary" onClick={() => navigate("/celulares/novo")}>
+          <button className="btn-primary" onClick={() => navigate("/vendas/novo")}>
             + Novas Vendas
           </button>
         </div>
@@ -117,32 +122,21 @@ function vendas() {
               <td colSpan={11}>Carregando...</td>
             </tr>
           )}
-          {!loading && !error && celulares.length === 0 && (
+          {!loading && !error && vendas.length === 0 && (
             <tr>
-              <td colSpan={11}>Nenhum aparelho encontrado.</td>
+              <td colSpan={11}>Nenhuma venda encontrada.</td>
             </tr>
           )}
           {!loading && !error &&
-            celulares.map((item) => (
+            vendas.map((item) => (
               <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.modelo}</td>
-                <td>
-                  {item.data_cadastro
-                    ? new Date(item.data_cadastro).toLocaleDateString('pt-BR')
-                    : '-'}
-                </td>
-                <td>{item.imei}</td>
-                <td>{item.cor || '-'}</td>
-                <td>{item.capacidade || '-'}</td>
-                <td>{item.status}</td>
-                <td>
-                  {item.valor_compra
-                    ? `R$ ${Number(item.valor_compra).toFixed(2).replace('.', ',')}`
-                    : '-'}
-                </td>
-                <td>{item.garantia_padrao_dias ?? '-'}</td>
-                <td>{item.defeitos_identificados || '-'}</td>
+                <td>{item.data_venda ? new Date(item.data_venda).toLocaleDateString('pt-BR') : '-'}</td>
+                <td>{item.celular?.modelo || '-'}</td>
+                <td>{item.cliente?.nome || '-'}</td>
+                <td>{item.valor_venda != null ? `R$ ${Number(item.valor_venda).toFixed(2).replace('.', ',')}` : '-'}</td>
+                <td>{item.garantia_dias ?? '-'}</td>
+                <td>{item.garantia_validade ? new Date(item.garantia_validade).toLocaleDateString('pt-BR') : '-'}</td>
+                <td>{item.observacoes || '-'}</td>
                 <td className="actions">
                   <span onClick={() => handleEdit(item.id)}>✏️</span>
                   <span onClick={() => handleDelete(item.id)}>🗑️</span>
@@ -156,4 +150,4 @@ function vendas() {
   );
 }
 
-export default vendas;
+export default Vendas;
