@@ -1,0 +1,62 @@
+/* HistoricoCliente - estilos baseados em HistoricoCelular.css, adaptados para clientes */
+
+/* Regras compartilhadas com o projeto */
+.Container{
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F6F6F6;
+  font-family: "Poppins", sans-serif;
+}
+
+.BarraSuperior{
+  width: 100%;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.LogoCellVex{ display:flex; flex-direction:column; font-weight:600; color:#5C2D91; }
+.SistemaDeGestao{ font-size:11px; margin-top:-2px; color:#6f6f6f; }
+.BotoesNavegacao{ background-color:#E9DFF1; padding:10px 24px; border-radius:10px; color:#5C2D91; font-weight:500; cursor:pointer; transition:0.25s ease; display:flex; align-items:center; justify-content:center; }
+.BotoesNavegacao:hover{ background-color:#D9C9EB; transform:translateY(-1px); }
+.Clientes{ margin:40px 80px 0px; font-size:22px; font-weight:600; color:#5C2D91; }
+.gerencie-1{ margin-left:80px; font-size:13px; color:#757575; }
+.gerencie-2{ margin-left:20px; font-size:13px; color:#757575; }
+.Gestao{ width:90%; margin:30px auto; border:1px solid #C8A3DB; border-radius:12px; padding:22px; background-color:#FFFFFF; }
+
+.titulo{ font-size:20px; margin-top:5px; font-weight:600; margin-left:20px; }
+
+.barra-acoes{ display:flex; justify-content:space-between; margin-top:18px; }
+.campo-busca{ width:65%; padding:10px; border-radius:8px; border:1px solid #bbb; }
+.botao-primario{ background-color:#5C2D91; color:#fff; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; }
+.botao-primario:hover{ background-color:#4b197a; }
+
+.container-tabela{ width:100%; overflow-x:auto; }
+.tabela-historico{ width:100%; border-collapse:collapse; background-color:#FFFFFF; border-radius:12px; border:1px solid #C8A3DB; overflow:hidden; }
+.tabela-historico th{ background-color:#F3EAFF; padding:14px; text-align:left; color:#5C2D91; }
+.tabela-historico td{ padding:14px; border-top:1px solid #eee; }
+
+.linha-erro{ color:#b91c1c; padding:12px; }
+
+/* Badges */
+.px-2{ padding-left:0.5rem; padding-right:0.5rem; }
+.inline-flex{ display:inline-flex; }
+.text-xs{ font-size:0.75rem; }
+.leading-5{ line-height:1.25rem; }
+.font-semibold{ font-weight:600; }
+.rounded-full{ border-radius:9999px; }
+.text-green-600{ color:#059669; } .bg-green-100{ background-color:#d1fae5; }
+.text-red-600{ color:#dc2626; } .bg-red-100{ background-color:#fee2e2; }
+.text-yellow-600{ color:#ca8a04; } .bg-yellow-100{ background-color:#fef3c7; }
+.text-blue-600{ color:#2563eb; } .bg-blue-100{ background-color:#dbeafe; }
+.text-indigo-600{ color:#4f46e5; } .bg-indigo-100{ background-color:#e0e7ff; }
+
+/* Scrollbar personalizado (Webkit) */
+.container-tabela::-webkit-scrollbar{ height:8px; }
+.container-tabela::-webkit-scrollbar-track{ background:#f1f1f1; border-radius:10px; }
+.container-tabela::-webkit-scrollbar-thumb{ background:#ef4444; border-radius:10px; }
+.container-tabela::-webkit-scrollbar-thumb:hover{ background:#dc2626; }
+.container-tabela{ scrollbar-width: thin; scrollbar-color: #ef4444 #f1f1f1; }

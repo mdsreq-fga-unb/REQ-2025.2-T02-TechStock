@@ -127,16 +127,17 @@ const OrdensServico = () => {
         <div className='LogoCellVex'>
           CellVex
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
+         </div>
+        <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
+        <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
+        <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
+        <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+        <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
+        <div className='BotoesNavegacao'>Fornecedores</div>
+        <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
+        <div className='BotoesNavegacao'>Relatórios</div>
         </div>
-
-            <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
-            <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-            <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
-            <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-            <div className='BotoesNavegacao'>Fornecedores</div>
-            <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
-            <div className='BotoesNavegacao'>Relatórios</div>
-                  </div>
+        
 
       <div className='ConteudoDashboard'>
         <div className='GradeMetricas'>
@@ -184,6 +185,7 @@ const OrdensServico = () => {
           </select>
 
           <button className="btn-primary" onClick={() => navigate("/novaOS")}>+ Nova OS</button>
+          <button className="btn-secondary-os" onClick={() => navigate("/testesordemservico")}>Testes OS</button>
         </div>
       </div>
 

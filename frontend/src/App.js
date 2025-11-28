@@ -10,7 +10,10 @@ import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboards";
 import OrdemDeServico from "./Pages/OrdemDeServico";
 import NovoOS from "./Pages/NovoOrdemDeServico";
-import vendas from "./Pages/Vendas"
+import Vendas from "./Pages/Vendas"
+import TestesOrdemServico from "./Pages/TestesOrdemServico";
+import HistoricoCelular from "./Pages/HistoricoCelular";
+import HistoricoClientes from "./Pages/HistoricoCliente";
 
 export default function App() {
   return (
@@ -30,7 +33,9 @@ export default function App() {
         <Route path="/ordemdeservico" element={<OrdemDeServico/>} />
         <Route path="/novaOS" element={<NovoOS/>} />
         <Route path="/vendas" element={<Vendas/>} />
-        
+        <Route path="/testesordemservico" element={<TestesOrdemServico/>} />
+        <Route path="/historicocelular" element={<HistoricoCelular/>} />
+        <Route path ="/historicocliente" element={<HistoricoClientes/>} />
       </Routes>
     </BrowserRouter>
   );

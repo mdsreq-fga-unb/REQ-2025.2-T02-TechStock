@@ -62,16 +62,17 @@ const Dashboard = () => {
         <div className='LogoCellVex'>
           CellVex 
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
+         </div>
+        <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
+        <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
+        <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
+        <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+        <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
+        <div className='BotoesNavegacao'>Fornecedores</div>
+        <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
+        <div className='BotoesNavegacao'>Relatórios</div>
         </div>
-
-          <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
-          <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-          <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
-          <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-          <div className='BotoesNavegacao'>Fornecedores</div>
-          <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
-          <div className='BotoesNavegacao'>Relatórios</div>
-                 </div>
+        
       <div className='ConteudoDashboard'>
         {error && <div className='AlertaErro'>{error}</div>}
         {!error && loading && <div className='AlertaInfo'>Carregando indicadores...</div>}

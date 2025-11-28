@@ -72,6 +72,14 @@ export const ordensServicoApi = {
   registrarPecas: (id, itens) => apiFetch(`/ordens-servico/${id}/pecas`, { method: 'POST', body: { itens } }),
 };
 
+export const vendasApi = {
+  list: (filters = {}) => apiFetch(`/vendas${buildQuery(filters)}`),
+  getById: (id) => apiFetch(`/vendas/${id}`),
+  create: (payload) => apiFetch('/vendas', { method: 'POST', body: payload }),
+  update: (id, payload) => apiFetch(`/vendas/${id}`, { method: 'PUT', body: payload }),
+  remove: (id) => apiFetch(`/vendas/${id}`, { method: 'DELETE' }),
+};
+
 export const dashboardsApi = {
   getResumo: () => apiFetch('/dashboard/resumo'),
 };
