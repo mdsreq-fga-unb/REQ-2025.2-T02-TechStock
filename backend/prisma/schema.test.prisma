@@ -30,6 +30,7 @@ model clientes {
 
   ordens_servico ordens_servico[]
   vendas         vendas[]
+  garantias      garantias[]
 }
 
 model celulares {
@@ -55,6 +56,7 @@ model celulares {
   historico       celulares_historico[]
   vendas          vendas[]
   movimentacoes   movimentacoes_estoque[]
+  garantias       garantias[]
 }
 
 model pecas {
@@ -154,4 +156,27 @@ model movimentacoes_estoque {
   usuario usuarios @relation(fields: [usuario_id], references: [id])
   celular celulares? @relation(fields: [celular_id], references: [id])
   peca     pecas?    @relation(fields: [peca_id], references: [id])
+}
+
+model garantias {
+  id               Int      @id @default(autoincrement())
+  cliente_id       Int
+  celular_id       Int
+  origem_tipo      String
+  origem_id        Int?
+  tipo             String
+  prazo_dias       Int
+  data_inicio      DateTime
+  data_fim         DateTime
+  alerta_enviado_em DateTime?
+  observacoes      String?
+  created_by       Int?     @default(1)
+  updated_by       Int?     @default(1)
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @updatedAt
+
+  cliente clientes @relation(fields: [cliente_id], references: [id])
+  celular celulares @relation(fields: [celular_id], references: [id])
+
+  @@unique([origem_tipo, origem_id], name: "garantia_origem_unique")
 }

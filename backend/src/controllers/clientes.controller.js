@@ -1,4 +1,5 @@
 const clientesService = require('../services/clientes.service');
+const clientesHistoricoService = require('../services/clientes-historico.service');
 
 async function list(req, res, next) {
   try {
@@ -56,4 +57,19 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { list, getById, create, update, remove };
+async function historico(req, res, next) {
+  try {
+    const { page = 1, pageSize = 20, cliente_id, tipo } = req.query;
+    const data = await clientesHistoricoService.listHistorico({
+      page: Number(page),
+      pageSize: Number(pageSize),
+      cliente_id: cliente_id != null ? Number(cliente_id) : undefined,
+      tipo,
+    });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { list, getById, create, update, remove, historico };

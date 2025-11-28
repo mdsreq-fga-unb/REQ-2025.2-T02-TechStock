@@ -74,3 +74,42 @@ BEGIN
     CREATE TYPE public.tipo_evento_celular AS ENUM ('OrdemServicoCriada', 'OrdemServicoAtualizada', 'OrdemServicoConcluida', 'OrdemServicoPecaRegistrada');
   END IF;
 END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'tipo_evento_celular' AND n.nspname = 'public'
+  ) THEN
+    BEGIN
+      ALTER TYPE public.tipo_evento_celular ADD VALUE 'GarantiaRegistrada';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_evento_celular ADD VALUE 'GarantiaAlerta';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'garantia_origem' AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.garantia_origem AS ENUM ('VENDA', 'ORDEM_SERVICO', 'MANUAL');
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'tipo_garantia' AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.tipo_garantia AS ENUM ('PRODUTO', 'SERVICO');
+  END IF;
+END $$;

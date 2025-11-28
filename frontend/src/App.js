@@ -10,6 +10,8 @@ import Login from "./Pages/Login";
 import Dashboard from "./Pages/Dashboards";
 import OrdemDeServico from "./Pages/OrdemDeServico";
 import NovoOS from "./Pages/NovoOrdemDeServico";
+import { AuthProvider } from "./context/AuthContext";
+import RequireAuth from "./components/RequireAuth";
 import Vendas from "./Pages/Vendas"
 import TestesOrdemServico from "./Pages/TestesOrdemServico";
 import HistoricoCelular from "./Pages/HistoricoCelular";
@@ -20,27 +22,132 @@ import NovoVendas from "./Pages/NovoVendas";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/cliente" element={<CadastroClientes />} />  
-        <Route path="/clientes/novo" element={<NovoCadastro />} />
-        <Route path="/pecas" element={<CadastroPecas />} />
-        <Route path="/pecas/novo" element={<NovoCadastroPecas />} /> 
-        <Route path="/celulares" element={<CadastroCelulares/>} />
-        <Route path="/celulares/novo" element={<NovoCadastroCelulares/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/dashboards" element={<Dashboard/>} />
-        <Route path="/ordemdeservico" element={<OrdemDeServico/>} />
-        <Route path="/novaOS" element={<NovoOS/>} />
-        <Route path="/vendas" element={<Vendas/>} />
-        <Route path="/testesordemservico" element={<TestesOrdemServico/>} />
-        <Route path="/historicocelular" element={<HistoricoCelular/>} />
-        <Route path ="/historicocliente" element={<HistoricoClientes/>} />
-        <Route path="/movimentacoes" element={<Movimentacoes/>} />
-        <Route path="/estoque" element={<Estoque/>} />
-        <Route path="/novavenda" element={<NovoVendas/>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route 
+            path="/" 
+            element={<Login />} 
+          />
+          <Route
+            path="/"
+            element={(
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/clientes"
+            element={(
+              <RequireAuth>
+                <CadastroClientes />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/clientes/novo"
+            element={(
+              <RequireAuth>
+                <NovoCadastro />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/pecas"
+            element={(
+              <RequireAuth>
+                <CadastroPecas />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/pecas/novo"
+            element={(
+              <RequireAuth>
+                <NovoCadastroPecas />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/celulares"
+            element={(
+              <RequireAuth>
+                <CadastroCelulares />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/celulares/novo"
+            element={(
+              <RequireAuth>
+                <NovoCadastroCelulares />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/ordemdeservico"
+            element={(
+              <RequireAuth>
+                <OrdemDeServico />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/novaOS"
+            element={(
+              <RequireAuth>
+                <NovoOS />
+              </RequireAuth>
+            )}
+          />
+          <Route 
+            path="/vendas" element={(
+              <RequireAuth>
+                <Vendas/>
+              </RequireAuth>
+            )} />
+          <Route 
+            path="/testesordemservico" element={(
+              <RequireAuth>
+                <TestesOrdemServico/>
+              </RequireAuth>
+            )} />
+          <Route 
+            path="/historicocelular" element={(
+              <RequireAuth>
+                <HistoricoCelular/>
+              </RequireAuth>
+            )} />
+          <Route 
+            path="/historicocliente" element={(
+              <RequireAuth>
+                <HistoricoClientes/>
+              </RequireAuth>
+            )} />
+          <Route 
+            path="/movimentacoes" element={(
+              <RequireAuth>
+                <Movimentacoes/>
+              </RequireAuth>
+            )} />
+          <Route 
+            path="/estoque" element={(
+              <RequireAuth>
+                <Estoque/>
+              </RequireAuth>
+            )} />
+          <Route
+            path="/novavenda"
+            element={(
+              <RequireAuth>
+                <NovoVendas />
+              </RequireAuth>
+            )}
+          />  
+
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

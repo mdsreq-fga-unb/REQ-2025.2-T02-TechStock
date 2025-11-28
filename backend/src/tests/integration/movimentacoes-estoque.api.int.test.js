@@ -1,15 +1,15 @@
 const request = require('supertest');
-const express = require('express');
 
 process.env.USE_SQLITE = '1';
 process.env.TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || 'file:./dev-test.db';
 
-const apiRouter = require('../../routes');
 const { getPrisma } = require('../../database/prisma');
+const { buildTestApp } = require('../utils/test-app');
+const { getAuthToken } = require('../utils/test-auth');
 
-const app = express();
-app.use(express.json());
-app.use('/api', apiRouter);
+const app = buildTestApp();
+let authToken;
+const withAuth = (req) => req.set('Authorization', `Bearer ${authToken}`);
 
 async function resetDB() {
   const prisma = getPrisma();
@@ -17,6 +17,8 @@ async function resetDB() {
   await prisma.vendas.deleteMany();
   await prisma.ordens_servico.deleteMany();
   await prisma.pecas.deleteMany();
+  await prisma.garantias.deleteMany();
+  await prisma.celulares_historico.deleteMany();
   await prisma.celulares.deleteMany();
   await prisma.clientes.deleteMany();
 }
@@ -63,6 +65,7 @@ describe('API /api/movimentacoes-estoque', () => {
   beforeAll(async () => {
     await resetDB();
     await ensureUsuario();
+    authToken = await getAuthToken(app);
   });
 
   beforeEach(async () => {
@@ -83,7 +86,7 @@ describe('API /api/movimentacoes-estoque', () => {
       quantidade: 5,
     };
 
-    const res = await request(app).post('/api/movimentacoes-estoque').send(payload).expect(201);
+    const res = await withAuth(request(app).post('/api/movimentacoes-estoque')).send(payload).expect(201);
 
     expect(res.body.message).toMatch(/sucesso/i);
     expect(res.body.movimento.tipo_item).toBe('PECA');
@@ -92,16 +95,16 @@ describe('API /api/movimentacoes-estoque', () => {
 
   test('POST saída de peça falha quando estoque insuficiente', async () => {
     const peca = await createPeca({ quantidade: 1 });
-    await request(app)
-      .post('/api/movimentacoes-estoque')
+    await withAuth(request(app)
+      .post('/api/movimentacoes-estoque'))
       .send({ tipo_item: 'PECA', tipo_operacao: 'VENDA', peca_id: peca.id, quantidade: 3 })
       .expect(400);
   });
 
   test('POST movimentação de celular altera status', async () => {
     const celular = await createCelular();
-    const res = await request(app)
-      .post('/api/movimentacoes-estoque')
+    const res = await withAuth(request(app)
+      .post('/api/movimentacoes-estoque'))
       .send({ tipo_item: 'CELULAR', tipo_operacao: 'CONSERTO', celular_id: celular.id })
       .expect(201);
 
@@ -113,13 +116,13 @@ describe('API /api/movimentacoes-estoque', () => {
 
   test('GET lista movimentações com filtros', async () => {
     const peca = await createPeca({ quantidade: 10 });
-    await request(app)
-      .post('/api/movimentacoes-estoque')
+    await withAuth(request(app)
+      .post('/api/movimentacoes-estoque'))
       .send({ tipo_item: 'PECA', tipo_operacao: 'COMPRA', peca_id: peca.id, quantidade: 2 })
       .expect(201);
 
-    const res = await request(app)
-      .get('/api/movimentacoes-estoque')
+    const res = await withAuth(request(app)
+      .get('/api/movimentacoes-estoque'))
       .query({ tipo_item: 'PECA' })
       .expect(200);
 

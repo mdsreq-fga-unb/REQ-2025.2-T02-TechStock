@@ -6,10 +6,18 @@ const STATUS_LABELS = {
 };
 
 const DEFAULT_STOCK_TARGET = 10;
+const GARANTIA_ALERT_WINDOW_DAYS = 60;
+const GARANTIA_URGENT_THRESHOLD_DAYS = 7;
+const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
 function hasVendasDelegate(prisma) {
   const delegate = prisma?.vendas;
   return Boolean(delegate && typeof delegate.count === 'function' && typeof delegate.findMany === 'function');
+}
+
+function hasGarantiasDelegate(prisma) {
+  const delegate = prisma?.garantias;
+  return Boolean(delegate && typeof delegate.findMany === 'function');
 }
 
 function getMonthBounds(reference = new Date()) {
@@ -49,6 +57,21 @@ function buildGrowth(current, previous) {
     text: `${prefix}${percent}%`,
     status: diff >= 0 ? 'positivo' : 'negativo',
   };
+}
+
+function diffInDays(target, reference = new Date()) {
+  if (!target) return 0;
+  const targetDate = target instanceof Date ? target : new Date(target);
+  if (Number.isNaN(targetDate.getTime())) return 0;
+  const diff = targetDate.getTime() - reference.getTime();
+  return Math.max(0, Math.ceil(diff / MS_IN_DAY));
+}
+
+function computeGarantiaProgress(prazoDias, diasRestantes) {
+  const total = prazoDias && prazoDias > 0 ? prazoDias : GARANTIA_ALERT_WINDOW_DAYS;
+  if (total <= 0) return 0;
+  const consumido = Math.max(0, total - diasRestantes);
+  return Math.min(100, Math.max(0, Math.round((consumido / total) * 100)));
 }
 
 async function getMetricas(prisma, bounds) {
@@ -210,19 +233,54 @@ async function getEstoqueBaixo(prisma) {
   });
 }
 
+async function getAlertasGarantia(prisma, reference = new Date()) {
+  if (!hasGarantiasDelegate(prisma)) {
+    return [];
+  }
+
+  const limite = new Date(reference);
+  limite.setDate(limite.getDate() + GARANTIA_ALERT_WINDOW_DAYS);
+
+  const garantias = await prisma.garantias.findMany({
+    where: { data_fim: { gte: reference, lte: limite } },
+    include: {
+      cliente: { select: { nome: true } },
+      celular: { select: { modelo: true, imei: true } },
+    },
+    orderBy: { data_fim: 'asc' },
+    take: 5,
+  });
+
+  return garantias.map((garantia) => {
+    const diasRestantes = diffInDays(garantia.data_fim, reference);
+    const status = diasRestantes <= GARANTIA_URGENT_THRESHOLD_DAYS ? 'Urgente' : 'Ativa';
+    return {
+      id: garantia.id,
+      cliente: garantia.cliente?.nome || 'Cliente não informado',
+      produto: garantia.celular?.modelo || 'Produto não informado',
+      imei: garantia.celular?.imei || null,
+      diasRestantes,
+      status,
+      venceEm: garantia.data_fim instanceof Date ? garantia.data_fim.toISOString() : garantia.data_fim,
+      progresso: computeGarantiaProgress(garantia.prazo_dias, diasRestantes),
+    };
+  });
+}
+
 async function getResumo() {
   const prisma = getPrisma();
   const bounds = getMonthBounds();
 
-  const [metricas, vendasRecentes, filaManutencao, ordensServico, estoqueBaixo] = await Promise.all([
+  const [metricas, vendasRecentes, filaManutencao, ordensServico, estoqueBaixo, alertasGarantia] = await Promise.all([
     getMetricas(prisma, bounds),
     getVendasRecentes(prisma),
     getFilaManutencao(prisma),
     getOrdensRecentes(prisma),
     getEstoqueBaixo(prisma),
+    getAlertasGarantia(prisma),
   ]);
 
-  return { metricas, vendasRecentes, filaManutencao, ordensServico, estoqueBaixo };
+  return { metricas, vendasRecentes, filaManutencao, ordensServico, estoqueBaixo, alertasGarantia };
 }
 
 module.exports = { getResumo };
