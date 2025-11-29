@@ -3,7 +3,7 @@ const { serializeCelular, serializeList } = require('../utils/serialization');
 
 async function list(req, res, next) {
   try {
-    const { page = 1, pageSize = 20, q, status, tipo, fornecedor, capacidade } = req.query;
+    const { page = 1, pageSize = 20, q, status, tipo, fornecedor, capacidade, id, finalidade } = req.query;
     const data = await celularesService.list({
       page: Number(page),
       pageSize: Number(pageSize),
@@ -12,6 +12,8 @@ async function list(req, res, next) {
       tipo,
       fornecedor,
       capacidade,
+      finalidade,
+      id: id ? Number(id) : undefined,
     });
     res.json({ meta: data.meta, items: serializeList(data.items) });
   } catch (err) {

@@ -1,11 +1,16 @@
 const vendasRepository = require('../repositories/vendas.repository');
 const celularesRepository = require('../repositories/celulares.repository');
+const historicoRepository = require('../repositories/celulares-historico.repository');
 const { getPrisma } = require('../database/prisma');
 const garantiasService = require('./garantias.service');
 
 const StatusCelular = {
     EM_ESTOQUE: 'EmEstoque',
     VENDIDO: 'Vendido',
+};
+
+const EVENTOS = {
+    CELULAR_VENDIDO: 'CelularVendido',
 };
 
 function httpError(status, message) {
@@ -50,6 +55,17 @@ function addDays(base, days) {
     const date = new Date(base);
     date.setDate(date.getDate() + Number(days));
     return date;
+}
+
+function formatCurrencyBR(value) {
+    if (value == null) return null;
+    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function buildDescricaoVenda({ vendaId, cliente, valor }) {
+    const clienteInfo = cliente ? `Cliente #${cliente.id}${cliente.nome ? ` - ${cliente.nome}` : ''}` : 'cliente não identificado';
+    const valorInfo = valor != null ? ` (${formatCurrencyBR(valor)})` : '';
+    return `Venda #${vendaId} registrada para ${clienteInfo}${valorInfo}.`;
 }
 
 function resolveGarantia({ garantia_dias, garantia_validade, fallbackDias, dataVenda, current }) {
@@ -141,7 +157,7 @@ async function create(data, user) {
     const valorVenda = normalizeValor(data.valor_venda, true);
 
     const created = await prisma.$transaction(async (tx) => {
-        await ensureCliente(tx, data.cliente_id);
+        const cliente = await ensureCliente(tx, data.cliente_id);
         const celular = await ensureCelularDisponivel(tx, data.celular_id);
 
         const garantiaPayload = resolveGarantia({
@@ -178,6 +194,15 @@ async function create(data, user) {
                 { tx, userId, descricao: `Garantia de produto registrada para venda #${venda.id}.` },
             );
         }
+        await historicoRepository.addEvent(
+            {
+                celular_id: celular.id,
+                tipo_evento: EVENTOS.CELULAR_VENDIDO,
+                descricao: buildDescricaoVenda({ vendaId: venda.id, cliente, valor: valorVenda }),
+                data_evento: dataVenda,
+            },
+            tx,
+        );
         return venda;
     });
 

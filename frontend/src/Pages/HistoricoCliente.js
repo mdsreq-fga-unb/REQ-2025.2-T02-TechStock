@@ -162,6 +162,21 @@ const HistoricoClientesTable = () => {
     return parts;
   };
 
+  const formatPecasResumo = (pecas) => {
+    if (!Array.isArray(pecas) || pecas.length === 0) return null;
+    const tokens = pecas
+      .map((peca) => {
+        if (!peca) return null;
+        const nome = peca.nome || (peca.id ? `Peça #${peca.id}` : null);
+        const quantidade = typeof peca.quantidade === 'number' && peca.quantidade > 0 ? `x${peca.quantidade}` : null;
+        if (!nome && !quantidade) return null;
+        return [nome, quantidade].filter(Boolean).join(' ');
+      })
+      .filter(Boolean);
+    if (tokens.length === 0) return null;
+    return tokens.join(', ');
+  };
+
   const formatDetalhes = (entry) => {
     const detalhes = entry?.detalhes;
     if (!detalhes) return '-';
@@ -177,6 +192,8 @@ const HistoricoClientesTable = () => {
       if (detalhes.garantia_dias) parts.push(`Garantia ${detalhes.garantia_dias} dias`);
       const validade = formatDateOnly(detalhes.garantia_validade);
       if (validade) parts.push(`Validade ${validade}`);
+      const pecasResumo = formatPecasResumo(detalhes.pecas);
+      if (pecasResumo) parts.push(`Peças: ${pecasResumo}`);
     } else if (entry?.tipo === 'garantia') {
       parts.push(...formatGarantiaResumo(detalhes));
     }

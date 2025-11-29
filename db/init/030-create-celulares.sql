@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS celulares (
   valor_compra NUMERIC(10, 2),
   garantia_padrao_dias INT NOT NULL DEFAULT 365,
   defeitos_identificados TEXT,
+  finalidade finalidade_celular NOT NULL DEFAULT 'REVENDA',
   tipo tipo_estoque_celular NOT NULL,
   status status_celular NOT NULL DEFAULT 'EmEstoque',
   data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

@@ -92,6 +92,10 @@ export const celularesApi = {
   remove: (id) => apiFetch(`/celulares/${id}`, { method: 'DELETE' }),
 };
 
+export const celularesHistoricoApi = {
+  list: (filters = {}) => apiFetch(`/celulares/historico${buildQuery(filters)}`),
+};
+
 export const ordensServicoApi = {
   list: (filters = {}) => apiFetch(`/ordens-servico${buildQuery(filters)}`),
   getById: (id) => apiFetch(`/ordens-servico/${id}`),
@@ -99,6 +103,7 @@ export const ordensServicoApi = {
   update: (id, payload) => apiFetch(`/ordens-servico/${id}`, { method: 'PATCH', body: payload }),
   remove: (id) => apiFetch(`/ordens-servico/${id}`, { method: 'DELETE' }),
   registrarPecas: (id, itens) => apiFetch(`/ordens-servico/${id}/pecas`, { method: 'POST', body: { itens } }),
+  atualizarPecas: (id, itens) => apiFetch(`/ordens-servico/${id}/pecas`, { method: 'PUT', body: { itens } }),
 };
 
 export const ordensServicoTestesApi = {

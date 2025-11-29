@@ -13,6 +13,7 @@ function NovoCadastroCelulares() {
   const [capacidade, setCapacidade] = useState('');
   const [status, setStatus] = useState('EmEstoque');
   const [tipo, setTipo] = useState('Novo');
+  const [finalidade, setFinalidade] = useState('REVENDA');
   const [fornecedor, setFornecedor] = useState('');
   const [valorCompra, setValorCompra] = useState('');
   const [garantiaDias, setGarantiaDias] = useState('365');
@@ -33,6 +34,7 @@ function NovoCadastroCelulares() {
       setCapacidade('');
       setStatus('EmEstoque');
       setTipo('Novo');
+      setFinalidade('REVENDA');
       setFornecedor('');
       setValorCompra('');
       setGarantiaDias('365');
@@ -55,6 +57,7 @@ function NovoCadastroCelulares() {
         setCapacidade(celular.capacidade || '');
         setStatus(celular.status || 'EmEstoque');
         setTipo(celular.tipo || 'Novo');
+        setFinalidade(celular.finalidade || 'REVENDA');
         setFornecedor(celular.nome_fornecedor || '');
         setValorCompra(
           celular.valor_compra !== null && celular.valor_compra !== undefined
@@ -92,6 +95,7 @@ function NovoCadastroCelulares() {
         status,
         tipo,
         nome_fornecedor: fornecedor,
+        finalidade,
         valor_compra: valorCompra !== '' ? Number(valorCompra) : undefined,
         garantia_padrao_dias: garantiaDias !== '' ? Number(garantiaDias) : undefined,
         defeitos_identificados: defeito || undefined,
@@ -149,6 +153,12 @@ function NovoCadastroCelulares() {
           <option value="Novo">Novo</option>
           <option value="Usado">Usado</option>
           <option value="Recondicionado">Recondicionado</option>
+        </select>
+
+        <label>Finalidade:</label>
+        <select value={finalidade} onChange={(event) => setFinalidade(event.target.value)} required>
+          <option value="REVENDA">Revenda</option>
+          <option value="MANUTENCAO">Manutenção</option>
         </select>
 
         <label>Fornecedor:</label>

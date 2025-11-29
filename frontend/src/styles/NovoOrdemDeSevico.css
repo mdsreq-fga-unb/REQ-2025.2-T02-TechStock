@@ -139,3 +139,87 @@
   color: #b91c1c;
   margin: 0;
 }
+
+.status-hint {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-top: -2px;
+}
+
+.pecas-section {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+  background: #fdfafc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pecas-section.info {
+  background: #f3f4f6;
+}
+
+.pecas-form-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.input-peca-quantidade {
+  width: 90px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.pecas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pecas-table th,
+.pecas-table td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+}
+
+.pecas-table th {
+  background: #f3e8ff;
+  font-weight: 600;
+}
+
+.pecas-table .input-peca-quantidade {
+  width: 100px;
+}
+
+.pecas-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.pecas-empty {
+  margin: 8px 0;
+  color: #6b7280;
+}
+
+.add-peca-btn {
+  padding: 10px 18px;
+}
+
+.peca-removida {
+  background: #fff7ed;
+}
+
+.peca-removida .removal-hint {
+  color: #b45309;
+  font-size: 0.8rem;
+}
+
+.peca-nome {
+  font-weight: 600;
+}

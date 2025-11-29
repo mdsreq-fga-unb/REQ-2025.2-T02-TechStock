@@ -33,6 +33,14 @@ async function fetchReparos({ cliente_id } = {}) {
     include: {
       cliente: { select: { id: true, nome: true } },
       celular: { select: { id: true, modelo: true, imei: true } },
+      pecas_utilizadas: {
+        select: {
+          id: true,
+          peca_id: true,
+          quantidade: true,
+          peca: { select: { id: true, nome: true, codigo_interno: true } },
+        },
+      },
     },
   });
 }

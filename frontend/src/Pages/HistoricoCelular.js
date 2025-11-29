@@ -1,32 +1,46 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/HistoricoCelular.css';
-import { movimentacoesEstoqueApi } from '../services/api';
+import { celularesHistoricoApi } from '../services/api';
 
-const OPERACAO_LABELS = {
-    COMPRA: 'Entrada em Estoque',
-    VENDA: 'Venda',
-    DEVOLUCAO: 'Devolução/Estoque',
-    CONSERTO: 'Conserto / Manutenção',
+const EVENT_LABELS = {
+    OrdemServicoCriada: 'OS aberta',
+    OrdemServicoAtualizada: 'OS atualizada',
+    OrdemServicoConcluida: 'OS concluída',
+    OrdemServicoPecaRegistrada: 'Peças registradas',
+    GarantiaRegistrada: 'Garantia registrada',
+    GarantiaAlerta: 'Alerta de garantia',
+    TesteTecnicoRegistrado: 'Teste técnico',
+    CelularCadastrado: 'Entrada no estoque',
+    CelularVendido: 'Venda registrada',
 };
 
-const OPERACAO_KEYWORDS = {
-    venda: 'VENDA',
-    vendido: 'VENDA',
-    compra: 'COMPRA',
-    entrada: 'COMPRA',
-    devolucao: 'DEVOLUCAO',
-    devolução: 'DEVOLUCAO',
-    retorno: 'DEVOLUCAO',
-    conserto: 'CONSERTO',
-    reparo: 'CONSERTO',
+const EVENT_COLORS = {
+    OrdemServicoCriada: 'text-indigo-600 bg-indigo-100',
+    OrdemServicoAtualizada: 'text-blue-600 bg-blue-100',
+    OrdemServicoConcluida: 'text-green-600 bg-green-100',
+    OrdemServicoPecaRegistrada: 'text-yellow-600 bg-yellow-100',
+    GarantiaRegistrada: 'text-purple-600 bg-purple-100',
+    GarantiaAlerta: 'text-red-600 bg-red-100',
+    TesteTecnicoRegistrado: 'text-gray-700 bg-gray-200',
+    CelularCadastrado: 'text-emerald-700 bg-emerald-100',
+    CelularVendido: 'text-orange-700 bg-orange-100',
 };
 
-const STATUS_COLOR = {
-    COMPRA: 'text-green-600 bg-green-100',
-    VENDA: 'text-red-600 bg-red-100',
-    DEVOLUCAO: 'text-blue-600 bg-blue-100',
-    CONSERTO: 'text-yellow-600 bg-yellow-100',
+const KEYWORD_EVENT = {
+    abertura: 'OrdemServicoCriada',
+    aberta: 'OrdemServicoCriada',
+    concluida: 'OrdemServicoConcluida',
+    concluída: 'OrdemServicoConcluida',
+    finalizada: 'OrdemServicoConcluida',
+    garantia: 'GarantiaRegistrada',
+    alerta: 'GarantiaAlerta',
+    teste: 'TesteTecnicoRegistrado',
+    entrada: 'CelularCadastrado',
+    cadastro: 'CelularCadastrado',
+    estoque: 'CelularCadastrado',
+    venda: 'CelularVendido',
+    vendido: 'CelularVendido',
 };
 
 const HistoricoCelularesTable = () => {
@@ -39,6 +53,7 @@ const HistoricoCelularesTable = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [reloadKey, setReloadKey] = useState(0);
+    const [eventFilter, setEventFilter] = useState('');
 
     useEffect(() => {
         const timer = setTimeout(() => setSearch(searchInput), 400);
@@ -47,31 +62,50 @@ const HistoricoCelularesTable = () => {
 
     useEffect(() => {
         setPage(1);
-    }, [search]);
+    }, [search, eventFilter]);
 
     const { filters } = useMemo(() => {
-        const base = { page, pageSize, tipo_item: 'CELULAR' };
+        const base = { page, pageSize };
+        if (eventFilter) {
+            base.tipo_evento = eventFilter;
+        }
         const trimmed = search.trim();
         if (trimmed) {
-            if (/^\d+$/.test(trimmed)) {
-                base.celular_id = Number(trimmed);
-            } else {
-                const normalized = trimmed.toLowerCase();
-                const matchKey = Object.keys(OPERACAO_KEYWORDS).find((key) => normalized.includes(key));
-                if (matchKey) {
-                    base.tipo_operacao = OPERACAO_KEYWORDS[matchKey];
+            const osMatch = trimmed.match(/os\s*#?(\d+)/i);
+            if (osMatch) {
+                base.ordem_servico_id = Number(osMatch[1]);
+                return { filters: base };
+            }
+            const celularMatch = trimmed.match(/(?:celular|id)\s*#?(\d+)/i);
+            if (celularMatch) {
+                base.celular_id = Number(celularMatch[1]);
+                return { filters: base };
+            }
+            const numericMatch = trimmed.match(/^#?(\d+)$/);
+            if (numericMatch) {
+                base.celular_id = Number(numericMatch[1]);
+                return { filters: base };
+            }
+            if (!eventFilter) {
+                const keyword = Object.keys(KEYWORD_EVENT).find((key) => trimmed.toLowerCase().includes(key));
+                if (keyword) {
+                    base.tipo_evento = KEYWORD_EVENT[keyword];
+                } else {
+                    base.q = trimmed;
                 }
+            } else {
+                base.q = trimmed;
             }
         }
         return { filters: base };
-    }, [page, pageSize, search]);
+    }, [page, pageSize, search, eventFilter]);
 
     useEffect(() => {
         let active = true;
         setLoading(true);
         setError('');
 
-        movimentacoesEstoqueApi
+        celularesHistoricoApi
             .list(filters)
             .then((data) => {
                 if (!active) return;
@@ -130,16 +164,20 @@ const HistoricoCelularesTable = () => {
     const firstItemIndex = historico.length ? (currentPage - 1) * currentPageSize + 1 : 0;
     const lastItemIndex = historico.length ? firstItemIndex + historico.length - 1 : 0;
 
-    const formatTipoMovimentacao = (tipoOperacao) => OPERACAO_LABELS[tipoOperacao] || tipoOperacao || '-';
+    const formatEvento = (tipoEvento) => EVENT_LABELS[tipoEvento] || tipoEvento || '-';
 
-    const getStatusColor = (tipoOperacao) => STATUS_COLOR[tipoOperacao] || 'text-gray-600 bg-gray-100';
+    const getEventoColor = (tipoEvento) => EVENT_COLORS[tipoEvento] || 'text-gray-600 bg-gray-100';
 
-    const formatDetalhes = (item) => {
-        const detalhes = [];
-        if (item.quantidade != null) detalhes.push(`Qtd: ${item.quantidade}`);
-        if (item.saldo_resultante != null) detalhes.push(`Saldo: ${item.saldo_resultante}`);
-        if (item.observacoes) detalhes.push(item.observacoes);
-        return detalhes.join(' • ') || '-';
+    const formatDescricao = (descricao) => descricao || '-';
+
+    const formatCelular = (entry) => {
+        if (!entry?.celular) return '-';
+        const { id, modelo, imei } = entry.celular;
+        const parts = [];
+        if (modelo) parts.push(modelo);
+        if (id) parts.push(`ID ${id}`);
+        if (imei) parts.push(`IMEI ${imei}`);
+        return parts.join(' • ');
     };
 
     return (
@@ -170,11 +208,22 @@ const HistoricoCelularesTable = () => {
                 <div className="barra-acoes">
                     <input
                         type="text"
-                        placeholder="Busque por ID do celular ou tipo (ex: venda, devolução)"
+                        placeholder="Busque por ID do celular, OS ou palavra-chave (ex: venda)"
                         className="campo-busca"
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
                     />
+
+                    <select
+                        className="select-evento"
+                        value={eventFilter}
+                        onChange={(event) => setEventFilter(event.target.value)}
+                    >
+                        <option value="">Todos os eventos</option>
+                        {Object.entries(EVENT_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
+                    </select>
 
                     <button className="botao-primario" onClick={handleReload} disabled={loading} title="Atualizar lista">
                         Atualizar
@@ -210,47 +259,45 @@ const HistoricoCelularesTable = () => {
                     <table className="tabela-historico">
                         <thead>
                             <tr>
-                                <th>ID Mov.</th>
+                                <th>ID Hist.</th>
                                 <th>Data/Hora</th>
-                                <th>ID Celular</th>
-                                <th>Modelo</th>
-                                <th>Tipo Movimentação</th>
-                                <th>Usuário Resp.</th>
-                                <th>Detalhes</th>
+                                <th>Celular</th>
+                                <th>Evento</th>
+                                <th>OS</th>
+                                <th>Descrição</th>
                             </tr>
                         </thead>
                         <tbody>
                             {error && (
                                 <tr>
-                                    <td colSpan={7} className="linha-erro">{error}</td>
+                                    <td colSpan={6} className="linha-erro">{error}</td>
                                 </tr>
                             )}
 
                             {loading && !error && (
                                 <tr>
-                                    <td colSpan={7}>Carregando Histórico...</td>
+                                    <td colSpan={6}>Carregando Histórico...</td>
                                 </tr>
                             )}
 
                             {!loading && !error && historico.length === 0 && (
                                 <tr>
-                                    <td colSpan={7}>Nenhuma movimentação histórica encontrada.</td>
+                                    <td colSpan={6}>Nenhum evento encontrado.</td>
                                 </tr>
                             )}
 
                             {!loading && !error && historico.map((item) => (
                                 <tr key={item.id}>
                                     <td>{item.id}</td>
-                                    <td>{item.data_movimentacao ? new Date(item.data_movimentacao).toLocaleString('pt-BR') : '-'}</td>
-                                    <td>{item.celular?.id ?? '-'}</td>
-                                    <td>{item.celular?.modelo ?? '-'}</td>
+                                    <td>{item.data_evento ? new Date(item.data_evento).toLocaleString('pt-BR') : '-'}</td>
+                                    <td>{formatCelular(item)}</td>
                                     <td>
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.tipo_operacao)}`}>
-                                            {formatTipoMovimentacao(item.tipo_operacao)}
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getEventoColor(item.tipo_evento)}`}>
+                                            {formatEvento(item.tipo_evento)}
                                         </span>
                                     </td>
-                                    <td>{item.usuario?.nome ?? '-'}</td>
-                                    <td>{formatDetalhes(item)}</td>
+                                    <td>{item.ordem_servico?.id ?? '-'}</td>
+                                    <td>{formatDescricao(item.descricao)}</td>
                                 </tr>
                             ))}
                         </tbody>

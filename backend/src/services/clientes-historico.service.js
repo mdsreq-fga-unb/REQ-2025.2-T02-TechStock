@@ -63,6 +63,7 @@ function mapCompra(venda) {
 function mapReparo(ordem) {
   const refer = ordem?.data_conclusao || ordem?.data_abertura || ordem?.updated_at;
   const timestamp = resolveTimestamp(refer);
+  const pecas = mapOrdemPecas(ordem);
   return {
     tipo: TIPOS.REPARO,
     origem_id: ordem?.id,
@@ -76,6 +77,7 @@ function mapReparo(ordem) {
       descricao: ordem?.descricao || null,
       garantia_dias: ordem?.garantia_dias ?? null,
       garantia_validade: ordem?.garantia_validade || null,
+      pecas: pecas.length ? pecas : null,
     },
     _ts: timestamp,
   };
@@ -113,6 +115,22 @@ function mapGarantia(garantia) {
     },
     _ts: timestamp || dataFimTs,
   };
+}
+
+function mapOrdemPecas(ordem) {
+  if (!ordem?.pecas_utilizadas || !Array.isArray(ordem.pecas_utilizadas)) return [];
+  return ordem.pecas_utilizadas
+    .map((uso) => {
+      if (!uso) return null;
+      const peca = uso.peca || {};
+      return {
+        id: peca.id ?? uso.peca_id ?? uso.id ?? null,
+        nome: peca.nome || null,
+        codigo_interno: peca.codigo_interno || null,
+        quantidade: typeof uso.quantidade === 'number' ? uso.quantidade : null,
+      };
+    })
+    .filter((item) => item && (item.id != null || item.nome || item.quantidade != null));
 }
 
 function sortByTimestampDesc(a, b) {

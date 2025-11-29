@@ -44,6 +44,7 @@ model celulares {
   garantia_padrao_dias   Int       @default(365)
   defeitos_identificados String?
   tipo                   String
+  finalidade             String    @default("REVENDA")
   status                 String    @default("EmEstoque")
   data_cadastro          DateTime? @default(now())
   nome_fornecedor        String

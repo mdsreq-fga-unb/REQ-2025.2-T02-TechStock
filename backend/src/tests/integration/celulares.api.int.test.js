@@ -46,7 +46,7 @@ describe('API /api/celulares', () => {
   test('POST cria e GET lista', async () => {
     const createRes = await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'iPhone 12', imei: '123456789012345', nome_fornecedor: 'Fornecedor X', tipo: 'Novo' })
+      .send({ modelo: 'iPhone 12', imei: '123456789012345', nome_fornecedor: 'Fornecedor X', tipo: 'Novo', finalidade: 'REVENDA' })
       .expect(201);
     expect(createRes.body.id).toBeDefined();
 
@@ -57,11 +57,11 @@ describe('API /api/celulares', () => {
   test('POST IMEI duplicado retorna 409', async () => {
     await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'A', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Novo' })
+      .send({ modelo: 'A', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Novo', finalidade: 'REVENDA' })
       .expect(201);
     await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'B', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Novo' })
+      .send({ modelo: 'B', imei: 'DUPL123', nome_fornecedor: 'F', tipo: 'Novo', finalidade: 'REVENDA' })
       .expect(409);
   });
 
@@ -72,7 +72,7 @@ describe('API /api/celulares', () => {
   test('PUT atualiza', async () => {
     const createRes = await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'Galaxy S20', imei: '999999999999999', nome_fornecedor: 'Fornecedor Y', tipo: 'Novo' })
+      .send({ modelo: 'Galaxy S20', imei: '999999999999999', nome_fornecedor: 'Fornecedor Y', tipo: 'Novo', finalidade: 'MANUTENCAO' })
       .expect(201);
 
     const id = createRes.body.id;
@@ -87,7 +87,7 @@ describe('API /api/celulares', () => {
   test('PUT validação falha (valor_compra negativo)', async () => {
     const createRes = await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'Moto Z', imei: 'VAL123', nome_fornecedor: 'F', tipo: 'Novo' })
+      .send({ modelo: 'Moto Z', imei: 'VAL123', nome_fornecedor: 'F', tipo: 'Novo', finalidade: 'REVENDA' })
       .expect(201);
 
     const id = createRes.body.id;
@@ -100,7 +100,7 @@ describe('API /api/celulares', () => {
   test('DELETE remove', async () => {
     const createRes = await withAuth(request(app)
       .post('/api/celulares'))
-      .send({ modelo: 'Moto G', imei: '111111111111111', nome_fornecedor: 'Fornecedor Z', tipo: 'Novo' })
+      .send({ modelo: 'Moto G', imei: '111111111111111', nome_fornecedor: 'Fornecedor Z', tipo: 'Novo', finalidade: 'MANUTENCAO' })
       .expect(201);
 
     const id = createRes.body.id;

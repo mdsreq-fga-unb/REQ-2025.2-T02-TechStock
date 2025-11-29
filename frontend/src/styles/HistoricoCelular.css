@@ -69,9 +69,11 @@
 
 .Gestao{ width: 90%; margin: 30px auto; border: 1px solid #C8A3DB; border-radius: 12px; padding: 22px; background-color: #FFFFFF; }
 
-.barra-acoes{ display: flex; justify-content: space-between; margin-top: 18px; }
+.barra-acoes{ display: flex; justify-content: flex-start; margin-top: 18px; gap: 12px; flex-wrap: wrap; align-items: center; }
 
-.campo-busca{ width: 65%; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+.campo-busca{ flex: 1 1 280px; min-width: 220px; max-width: 480px; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+
+.select-evento{ min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #bbb; background-color: #fff; }
 
 .botao-primario{ background-color: #5C2D91; color: #fff; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; }
 .botao-primario:hover{ background-color: #4b197a; }
@@ -191,6 +193,8 @@ td {
 .text-yellow-600 { color: #ca8a04; } .bg-yellow-100 { background-color: #fef3c7; }
 .text-blue-600 { color: #2563eb; } .bg-blue-100 { background-color: #dbeafe; }
 .text-indigo-600 { color: #4f46e5; } .bg-indigo-100 { background-color: #e0e7ff; }
+.text-purple-600 { color: #9333ea; } .bg-purple-100 { background-color: #f3e8ff; }
+.text-gray-700 { color: #374151; } .bg-gray-200 { background-color: #e5e7eb; }
 
 /* =========================================
  * ESTILOS DE SCROLLBAR (PERSONALIZADOS)

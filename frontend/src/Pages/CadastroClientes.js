@@ -10,6 +10,7 @@ function CadastroClientes() {
   const [error, setError] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
 
   useEffect(() => {
     const handler = setTimeout(() => setSearch(searchInput), 400);
@@ -20,8 +21,11 @@ function CadastroClientes() {
     let active = true;
     setLoading(true);
     setError('');
+    const filters = {};
+    if (search) filters.q = search;
+    if (typeFilter) filters.tipo = typeFilter;
     clientesApi
-      .list(search ? { q: search } : {})
+      .list(filters)
       .then((data) => {
         if (!active) return;
         setClients(data?.items || []);
@@ -36,7 +40,7 @@ function CadastroClientes() {
     return () => {
       active = false;
     };
-  }, [search]);
+  }, [search, typeFilter]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Deseja realmente remover este cliente?')) return;
@@ -81,11 +85,21 @@ function CadastroClientes() {
         <div className="actions-bar">
           <input
             type="text"
-            placeholder="Buscar por nome, telefone ou email..."
+            placeholder="Buscar por CPF, nome, telefone ou email..."
             className="search-input"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
+          <select
+            className="search-input"
+            value={typeFilter}
+            onChange={(event) => setTypeFilter(event.target.value)}
+          >
+            <option value="">Todos os tipos</option>
+            <option value="CONSUMIDOR">Consumidor</option>
+            <option value="REVENDEDOR">Revendedor</option>
+            <option value="MANUTENCAO">Manutenção/Parceiro</option>
+          </select>
           <button 
             className="btn-primary" 
             onClick={() => navigate('/historicocliente')} // Usa navigateTo para simular a rota

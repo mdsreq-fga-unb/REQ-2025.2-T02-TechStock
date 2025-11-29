@@ -25,6 +25,12 @@ const TEST_STAGE_OPTIONS = [
   { value: 'FINAL', label: 'Final' },
 ];
 
+const STATUS_FILTER_OPTIONS = [
+  { value: 'EmAndamento', label: 'Em andamento' },
+  { value: 'Concluido', label: 'Concluídas' },
+  { value: 'Todos', label: 'Todas' },
+];
+
 const buildInitialResults = () => TEST_CRITERIA.reduce((acc, criterio) => {
   acc[criterio.key] = 'NAO_TESTADO';
   return acc;
@@ -55,6 +61,7 @@ const TesteCelulares = () => {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [ordersError, setOrdersError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
+  const [statusFilter, setStatusFilter] = useState('EmAndamento');
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [testResults, setTestResults] = useState(() => buildInitialResults());
@@ -63,7 +70,6 @@ const TesteCelulares = () => {
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [testStage, setTestStage] = useState('FINAL');
-  const [evidences, setEvidences] = useState(['']);
   const [testError, setTestError] = useState('');
 
   const [history, setHistory] = useState([]);
@@ -81,7 +87,10 @@ const TesteCelulares = () => {
     setLoadingOrders(true);
     setOrdersError('');
 
-    const params = { status: 'EmAndamento', pageSize: 10 };
+    const params = { pageSize: 10 };
+    if (statusFilter !== 'Todos') {
+      params.status = statusFilter;
+    }
     if (debouncedSearch) params.q = debouncedSearch;
 
     ordensServicoApi
@@ -101,7 +110,7 @@ const TesteCelulares = () => {
     return () => {
       active = false;
     };
-  }, [debouncedSearch, reloadKey]);
+  }, [debouncedSearch, reloadKey, statusFilter]);
 
   const resetSelection = () => {
     setSelectedOrder(null);
@@ -114,7 +123,6 @@ const TesteCelulares = () => {
     setSearchTerm('');
     setDebouncedSearch('');
     setTestStage('FINAL');
-    setEvidences(['']);
     setTestError('');
     setLastResult(null);
   };
@@ -141,29 +149,12 @@ const TesteCelulares = () => {
     setSubmitted(false);
     setSubmitError('');
     setTestStage('FINAL');
-    setEvidences(['']);
     setLastResult(null);
     loadHistory(order.id);
   };
 
   const handleResultChange = (key, value) => {
     setTestResults((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleEvidenceChange = (index, value) => {
-    setEvidences((prev) => {
-      const clone = [...prev];
-      clone[index] = value;
-      return clone;
-    });
-  };
-
-  const handleAddEvidence = () => {
-    setEvidences((prev) => (prev.length >= 5 ? prev : [...prev, '']));
-  };
-
-  const handleRemoveEvidence = (index) => {
-    setEvidences((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const handleSubmit = async (event) => {
@@ -179,12 +170,10 @@ const TesteCelulares = () => {
     setSubmitting(true);
     try {
       const criteriosPayload = TEST_CRITERIA.map(({ label, key }) => ({ nome: label, status: testResults[key] || 'NAO_TESTADO' }));
-      const midia = evidences.map((url) => (typeof url === 'string' ? url.trim() : '')).filter(Boolean);
       const payload = {
         criterios: criteriosPayload,
         observacoes: observations,
         etapa: testStage,
-        midia_urls: midia,
       };
       const response = await ordensServicoTestesApi.create(selectedOrder.id, payload);
       setSubmitted(true);
@@ -210,11 +199,28 @@ const TesteCelulares = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ width: '100%', padding: '10px', marginTop: '6px', borderRadius: '8px', border: '1px solid #d4d4d4' }}
       />
-      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <small style={{ color: '#6b7280' }}>Resultados limitados aos testes em andamento.</small>
-        <button type="button" onClick={() => setReloadKey((prev) => prev + 1)} style={{ border: 'none', background: 'transparent', color: '#5C2D91', cursor: 'pointer' }}>
-          Atualizar
-        </button>
+      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 220px' }}>
+          <label htmlFor="statusFilter" style={{ fontSize: '0.85rem', color: '#4b5563' }}>Filtrar por status</label>
+          <select
+            id="statusFilter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ marginTop: '4px', padding: '8px', borderRadius: '8px', border: '1px solid #d4d4d4' }}
+          >
+            {STATUS_FILTER_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flex: '1 1 160px' }}>
+          <small style={{ color: '#6b7280' }}>
+            {statusFilter === 'Todos' ? 'Mostrando OS em qualquer status.' : `Mostrando apenas status: ${statusFilter}.`}
+          </small>
+          <button type="button" onClick={() => setReloadKey((prev) => prev + 1)} style={{ border: 'none', background: 'transparent', color: '#5C2D91', cursor: 'pointer', marginTop: '4px' }}>
+            Atualizar
+          </button>
+        </div>
       </div>
       <ul style={styles.list}>
         {ordersError && <li style={{ padding: '12px', color: '#b91c1c' }}>{ordersError}</li>}
@@ -233,7 +239,7 @@ const TesteCelulares = () => {
           >
             <strong>OS #{order.id} · {order.celular?.modelo || 'Sem modelo'}</strong>
             <div style={{ fontSize: '0.85rem', color: '#4b5563' }}>
-              IMEI: {order.celular?.imei || '-'} · Cliente: {order.cliente?.nome || '-'}
+              IMEI: {order.celular?.imei || '-'} · Cliente: {order.cliente?.nome || '-'} · Status: {order.status}
             </div>
           </li>
         ))}
@@ -264,15 +270,6 @@ const TesteCelulares = () => {
                   .map(([key, value]) => `${value.label || key}: ${value.status}`)
                   .join(' · ')}
               </small>
-              {item.midia_urls?.length > 0 && (
-                <div style={{ marginTop: '4px' }}>
-                  {item.midia_urls.map((url) => (
-                    <a key={url} href={url} target="_blank" rel="noreferrer" style={{ marginRight: '8px', color: '#5C2D91' }}>
-                      Evidência
-                    </a>
-                  ))}
-                </div>
-              )}
             </li>
           ))}
         </ul>
@@ -280,8 +277,32 @@ const TesteCelulares = () => {
     );
   };
 
-  const renderForm = () => (
-    <form onSubmit={handleSubmit} style={{ ...styles.card, marginTop: '1.5rem' }}>
+  const renderForm = () => {
+    const isConcluded = selectedOrder.status === 'Concluido';
+    if (isConcluded) {
+      return (
+        <div style={{ ...styles.card, marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Histórico: {selectedOrder.celular?.modelo || 'Dispositivo'}</h3>
+              <small style={{ color: '#6b7280' }}>
+                OS #{selectedOrder.id} · IMEI {selectedOrder.celular?.imei || '-'} · Cliente {selectedOrder.cliente?.nome || '-'}
+              </small>
+            </div>
+            <button type="button" onClick={resetSelection} style={styles.buttonLink}>
+              Voltar
+            </button>
+          </div>
+          {renderHistory()}
+          <p style={{ marginTop: '1rem', color: '#4b5563' }}>
+            Esta ordem já foi concluída. Utilize a lista para consultar outra OS em andamento caso precise registrar um novo teste.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <form onSubmit={handleSubmit} style={{ ...styles.card, marginTop: '1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h3 style={{ margin: 0 }}>Avaliando: {selectedOrder.celular?.modelo || 'Dispositivo'}</h3>
@@ -334,38 +355,14 @@ const TesteCelulares = () => {
         </div>
       </div>
 
-      <div style={{ marginTop: '18px' }}>
-        <label>Evidências (URLs)</label>
-        {evidences.map((url, index) => (
-          <div key={`evid-${index}`} style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => handleEvidenceChange(index, e.target.value)}
-              placeholder="https://..."
-              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #d4d4d4' }}
-            />
-            {evidences.length > 1 && (
-              <button type="button" onClick={() => handleRemoveEvidence(index)} style={{ border: 'none', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', padding: '0 12px' }}>
-                X
-              </button>
-            )}
-          </div>
-        ))}
-        {evidences.length < 5 && (
-          <button type="button" onClick={handleAddEvidence} style={{ marginTop: '8px', border: 'none', background: 'transparent', color: '#5C2D91', cursor: 'pointer' }}>
-            + Adicionar evidência
-          </button>
-        )}
-      </div>
-
       {(submitError || testError) && <p style={{ color: '#b91c1c', marginTop: '10px' }}>{submitError || testError}</p>}
 
       <button type="submit" style={{ ...styles.buttonPrimary, opacity: submitting ? 0.8 : 1 }} disabled={submitting}>
         {submitting ? 'Registrando teste...' : 'Finalizar Teste'}
       </button>
     </form>
-  );
+    );
+  };
 
   const renderSuccess = () => {
     const resultado = lastResult?.resultado || (lastResult?.aprovado ? 'APROVADO' : null) || 'APROVADO';

@@ -62,8 +62,16 @@ function NovoCadastroPecas() {
 
   const handleSave = async (event) => {
     event.preventDefault();
-    if (!name || !codigoInterno || !fornecedor) {
-      setMessage('Preencha os campos obrigatórios.');
+    if (!name || !codigoInterno || !fornecedor || !garantiaDias || garantiaDias === '') {
+      setMessage('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    if (!compatibilidade) {
+      setMessage('Informe a compatibilidade da peça.');
+      return;
+    }
+    if (Number(garantiaDias) < 0) {
+      setMessage('Garantia deve ser um número positivo.');
       return;
     }
 
@@ -73,7 +81,7 @@ function NovoCadastroPecas() {
       const payload = {
         nome: name,
         codigo_interno: codigoInterno,
-        compatibilidade: compatibilidade || undefined,
+        compatibilidade,
         nome_fornecedor: fornecedor,
         quantidade: quantidade !== '' ? Number(quantidade) : undefined,
         garantia_padrao_dias: garantiaDias !== '' ? Number(garantiaDias) : undefined,
@@ -113,7 +121,12 @@ function NovoCadastroPecas() {
         <input type="text" value={codigoInterno} onChange={(event) => setCodigoInterno(event.target.value)} required />
 
         <label>Compatibilidade:</label>
-        <input type="text" value={compatibilidade} onChange={(event) => setCompatibilidade(event.target.value)} />
+        <input
+          type="text"
+          value={compatibilidade}
+          onChange={(event) => setCompatibilidade(event.target.value)}
+          required
+        />
 
         <label>Quantidade:</label>
         <input type="number" min="0" value={quantidade} onChange={(event) => setQuantidade(event.target.value)} />
@@ -122,7 +135,13 @@ function NovoCadastroPecas() {
         <input type="text" value={fornecedor} onChange={(event) => setFornecedor(event.target.value)} required />
 
         <label>Garantia padrão (dias):</label>
-        <input type="number" min="0" value={garantiaDias} onChange={(event) => setGarantiaDias(event.target.value)} />
+        <input
+          type="number"
+          min="0"
+          value={garantiaDias}
+          onChange={(event) => setGarantiaDias(event.target.value)}
+          required
+        />
 
         <button className="btn-primary" type="submit" disabled={loading || initialLoading}>
           {loading ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar Peça'}

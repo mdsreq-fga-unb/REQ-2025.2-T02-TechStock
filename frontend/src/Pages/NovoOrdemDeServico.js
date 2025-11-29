@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Select from "react-select";
 import '../styles/NovoOrdemDeSevico.css';
-import { ordensServicoApi, clientesApi, celularesApi } from '../services/api';
+import { ordensServicoApi, clientesApi, celularesApi, pecasApi } from '../services/api';
 
 const STATUS_OPTIONS = [
   { value: 'EmAndamento', label: 'Em andamento' },
@@ -45,6 +45,32 @@ const customStyles = {
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
+const buildSnapshot = (lista = []) => (
+  (lista || [])
+    .map((item) => ({
+      pecaId: Number(item?.pecaId ?? item?.peca_id),
+      quantidade: Number(item?.quantidade ?? 0),
+    }))
+    .filter((item) => Number.isInteger(item.pecaId) && item.pecaId > 0)
+    .sort((a, b) => a.pecaId - b.pecaId)
+);
+
+const snapshotsAreEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i].pecaId !== b[i].pecaId || a[i].quantidade !== b[i].quantidade) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const computeMaxPermitido = (item = {}) => {
+  const disponivel = Number.isFinite(Number(item.disponibilidade)) ? Number(item.disponibilidade) : 0;
+  const original = Number.isFinite(Number(item.originalQuantidade)) ? Number(item.originalQuantidade) : 0;
+  return disponivel + original;
+};
+
 // --- COMPONENTE MODAL (Mantido igual) ---
 function ModalCelular({ isOpen, onClose, onSave, loading }) {
   const [modelo, setModelo] = useState('');
@@ -68,8 +94,6 @@ function NovoOS() {
   const [descricao, setDescricao] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [status, setStatus] = useState('EmAndamento');
-  const [garantiaDias, setGarantiaDias] = useState('');
-  const [garantiaValidade, setGarantiaValidade] = useState('');
   const [dataConclusao, setDataConclusao] = useState('');
   
   const [message, setMessage] = useState('');
@@ -79,8 +103,15 @@ function NovoOS() {
   const [loadingModal, setLoadingModal] = useState(false);
   const [testResults, setTestResults] = useState(() => buildInitialTestResults());
   const [testObservacoes, setTestObservacoes] = useState('');
-  const [testEvidence, setTestEvidence] = useState(['']);
   const [testError, setTestError] = useState('');
+  const [pecasLookup, setPecasLookup] = useState([]);
+  const [pecasSelecionadas, setPecasSelecionadas] = useState([]);
+  const [pecasOriginais, setPecasOriginais] = useState([]);
+  const [pecasLoading, setPecasLoading] = useState(false);
+  const [pecasSearch, setPecasSearch] = useState('');
+  const [pecaSelecionadaId, setPecaSelecionadaId] = useState(null);
+  const [pecaQuantidade, setPecaQuantidade] = useState('');
+  const [pecasErro, setPecasErro] = useState('');
 
   const isEditing = Boolean(editingId);
 
@@ -105,6 +136,17 @@ function NovoOS() {
     });
   }, [celulares, clientes]);
 
+  const opcoesPecas = useMemo(() => (
+    pecasLookup.map((p) => ({
+      value: p.id,
+      label: `#${p.id} - ${p.nome} (disp: ${p.quantidade ?? 0})`,
+    }))
+  ), [pecasLookup]);
+
+  const selectedPecaOption = useMemo(() => (
+    opcoesPecas.find((opt) => opt.value === pecaSelecionadaId) || null
+  ), [opcoesPecas, pecaSelecionadaId]);
+
   useEffect(() => {
     let active = true;
     Promise.all([clientesApi.list({ pageSize: 100 }), celularesApi.list({ pageSize: 100 })])
@@ -119,8 +161,59 @@ function NovoOS() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    setPecasLoading(true);
+    const timeout = setTimeout(async () => {
+      try {
+        const filters = { pageSize: 50 };
+        const trimmed = pecasSearch?.trim();
+        if (trimmed) {
+          filters.q = trimmed;
+        }
+        const base = await pecasApi.list(filters);
+        let items = base?.items || [];
+        if (trimmed && /^\d+$/.test(trimmed)) {
+          try {
+            const byId = await pecasApi.getById(Number(trimmed));
+            if (byId && !items.find((item) => item.id === byId.id)) {
+              items = [byId, ...items];
+            }
+          } catch (_) {
+            // ignora busca específica sem resultados
+          }
+        }
+        if (active) {
+          setPecasLookup(items);
+          setPecasErro('');
+        }
+      } catch (err) {
+        if (active) {
+          setPecasErro(err.message || 'Erro ao buscar peças.');
+        }
+      } finally {
+        if (active) {
+          setPecasLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
+  }, [pecasSearch]);
+
+  useEffect(() => {
     const editId = location?.state?.editId;
-    if (!editId) return;
+    if (!editId) {
+      setEditingId(null);
+      setPecasSelecionadas([]);
+      setPecasOriginais([]);
+      setPecaSelecionadaId(null);
+      setPecaQuantidade('');
+      setPecasErro('');
+      return;
+    }
     setEditingId(editId);
     setLoading(true);
     ordensServicoApi.getById(editId)
@@ -130,15 +223,31 @@ function NovoOS() {
         setDescricao(ordem.descricao || '');
         setObservacoes(ordem.observacoes || '');
         setStatus(ordem.status || 'EmAndamento');
-        setGarantiaDias(ordem.garantia_dias != null ? String(ordem.garantia_dias) : '');
-        setGarantiaValidade(ordem.garantia_validade ? ordem.garantia_validade.substring(0, 10) : '');
         setDataConclusao(ordem.data_conclusao ? ordem.data_conclusao.substring(0, 10) : '');
+        const registradas = (ordem.pecas_utilizadas || []).map((item) => {
+          const disponivel = Number.isFinite(Number(item.peca?.quantidade_disponivel))
+            ? Number(item.peca.quantidade_disponivel)
+            : 0;
+          return {
+            pecaId: item.peca?.id || item.peca_id,
+            nome: item.peca?.nome || `Peça #${item.peca_id}`,
+            codigo: item.peca?.codigo_interno,
+            quantidade: item.quantidade,
+            originalQuantidade: item.quantidade,
+            disponibilidade: disponivel,
+          };
+        });
+        setPecasSelecionadas(registradas);
+        setPecasOriginais(buildSnapshot(registradas));
+        setPecaSelecionadaId(null);
+        setPecaQuantidade('');
       })
       .catch((err) => setMessage(err.message))
       .finally(() => setLoading(false));
   }, [location]);
 
   const handleStatusChange = (e) => {
+    if (!isEditing) return;
     const newStatus = e.target.value;
     setStatus(newStatus);
     if (newStatus === 'Concluido' && !dataConclusao) {
@@ -191,23 +300,37 @@ function NovoOS() {
       setTestError('');
     }
 
+    const pecasSanitizadas = pecasSelecionadas.map((item) => ({
+      ...item,
+      quantidade: Number(item.quantidade) || 0,
+    }));
+
+    for (const item of pecasSanitizadas) {
+      if (!Number.isInteger(item.quantidade) || item.quantidade < 0) {
+        setPecasErro(`Quantidade inválida para ${item.nome}.`);
+        return;
+      }
+      const maxPermitido = computeMaxPermitido(item);
+      if (item.quantidade > maxPermitido) {
+        setPecasErro(`Quantidade para ${item.nome} excede o estoque disponível (${maxPermitido}).`);
+        return;
+      }
+    }
+    setPecasErro('');
+
     setLoading(true);
     setMessage('');
     try {
       const payload = {
         descricao: descricao || undefined,
         observacoes: observacoes || undefined,
-        status,
-        garantia_dias: garantiaDias ? Number(garantiaDias) : undefined,
-        garantia_validade: garantiaValidade ? new Date(garantiaValidade).toISOString() : undefined,
+        status: isEditing ? status : undefined,
       };
       
       if (status === 'Concluido') {
-        payload.data_conclusao = dataConclusao 
-          ? new Date(dataConclusao).toISOString() 
+        payload.data_conclusao = dataConclusao
+          ? new Date(dataConclusao).toISOString()
           : new Date().toISOString();
-      } else {
-        payload.data_conclusao = null; 
       }
 
       if (!isEditing) {
@@ -215,20 +338,33 @@ function NovoOS() {
           nome: label,
           status: testResults[key] || 'NAO_TESTADO',
         }));
-        const midiaPayload = testEvidence
-          .map((url) => (typeof url === 'string' ? url.trim() : ''))
-          .filter(Boolean);
         payload.testes = [
           {
             etapa: 'INICIAL',
             criterios: criteriosPayload,
             observacoes: testObservacoes || undefined,
-            midia_urls: midiaPayload,
           },
         ];
+
+        const pecasPayload = pecasSanitizadas
+          .filter((item) => item.quantidade > 0)
+          .map((item) => ({ peca_id: item.pecaId, quantidade: item.quantidade }));
+        if (pecasPayload.length) {
+          payload.pecas = pecasPayload;
+        }
       }
 
       if (isEditing) {
+        const pecasPayload = pecasSanitizadas
+          .filter((item) => item.quantidade > 0 || (item.originalQuantidade || 0) > 0)
+          .map((item) => ({ peca_id: item.pecaId, quantidade: item.quantidade }));
+        const snapshotAtual = buildSnapshot(pecasPayload);
+        const pecasMudaram = !snapshotsAreEqual(snapshotAtual, pecasOriginais);
+
+        if (pecasMudaram) {
+          await ordensServicoApi.atualizarPecas(editingId, pecasPayload);
+        }
+
         await ordensServicoApi.update(editingId, payload);
         setMessage('Ordem atualizada com sucesso!');
       } else {
@@ -238,7 +374,11 @@ function NovoOS() {
         setMessage('Ordem criada com sucesso!');
         setTestResults(buildInitialTestResults());
         setTestObservacoes('');
-        setTestEvidence(['']);
+        setPecasSelecionadas([]);
+        setPecasOriginais([]);
+        setPecaQuantidade('');
+        setPecaSelecionadaId(null);
+        setPecasErro('');
       }
       setTimeout(() => navigate('/ordemdeservico'), 800);
     } catch (err) {
@@ -248,24 +388,195 @@ function NovoOS() {
     }
   };
 
+  const handleAddPeca = () => {
+    if (!pecaSelecionadaId) {
+      setPecasErro('Selecione uma peça para vincular.');
+      return;
+    }
+    const quantidade = Number(pecaQuantidade);
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+      setPecasErro('Informe uma quantidade válida (mínimo 1).');
+      return;
+    }
+    const pecaDados = pecasLookup.find((p) => p.id === Number(pecaSelecionadaId));
+    if (!pecaDados) {
+      setPecasErro('Peça não encontrada. Refine a busca digitando o nome ou o ID.');
+      return;
+    }
+    const disponivel = Number.isFinite(Number(pecaDados.quantidade)) ? Number(pecaDados.quantidade) : 0;
+    const atual = pecasSelecionadas.find((item) => item.pecaId === pecaDados.id);
+    const originalQtd = atual?.originalQuantidade || 0;
+    const maxPermitido = disponivel + originalQtd;
+    const novoTotal = quantidade + (atual?.quantidade || 0);
+    if (novoTotal > maxPermitido) {
+      setPecasErro(`Quantidade solicitada maior que o estoque disponível (${maxPermitido}).`);
+      return;
+    }
+
+    setPecasSelecionadas((prev) => {
+      if (atual) {
+        return prev.map((item) => (item.pecaId === pecaDados.id
+          ? { ...item, quantidade: novoTotal, disponibilidade: disponivel }
+          : item));
+      }
+      return [
+        ...prev,
+        {
+          pecaId: pecaDados.id,
+          nome: pecaDados.nome,
+          codigo: pecaDados.codigo_interno,
+          quantidade,
+          disponibilidade: disponivel,
+          originalQuantidade: 0,
+        },
+      ];
+    });
+    setPecaSelecionadaId(null);
+    setPecaQuantidade('');
+    setPecasErro('');
+  };
+
+  const handleRemovePeca = (pecaId) => {
+    setPecasSelecionadas((prev) => {
+      const alvo = prev.find((item) => item.pecaId === pecaId);
+      if (!alvo) return prev;
+      const original = alvo.originalQuantidade || 0;
+      if (original > 0) {
+        const estaRemovida = Number(alvo.quantidade) === 0;
+        const quantidadeRestaurada = alvo.ultimaQuantidade ?? original;
+        const proximaQuantidade = estaRemovida ? quantidadeRestaurada : 0;
+        return prev.map((item) => (item.pecaId === pecaId
+          ? {
+              ...item,
+              quantidade: proximaQuantidade,
+              ultimaQuantidade: estaRemovida ? undefined : item.quantidade,
+            }
+          : item));
+      }
+      return prev.filter((item) => item.pecaId !== pecaId);
+    });
+    setPecasErro('');
+  };
+
+  const handleQuantidadeManualChange = (pecaId, value) => {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      setPecasErro('Informe apenas números inteiros para a quantidade.');
+      return;
+    }
+    const quantidade = Math.max(0, Math.floor(parsed));
+    setPecasSelecionadas((prev) => prev.flatMap((item) => {
+      if (item.pecaId !== pecaId) return item;
+      if (quantidade === 0 && (item.originalQuantidade || 0) === 0) {
+        return [];
+      }
+      return { ...item, quantidade, ultimaQuantidade: undefined };
+    }));
+    setPecasErro('');
+  };
+
+  const renderPecasSection = () => {
+    const titulo = isEditing ? 'Peças vinculadas à OS' : 'Peças utilizadas ao abrir a OS';
+    const descricao = isEditing
+      ? 'Edite quantidades, remova componentes ou inclua novos itens. As alterações impactam o estoque imediatamente.'
+      : 'Busque pelo nome ou ID, informe a quantidade e reserve o estoque necessário para o reparo.';
+    const badge = isEditing ? 'Sincronize o estoque' : 'Quantidade obrigatória';
+
+    return (
+      <div className={`pecas-section ${isEditing ? 'info' : ''}`}>
+        <div className="testes-header">
+          <div>
+            <h3>{titulo}</h3>
+            <p>{descricao}</p>
+          </div>
+          <span className="badge-required">{badge}</span>
+        </div>
+        {pecasErro && <p className="error-text">{pecasErro}</p>}
+        <div className="pecas-form-row">
+          <div style={{ flex: 1 }}>
+            <Select
+              value={selectedPecaOption}
+              onChange={(opt) => setPecaSelecionadaId(opt ? opt.value : null)}
+              onInputChange={(value, meta) => {
+                if (meta.action === 'input-change') {
+                  setPecasSearch(value);
+                }
+              }}
+              options={opcoesPecas}
+              isLoading={pecasLoading}
+              placeholder="Busque peças por nome ou ID..."
+              isClearable
+              isSearchable
+              styles={customStyles}
+              noOptionsMessage={() => 'Nenhuma peça encontrada'}
+            />
+          </div>
+          <input
+            type="number"
+            min="1"
+            placeholder="Qtd"
+            value={pecaQuantidade}
+            onChange={(e) => setPecaQuantidade(e.target.value)}
+            className="input-peca-quantidade"
+          />
+          <button type="button" className="btn-secondary add-peca-btn" onClick={handleAddPeca}>
+            {isEditing ? 'Adicionar/Atualizar' : 'Adicionar peça'}
+          </button>
+        </div>
+
+        {pecasSelecionadas.length > 0 ? (
+          <table className="pecas-table">
+            <thead>
+              <tr>
+                <th>Peça</th>
+                <th>Estoque máximo</th>
+                <th>Quantidade desejada</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pecasSelecionadas.map((item) => {
+                const maxPermitido = computeMaxPermitido(item);
+                const seraRemovida = (item.originalQuantidade || 0) > 0 && Number(item.quantidade) === 0;
+                return (
+                  <tr key={item.pecaId} className={seraRemovida ? 'peca-removida' : ''}>
+                    <td>
+                      <div className="peca-nome">{item.nome}</div>
+                      <small>
+                        #{item.pecaId}
+                        {item.codigo ? ` • ${item.codigo}` : ''}
+                      </small>
+                      {seraRemovida && <div className="removal-hint">Será removida da OS</div>}
+                    </td>
+                    <td>{maxPermitido}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.quantidade}
+                        onChange={(e) => handleQuantidadeManualChange(item.pecaId, e.target.value)}
+                        className="input-peca-quantidade"
+                      />
+                    </td>
+                    <td>
+                      <button type="button" className="btn-secondary" onClick={() => handleRemovePeca(item.pecaId)}>
+                        {seraRemovida ? 'Desfazer remoção' : 'Remover'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p className="pecas-empty">Nenhuma peça selecionada.</p>
+        )}
+      </div>
+    );
+  };
+
   const handleTestResultChange = (key, value) => {
     setTestResults((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleEvidenceChange = (index, value) => {
-    setTestEvidence((prev) => {
-      const clone = [...prev];
-      clone[index] = value;
-      return clone;
-    });
-  };
-
-  const handleAddEvidence = () => {
-    setTestEvidence((prev) => (prev.length >= 5 ? prev : [...prev, '']));
-  };
-
-  const handleRemoveEvidence = (index) => {
-    setTestEvidence((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const renderTestSection = () => {
@@ -312,30 +623,6 @@ function NovoOS() {
             onChange={(e) => setTestObservacoes(e.target.value)}
             placeholder="Ex: Tela com micro riscos, aparelho chegou sem parafusos."
           />
-        </div>
-
-        <div className="testes-extra">
-          <label>Evidências (URLs de fotos ou vídeos):</label>
-          {testEvidence.map((url, index) => (
-            <div key={`evidencia-${index}`} className="evidence-row">
-              <input
-                type="url"
-                value={url}
-                placeholder="https://..."
-                onChange={(e) => handleEvidenceChange(index, e.target.value)}
-              />
-              {testEvidence.length > 1 && (
-                <button type="button" onClick={() => handleRemoveEvidence(index)} className="remove-evidence">
-                  Remover
-                </button>
-              )}
-            </div>
-          ))}
-          {testEvidence.length < 5 && (
-            <button type="button" onClick={handleAddEvidence} className="link-button">
-              + Adicionar evidência
-            </button>
-          )}
         </div>
       </div>
     );
@@ -393,10 +680,15 @@ function NovoOS() {
         <label>Observações:</label>
         <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
 
+        {renderPecasSection()}
+
         <label>Status:</label>
-        <select value={status} onChange={handleStatusChange}>
+        <select value={status} onChange={handleStatusChange} disabled={!isEditing}>
           {STATUS_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
+        {!isEditing && (
+          <small className="status-hint">Novas ordens sempre iniciam em andamento e podem ser concluídas pela listagem.</small>
+        )}
 
         {status === 'Concluido' && (
           <div style={{animation: 'fadeIn 0.3s'}}>
@@ -408,12 +700,6 @@ function NovoOS() {
             />
           </div>
         )}
-
-        <label>Garantia (dias):</label>
-        <input type="number" min="0" value={garantiaDias} onChange={(e) => setGarantiaDias(e.target.value)} />
-
-        <label>Garantia válida até:</label>
-        <input type="date" value={garantiaValidade} onChange={(e) => setGarantiaValidade(e.target.value)} />
 
         {renderTestSection()}
 

@@ -83,7 +83,7 @@ function CadastroPecas() {
         <div className="actions-bar">
           <input
             type="text"
-            placeholder="Buscar por nome ou código"
+            placeholder="Buscar por nome, código, fornecedor ou compatibilidade"
             className="search-input"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}

@@ -77,6 +77,9 @@ async function create(data, user) {
     throw err;
   }
 
+  const possuiPecas = Array.isArray(data.pecas) && data.pecas.length > 0;
+  const pecasAgregadas = possuiPecas ? aggregateItens(data.pecas) : null;
+
   const prisma = getPrisma();
   const userId = user?.id || 1;
 
@@ -103,6 +106,9 @@ async function create(data, user) {
     );
     for (const teste of testesPayload) {
       await testesService.registrarTeste(ordem.id, { ...teste, etapa: teste.etapa || 'INICIAL' }, user, { tx });
+    }
+    if (pecasAgregadas) {
+      await registrarPecasNaTransacao({ tx, ordem, agregados: pecasAgregadas, userId, validarTestes: false });
     }
     return ordem;
   });
@@ -290,11 +296,102 @@ function aggregateItens(itens) {
   return map;
 }
 
+function normalizePecasTarget(itens) {
+  if (itens === undefined) {
+    return new Map();
+  }
+  if (!Array.isArray(itens)) {
+    const err = new Error('Lista de peças inválida');
+    err.status = 400;
+    throw err;
+  }
+
+  const map = new Map();
+  itens.forEach((item, index) => {
+    const pecaId = Number(item?.peca_id);
+    if (!Number.isInteger(pecaId) || pecaId <= 0) {
+      const err = new Error(`Peça inválida na posição ${index}`);
+      err.status = 400;
+      throw err;
+    }
+    const quantidade = Number(item?.quantidade);
+    if (!Number.isInteger(quantidade) || quantidade < 0) {
+      const err = new Error(`Quantidade inválida para a peça ${pecaId}`);
+      err.status = 400;
+      throw err;
+    }
+    map.set(pecaId, quantidade);
+  });
+
+  return map;
+}
+
+async function registrarPecasNaTransacao({ tx, ordem, agregados, userId, validarTestes = true }) {
+  if (!agregados || agregados.size === 0) {
+    return;
+  }
+
+  if (validarTestes) {
+    await testesService.garantirTestesAntesDeOperacao(ordem.id);
+  }
+
+  const dataUso = new Date();
+  const ids = Array.from(agregados.keys());
+  const pecas = await tx.pecas.findMany({ where: { id: { in: ids } } });
+  const pecasMap = new Map(pecas.map((p) => [p.id, p]));
+
+  for (const [pecaId] of agregados.entries()) {
+    if (!pecasMap.has(pecaId)) {
+      const err = new Error(`Peça ${pecaId} não encontrada`);
+      err.status = 404;
+      throw err;
+    }
+  }
+
+  for (const [pecaId, quantidade] of agregados.entries()) {
+    const peca = pecasMap.get(pecaId);
+    const disponivel = Number.isFinite(Number(peca.quantidade)) ? Number(peca.quantidade) : 0;
+    if (disponivel < quantidade) {
+      const err = new Error(`Quantidade solicitada para a peça ${peca.nome} excede o estoque disponível (${disponivel}).`);
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  for (const [pecaId, quantidade] of agregados.entries()) {
+    await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { decrement: quantidade }, updated_by: userId } });
+    await tx.ordens_servico_pecas.upsert({
+      where: { ordem_servico_peca_unique: { ordem_servico_id: ordem.id, peca_id: pecaId } },
+      update: { quantidade: { increment: quantidade }, data_uso: dataUso },
+      create: { ordem_servico_id: ordem.id, peca_id: pecaId, quantidade, data_uso: dataUso },
+    });
+  }
+
+  const descricao = Array.from(agregados.entries())
+    .map(([pecaId, quantidade]) => {
+      const peca = pecasMap.get(pecaId);
+      if (!peca) {
+        throw new Error(`Invariante violada: peça ${pecaId} não encontrada ao construir a descrição.`);
+      }
+      return `${peca.nome} x${quantidade}`;
+    })
+    .join(', ');
+
+  await historicoRepository.addEvent(
+    {
+      celular_id: ordem.celular_id,
+      ordem_servico_id: ordem.id,
+      tipo_evento: EVENTOS.PECA_REGISTRADA,
+      descricao: `Peças registradas: ${descricao}.`,
+    },
+    tx,
+  );
+}
+
 async function registrarPecas(id, itens, user) {
   const agregados = aggregateItens(itens);
   const prisma = getPrisma();
   const userId = user?.id || 1;
-  const dataUso = new Date();
 
   await prisma.$transaction(async (tx) => {
     const ordem = await tx.ordens_servico.findUnique({ where: { id }, select: { id: true, celular_id: true } });
@@ -304,54 +401,117 @@ async function registrarPecas(id, itens, user) {
       throw err;
     }
 
+    await registrarPecasNaTransacao({ tx, ordem, agregados, userId, validarTestes: true });
+  });
+
+  return ordensRepository.getById(id);
+}
+
+async function sincronizarPecas(id, itens, user) {
+  const desejado = normalizePecasTarget(itens);
+  const prisma = getPrisma();
+  const userId = user?.id || 1;
+
+  await prisma.$transaction(async (tx) => {
+    const ordem = await tx.ordens_servico.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        celular_id: true,
+        pecas_utilizadas: { select: { id: true, peca_id: true, quantidade: true } },
+      },
+    });
+    if (!ordem) {
+      const err = new Error('Ordem de serviço não encontrada');
+      err.status = 404;
+      throw err;
+    }
+
     await testesService.garantirTestesAntesDeOperacao(id);
 
-    const ids = Array.from(agregados.keys());
-    const pecas = await tx.pecas.findMany({ where: { id: { in: ids } } });
-    const pecasMap = new Map(pecas.map((p) => [p.id, p]));
+    const atuais = new Map();
+    ordem.pecas_utilizadas.forEach((item) => {
+      atuais.set(item.peca_id, { quantidade: item.quantidade, registroId: item.id });
+    });
 
-    for (const [pecaId, quantidade] of agregados.entries()) {
+    const ids = new Set([...atuais.keys(), ...desejado.keys()]);
+    if (ids.size === 0) {
+      return;
+    }
+
+    const pecasBD = await tx.pecas.findMany({ where: { id: { in: Array.from(ids) } } });
+    const pecasMap = new Map(pecasBD.map((p) => [p.id, p]));
+    const historicoMudancas = [];
+    const dataUso = new Date();
+
+    for (const pecaId of ids) {
+      const atualInfo = atuais.get(pecaId);
+      const atualQuantidade = atualInfo?.quantidade || 0;
+      const desejadaQuantidade = desejado.has(pecaId) ? Number(desejado.get(pecaId)) : 0;
+      if (desejadaQuantidade === atualQuantidade) {
+        continue;
+      }
+
+      if (desejadaQuantidade < 0) {
+        const err = new Error(`Quantidade negativa para a peça ${pecaId}`);
+        err.status = 400;
+        throw err;
+      }
+
       const peca = pecasMap.get(pecaId);
       if (!peca) {
         const err = new Error(`Peça ${pecaId} não encontrada`);
         err.status = 404;
         throw err;
       }
-      if (peca.quantidade < quantidade) {
-        const err = new Error(`Quantidade solicitada para a peça ${peca.nome} excede o estoque disponível (${peca.quantidade}).`);
-        err.status = 400;
-        throw err;
+
+      const delta = desejadaQuantidade - atualQuantidade;
+      if (delta > 0) {
+        const disponivel = Number.isFinite(Number(peca.quantidade)) ? Number(peca.quantidade) : 0;
+        if (disponivel < delta) {
+          const err = new Error(`Quantidade solicitada para a peça ${peca.nome} excede o estoque disponível (${disponivel}).`);
+          err.status = 400;
+          throw err;
+        }
+        await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { decrement: delta }, updated_by: userId } });
+      } else if (delta < 0) {
+        await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { increment: Math.abs(delta) }, updated_by: userId } });
+      }
+
+      if (desejadaQuantidade === 0 && atualInfo) {
+        await tx.ordens_servico_pecas.delete({ where: { id: atualInfo.registroId } });
+      } else if (atualInfo) {
+        await tx.ordens_servico_pecas.update({
+          where: { id: atualInfo.registroId },
+          data: { quantidade: desejadaQuantidade, data_uso: dataUso },
+        });
+      } else if (desejadaQuantidade > 0) {
+        await tx.ordens_servico_pecas.create({
+          data: {
+            ordem_servico_id: id,
+            peca_id: pecaId,
+            quantidade: desejadaQuantidade,
+            data_uso: dataUso,
+          },
+        });
+      }
+
+      if (delta !== 0) {
+        historicoMudancas.push(`${peca.nome} ${delta > 0 ? `+${delta}` : delta}`);
       }
     }
 
-    for (const [pecaId, quantidade] of agregados.entries()) {
-      await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { decrement: quantidade }, updated_by: userId } });
-      await tx.ordens_servico_pecas.upsert({
-        where: { ordem_servico_peca_unique: { ordem_servico_id: id, peca_id: pecaId } },
-        update: { quantidade: { increment: quantidade }, data_uso: dataUso },
-        create: { ordem_servico_id: id, peca_id: pecaId, quantidade, data_uso: dataUso },
-      });
+    if (historicoMudancas.length) {
+      await historicoRepository.addEvent(
+        {
+          celular_id: ordem.celular_id,
+          ordem_servico_id: ordem.id,
+          tipo_evento: EVENTOS.PECA_REGISTRADA,
+          descricao: `Peças atualizadas: ${historicoMudancas.join(', ')}.`,
+        },
+        tx,
+      );
     }
-
-    const descricao = Array.from(agregados.entries())
-      .map(([pecaId, quantidade]) => {
-        const peca = pecasMap.get(pecaId);
-        if (!peca) {
-          throw new Error(`Invariante violada: peça ${pecaId} não encontrada ao construir a descrição.`);
-        }
-        return `${peca.nome} x${quantidade}`;
-      })
-      .join(', ');
-
-    await historicoRepository.addEvent(
-      {
-        celular_id: ordem.celular_id,
-        ordem_servico_id: ordem.id,
-        tipo_evento: EVENTOS.PECA_REGISTRADA,
-        descricao: `Peças registradas: ${descricao}.`,
-      },
-      tx,
-    );
   });
 
   return ordensRepository.getById(id);
@@ -372,4 +532,4 @@ async function remove(id) {
   return atual;
 }
 
-module.exports = { list, getById, create, update, registrarPecas, remove, STATUS };
+module.exports = { list, getById, create, update, registrarPecas, sincronizarPecas, remove, STATUS };

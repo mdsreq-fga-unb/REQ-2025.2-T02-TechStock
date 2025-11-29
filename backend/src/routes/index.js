@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { getPrisma } = require('../database/prisma');
 const usuariosController = require('../controllers/usuarios.controller');
 const celularesController = require('../controllers/celulares.controller');
+const celularesHistoricoController = require('../controllers/celulares-historico.controller');
 const pecasController = require('../controllers/pecas.controller');
 const clientesController = require('../controllers/clientes.controller');
 const ordensServicoController = require('../controllers/ordens-servico.controller');
@@ -711,8 +712,10 @@ router.get(
     query('page').optional().isInt({ min: 1 }).toInt(),
     query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
     query('q').optional().isString(),
+    query('id').optional().isInt({ min: 1 }).toInt(),
     query('status').optional().isString(),
     query('tipo').optional().isString(),
+    query('finalidade').optional().isIn(['REVENDA', 'MANUTENCAO']),
     query('fornecedor').optional().isString(),
     query('capacidade').optional().isString(),
   ],
@@ -726,6 +729,7 @@ router.post(
     body('imei').isString().notEmpty(),
     body('nome_fornecedor').isString().notEmpty(),
     body('tipo').isString().notEmpty(),
+    body('finalidade').isIn(['REVENDA', 'MANUTENCAO']),
     body('valor_compra').optional().isFloat({ min: 0 }),
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
@@ -738,11 +742,25 @@ router.put(
     param('id').isInt().toInt(),
     body('status').optional().isString(),
     body('tipo').optional().isString(),
+    body('finalidade').optional().isIn(['REVENDA', 'MANUTENCAO']),
     body('valor_compra').optional().isFloat({ min: 0 }),
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
   celularesController.update,
+);
+router.get(
+  '/celulares/historico',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+    query('ordem_servico_id').optional().isInt({ min: 1 }).toInt(),
+    query('tipo_evento').optional().isString(),
+    query('q').optional().isString(),
+  ],
+  validateRequest,
+  celularesHistoricoController.list,
 );
 router.get('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.getById);
 router.delete('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.remove);
@@ -885,6 +903,15 @@ router.post(
       .optional()
       .isIn(['INICIAL', 'INTERMEDIARIA', 'FINAL'])
       .withMessage('Etapa de teste inválida.'),
+    body('pecas').optional().isArray({ min: 1 }),
+    body('pecas.*.peca_id')
+      .if(body('pecas').exists())
+      .isInt({ min: 1 })
+      .toInt(),
+    body('pecas.*.quantidade')
+      .if(body('pecas').exists())
+      .isInt({ min: 1 })
+      .toInt(),
   ],
   validateRequest,
   ordensServicoController.create,
@@ -1044,6 +1071,18 @@ router.post(
   ],
   validateRequest,
   ordensServicoController.registrarPecas,
+);
+
+router.put(
+  '/ordens-servico/:id/pecas',
+  [
+    param('id').isInt().toInt(),
+    body('itens').isArray(),
+    body('itens.*.peca_id').isInt({ min: 1 }).toInt(),
+    body('itens.*.quantidade').isInt({ min: 0 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoController.atualizarPecas,
 );
 
 // Vendas

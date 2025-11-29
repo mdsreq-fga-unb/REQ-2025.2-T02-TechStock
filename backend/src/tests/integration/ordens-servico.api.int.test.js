@@ -131,6 +131,103 @@ describe('API /api/ordens-servico', () => {
     expect(response.body.testes[0].resultado).toBeDefined();
   });
 
+  test('POST cria OS já vinculando peças e baixa estoque', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    const peca = await seedPeca(4);
+    const response = await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({
+        cliente_id: cliente.id,
+        celular_id: celular.id,
+        descricao: 'Troca com peças',
+        testes: buildTestesPayload(),
+        pecas: [
+          { peca_id: peca.id, quantidade: 2 },
+          { peca_id: peca.id, quantidade: 1 },
+        ],
+      })
+      .expect(201);
+
+    const uso = response.body.pecas_utilizadas.find((item) => item.peca.id === peca.id);
+    expect(uso).toBeTruthy();
+    expect(uso.quantidade).toBe(3);
+    expect(response.body.historico.some((h) => h.tipo_evento === 'OrdemServicoPecaRegistrada')).toBe(true);
+
+    const prisma = getPrisma();
+    const estoque = await prisma.pecas.findUnique({ where: { id: peca.id } });
+    expect(estoque.quantidade).toBe(1);
+  });
+
+  test('PUT /ordens-servico/:id/pecas sincroniza quantidades e devolve estoque', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    const peca = await seedPeca(8);
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca parcial', testes: buildTestesPayload(), pecas: [{ peca_id: peca.id, quantidade: 3 }] })
+      .expect(201);
+
+    const sincronizado = await withAuth(request(app)
+      .put(`/api/ordens-servico/${ordem.body.id}/pecas`))
+      .send({ itens: [{ peca_id: peca.id, quantidade: 1 }] })
+      .expect(200);
+
+    const uso = sincronizado.body.pecas_utilizadas.find((item) => item.peca.id === peca.id);
+    expect(uso).toBeTruthy();
+    expect(uso.quantidade).toBe(1);
+
+    const prisma = getPrisma();
+    const estoque = await prisma.pecas.findUnique({ where: { id: peca.id } });
+    expect(estoque.quantidade).toBe(7); // 8 - 3 + 2 devolvidos = 7
+  });
+
+  test('PUT /ordens-servico/:id/pecas remove todas as peças quando lista vazia', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    const peca = await seedPeca(4);
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Remover peças', testes: buildTestesPayload(), pecas: [{ peca_id: peca.id, quantidade: 2 }] })
+      .expect(201);
+
+    const resposta = await withAuth(request(app)
+      .put(`/api/ordens-servico/${ordem.body.id}/pecas`))
+      .send({ itens: [] })
+      .expect(200);
+
+    expect(resposta.body.pecas_utilizadas.length).toBe(0);
+    const prisma = getPrisma();
+    const estoque = await prisma.pecas.findUnique({ where: { id: peca.id } });
+    expect(estoque.quantidade).toBe(4);
+  });
+
+  test('PUT /ordens-servico/:id/pecas impede aumento acima do estoque atual', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    const peca = await seedPeca(2);
+    const ordem = await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Capacidade limite', testes: buildTestesPayload(), pecas: [{ peca_id: peca.id, quantidade: 1 }] })
+      .expect(201);
+
+    await withAuth(request(app)
+      .put(`/api/ordens-servico/${ordem.body.id}/pecas`))
+      .send({ itens: [{ peca_id: peca.id, quantidade: 5 }] })
+      .expect(400);
+  });
+
+  test('POST rejeita OS com peças acima do estoque', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    const peca = await seedPeca(1);
+    await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({
+        cliente_id: cliente.id,
+        celular_id: celular.id,
+        descricao: 'Troca peça sem estoque',
+        testes: buildTestesPayload(),
+        pecas: [{ peca_id: peca.id, quantidade: 2 }],
+      })
+      .expect(400);
+  });
+
   test('POST rejeita criação sem testes iniciais', async () => {
     const { cliente, celular } = await seedClienteCelular();
     await withAuth(request(app)
