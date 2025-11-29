@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/vendas.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { vendasApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 function Vendas() {
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ function Vendas() {
                 <div className='BotoesNavegacao'>Fornecedores</div>
                 <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
                 <div className='BotoesNavegacao'>Relatórios</div>
-                <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+                    <LogoutButton className='BotaoLogout' /> 
           </div>
 
 
@@ -153,7 +154,7 @@ function Vendas() {
                    /> 
                    
 
-                   <button className="btn-primary" onClick={() => navigate("/novavenda")}>
+                   <button className="btn-primary" onClick={() => navigate("/vendas/novo")}>
                      + Novas Vendas
                    </button>
 

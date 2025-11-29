@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp } from 'lucide-react';
 import '../styles/OrdemDeServiço.css';
 import { dashboardsApi, ordensServicoApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
@@ -199,7 +200,7 @@ const OrdensServico = () => {
         <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+        <LogoutButton className='BotaoLogout' /> 
         </div>
         
 

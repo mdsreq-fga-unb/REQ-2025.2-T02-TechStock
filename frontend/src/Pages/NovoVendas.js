@@ -1,186 +1,323 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { vendasApi } from '../services/api'; 
+import Select from 'react-select';
+import { vendasApi, clientesApi, celularesApi } from '../services/api';
 import "../styles/NovaVenda.css";
+
+const DEFAULT_GARANTIA = 90;
+const TODAY = new Date().toISOString().substring(0, 10);
+
+const selectStyles = {
+    control: (provided) => ({
+        ...provided,
+        minHeight: '45px',
+        marginBottom: '15px',
+        borderRadius: '8px',
+        borderColor: '#ccc',
+        boxShadow: 'none',
+        '&:hover': { borderColor: '#888' },
+    }),
+    menu: (provided) => ({ ...provided, zIndex: 9999 }),
+};
 
 function NovaVenda() {
     const navigate = useNavigate();
     const location = useLocation();
-    const editId = location.state?.editId; // ID para edição
-    const isEditing = !!editId;
+    const editId = location.state?.editId;
+    const isEditing = Boolean(editId);
 
-    // Estado inicial dos campos do formulário
     const [formData, setFormData] = useState({
-        clienteId: '', // ID do cliente
-        celularId: '', // ID do celular/produto vendido
-        data_venda: new Date().toISOString().substring(0, 10), // Data padrão
+        cliente_id: '',
+        celular_id: '',
+        data_venda: TODAY,
         valor_venda: '',
-        garantia_dias: 90, 
+        garantia_dias: DEFAULT_GARANTIA,
         observacoes: '',
     });
-
-    const [loading, setLoading] = useState(false);
+    const [clientes, setClientes] = useState([]);
+    const [celulares, setCelulares] = useState([]);
+    const [loadingOptions, setLoadingOptions] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
 
-    // Efeito para carregar dados para edição
     useEffect(() => {
-        if (isEditing) {
-            setLoading(true);
-            vendasApi.getById(editId)
-                .then(data => {
-                    setFormData({
-                        clienteId: data.clienteId || '',
-                        celularId: data.celularId || '',
-                        // Formato 'YYYY-MM-DD' para o input type="date"
-                        data_venda: data.data_venda ? new Date(data.data_venda).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10),
-                        valor_venda: data.valor_venda || '',
-                        garantia_dias: data.garantia_dias || 90,
-                        observacoes: data.observacoes || '',
-                    });
-                })
-                .catch(err => {
-                    setError('Erro ao carregar dados da venda para edição.');
-                    console.error(err);
-                })
-                .finally(() => setLoading(false));
-        }
+        let active = true;
+        setLoadingOptions(true);
+        Promise.all([
+            clientesApi.list({ pageSize: 100 }),
+            celularesApi.list({ pageSize: 100, status: 'EmEstoque' }),
+        ])
+            .then(([clientesRes, celularesRes]) => {
+                if (!active) return;
+                setClientes(clientesRes?.items || []);
+                setCelulares(celularesRes?.items || []);
+            })
+            .catch((err) => {
+                if (active) setError(err.message || 'Erro ao carregar clientes e celulares.');
+            })
+            .finally(() => {
+                if (active) setLoadingOptions(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isEditing) return;
+        setInitialLoading(true);
+        vendasApi.getById(editId)
+            .then((data) => {
+                setFormData({
+                    cliente_id: data.cliente_id ?? data.cliente?.id ?? '',
+                    celular_id: data.celular_id ?? data.celular?.id ?? '',
+                    data_venda: data.data_venda ? new Date(data.data_venda).toISOString().substring(0, 10) : TODAY,
+                    valor_venda: data.valor_venda != null ? String(Number(data.valor_venda).toFixed(2)) : '',
+                    garantia_dias: data.garantia_dias ?? DEFAULT_GARANTIA,
+                    observacoes: data.observacoes || '',
+                });
+                if (data.cliente) {
+                    setClientes((prev) => (prev.some((item) => item.id === data.cliente.id)
+                        ? prev
+                        : [...prev, data.cliente]));
+                }
+                if (data.celular) {
+                    setCelulares((prev) => (prev.some((item) => item.id === data.celular.id)
+                        ? prev
+                        : [...prev, data.celular]));
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                setError('Erro ao carregar dados da venda.');
+            })
+            .finally(() => setInitialLoading(false));
     }, [editId, isEditing]);
 
+    const opcoesClientes = useMemo(() => (
+        clientes.map((cliente) => ({
+            value: cliente.id,
+            label: `${cliente.nome}${cliente.cpf ? ` - CPF: ${cliente.cpf}` : ''}`,
+        }))
+    ), [clientes]);
 
-    // Função genérica para atualizar o estado ao mudar o campo
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const opcoesCelulares = useMemo(() => (
+        celulares.map((celular) => {
+            const modelo = celular.modelo || 'Celular';
+            const imei = celular.imei ? ` (IMEI ${celular.imei})` : '';
+            const statusLabel = celular.status ? ` • ${celular.status}` : '';
+            return {
+                value: celular.id,
+                label: `#${celular.id} - ${modelo}${imei}${statusLabel}`,
+            };
+        })
+    ), [celulares]);
+
+    const selectedClienteOption = useMemo(() => (
+        opcoesClientes.find((opt) => opt.value === Number(formData.cliente_id)) || null
+    ), [opcoesClientes, formData.cliente_id]);
+
+    const selectedCelularOption = useMemo(() => (
+        opcoesCelulares.find((opt) => opt.value === Number(formData.celular_id)) || null
+    ), [opcoesCelulares, formData.celular_id]);
+
+    const clienteSelecionado = useMemo(() => (
+        clientes.find((cliente) => cliente.id === Number(formData.cliente_id)) || null
+    ), [clientes, formData.cliente_id]);
+
+    const celularSelecionado = useMemo(() => (
+        celulares.find((celular) => celular.id === Number(formData.celular_id)) || null
+    ), [celulares, formData.celular_id]);
+
+    const garantiaValidade = useMemo(() => {
+        const dias = Number(formData.garantia_dias);
+        if (!formData.data_venda || Number.isNaN(dias)) return '';
+        const base = new Date(formData.data_venda);
+        if (Number.isNaN(base.getTime())) return '';
+        const future = new Date(base);
+        future.setDate(future.getDate() + dias);
+        return future.toISOString().substring(0, 10);
+    }, [formData.data_venda, formData.garantia_dias]);
+
+    const handleFieldChange = (event) => {
+        const { name, value } = event.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Função de submissão do formulário
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+    const handleClienteChange = (option) => {
+        setFormData((prev) => ({ ...prev, cliente_id: option ? option.value : '' }));
+    };
 
-        // Prepara os dados: substitui vírgula por ponto no valor de venda para garantir que seja um número
-        const dataToSave = {
-            ...formData,
-            valor_venda: parseFloat(String(formData.valor_venda).replace(',', '.'))
+    const handleCelularChange = (option) => {
+        setFormData((prev) => ({ ...prev, celular_id: option ? option.value : '' }));
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setError(null);
+        if (!formData.cliente_id || !formData.celular_id) {
+            setError('Selecione um cliente e um celular.');
+            return;
+        }
+        const valor = Number(String(formData.valor_venda).replace(',', '.'));
+        if (!Number.isFinite(valor) || valor <= 0) {
+            setError('Informe um valor de venda válido.');
+            return;
+        }
+        const diasGarantia = formData.garantia_dias === '' ? null : Number(formData.garantia_dias);
+        if (diasGarantia != null && (Number.isNaN(diasGarantia) || diasGarantia < 0)) {
+            setError('Garantia deve ser um número maior ou igual a zero.');
+            return;
+        }
+
+        const payload = {
+            cliente_id: Number(formData.cliente_id),
+            celular_id: Number(formData.celular_id),
+            data_venda: formData.data_venda,
+            valor_venda: Number(valor.toFixed(2)),
+            garantia_dias: diasGarantia,
+            garantia_validade: garantiaValidade || null,
+            observacoes: formData.observacoes || undefined,
         };
-        
+
+        setSaving(true);
         try {
             if (isEditing) {
-                await vendasApi.update(editId, dataToSave);
+                await vendasApi.update(editId, payload);
                 alert('Venda atualizada com sucesso!');
             } else {
-                await vendasApi.create(dataToSave);
+                await vendasApi.create(payload);
                 alert('Venda cadastrada com sucesso!');
             }
-            // Navega de volta para a lista de vendas
-            navigate('/vendas'); 
+            navigate('/vendas');
         } catch (err) {
-            console.error('Erro ao salvar venda:', err);
-            setError(err.message || 'Erro ao salvar a venda. Verifique os dados e tente novamente.');
+            console.error(err);
+            setError(err.message || 'Erro ao salvar a venda.');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
-    if (loading && isEditing) return <div>Carregando dados para edição...</div>;
+    if (initialLoading) {
+        return <div>Carregando dados da venda...</div>;
+    }
 
     return (
         <div className='novo-container-venda'>
             <h2>{isEditing ? 'Editar Venda' : 'Nova Venda'}</h2>
-            
-            <div className="form-box-venda">
+            <form className="form-box-venda" onSubmit={handleSubmit}>
                 {error && <p className="error-message">{error}</p>}
-                
+
                 <div>
-                    <label htmlFor="clienteId">ID do Cliente:</label>
-                    <input
-                        type="text"
-                        id="clienteId"
-                        name="clienteId"
-                        value={formData.clienteId}
-                        onChange={handleChange}
-                        placeholder="Insira o ID do Cliente"
-                        required
+                    <label>Cliente</label>
+                    <Select
+                        isDisabled={loadingOptions || saving}
+                        isLoading={loadingOptions}
+                        value={selectedClienteOption}
+                        onChange={handleClienteChange}
+                        options={opcoesClientes}
+                        placeholder="Selecione o cliente..."
+                        isClearable
+                        isSearchable
+                        styles={selectStyles}
+                        noOptionsMessage={() => 'Nenhum cliente encontrado'}
                     />
+                    {clienteSelecionado && (
+                        <small className="selection-hint">
+                            Cliente selecionado: #{clienteSelecionado.id} - {clienteSelecionado.nome}
+                        </small>
+                    )}
                 </div>
 
                 <div>
-                    <label htmlFor="celularId">ID do Celular/Produto:</label>
-                    <input
-                        type="text"
-                        id="celularId"
-                        name="celularId"
-                        value={formData.celularId}
-                        onChange={handleChange}
-                        placeholder="Insira o ID do Celular"
-                        required
+                    <label>Celular</label>
+                    <Select
+                        isDisabled={loadingOptions || saving}
+                        isLoading={loadingOptions}
+                        value={selectedCelularOption}
+                        onChange={handleCelularChange}
+                        options={opcoesCelulares}
+                        placeholder="Selecione o celular..."
+                        isClearable
+                        isSearchable
+                        styles={selectStyles}
+                        noOptionsMessage={() => 'Nenhum celular disponível'}
                     />
+                    {celularSelecionado && (
+                        <small className="selection-hint">
+                            Celular selecionado: #{celularSelecionado.id} - {celularSelecionado.modelo}
+                        </small>
+                    )}
                 </div>
 
-                {/* Data da Venda */}
                 <div>
-                    <label htmlFor="data_venda">Data da Venda:</label>
+                    <label htmlFor="data_venda">Data da Venda</label>
                     <input
                         type="date"
                         id="data_venda"
                         name="data_venda"
                         value={formData.data_venda}
-                        onChange={handleChange}
+                        onChange={handleFieldChange}
                         required
                     />
                 </div>
 
-                {/* Valor da Venda */}
                 <div>
-                    <label htmlFor="valor_venda">Valor da Venda (R$):</label>
+                    <label htmlFor="valor_venda">Valor da Venda (R$)</label>
                     <input
                         type="number"
                         id="valor_venda"
                         name="valor_venda"
                         value={formData.valor_venda}
-                        onChange={handleChange}
+                        onChange={handleFieldChange}
                         step="0.01"
+                        min="0"
                         placeholder="0,00"
                         required
                     />
                 </div>
 
-                {/* Garantia (Dias) */}
                 <div>
-                    <label htmlFor="garantia_dias">Garantia Padrão (Dias):</label>
+                    <label htmlFor="garantia_dias">Garantia (dias)</label>
                     <input
                         type="number"
                         id="garantia_dias"
                         name="garantia_dias"
                         value={formData.garantia_dias}
-                        onChange={handleChange}
+                        onChange={handleFieldChange}
                         min="0"
                         required
                     />
                 </div>
-                
-                {/* Observações */}
+
                 <div>
-                    <label htmlFor="observacoes">Observações:</label>
+                    <label>Validade da Garantia</label>
+                    <input type="date" value={garantiaValidade || ''} readOnly />
+                    <small>Calculada automaticamente a partir da data e do prazo informado.</small>
+                </div>
+
+                <div>
+                    <label htmlFor="observacoes">Observações</label>
                     <textarea
                         id="observacoes"
                         name="observacoes"
                         value={formData.observacoes}
-                        onChange={handleChange}
+                        onChange={handleFieldChange}
                         rows="4"
-                    ></textarea>
+                        placeholder="Notas adicionais sobre a venda"
+                    />
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                    <button type="submit" onClick={handleSubmit} className="btn-primary" disabled={loading}>
-                        {loading ? 'Salvando...' : (isEditing ? 'Atualizar Venda' : 'Cadastrar Venda')}
+                    <button type="submit" className="btn-primary" disabled={saving}>
+                        {saving ? 'Salvando...' : isEditing ? 'Atualizar Venda' : 'Cadastrar Venda'}
                     </button>
                     <button type="button" onClick={() => navigate('/vendas')} className="btn-secondary">
                         Cancelar
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
