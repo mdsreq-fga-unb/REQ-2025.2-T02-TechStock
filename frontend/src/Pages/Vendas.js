@@ -65,11 +65,12 @@ function Vendas() {
                 <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
                 <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
                 <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-                <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+                <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
                 <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
                 <div className='BotoesNavegacao'>Fornecedores</div>
-                <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
+                <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
                 <div className='BotoesNavegacao'>Relatórios</div>
+                <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
           </div>
 
 
@@ -81,19 +82,32 @@ function Vendas() {
         <h2 className="gerencie-2">Gerencie todas as Vendas</h2> 
 
         <div className="actions-bar">
-          <input
-            type="text"
-            placeholder="Buscar vendas..."
-            className="search-input"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-          />
-          
-          {/*botão agora navega para tela de cadastro */}
-          <button className="btn-primary" onClick={() => navigate("/vendas/novo")}>
-            + Novas Vendas
-          </button>
-        </div>
+                   <input
+                     type="text"
+                     placeholder="Buscar vendas..."
+                     className="search-input"
+                     value={searchInput}
+                     onChange={(event) => setSearchInput(event.target.value)}
+                   /> 
+                   
+
+                   <button className="btn-primary" onClick={() => navigate("/novavenda")}>
+                     + Novas Vendas
+                   </button>
+
+                   <button
+                     className="btn-primary"
+                     onClick={() => navigate("/movimentacoes")}
+                   >
+                     + Movimentações
+                   </button>
+                     <button
+                     className="btn-primary"
+                     onClick={() => navigate("/estoque")}
+                   >
+                     + Estoque
+                   </button>
+              </div>
       </div>
 
       {/*TABELA */}
