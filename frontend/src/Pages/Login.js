@@ -30,7 +30,6 @@ function Login(){
                     <label>
                         <input type="checkbox" className="Senha" />
                         Lembrar-me
-                        <a href="#"> Esqueceu a senha </a>
                     </label>
                 </div>
                 

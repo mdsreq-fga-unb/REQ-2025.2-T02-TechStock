@@ -1,0 +1,86 @@
+.novo-container-venda {
+  width: 60%;
+  margin: 6px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid #72008b;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+}
+
+.form-box-venda {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.form-box-venda label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.form-box-venda input,
+.form-box-venda select,
+.form-box-venda textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-box-venda textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-primary {
+  background: #7d2cff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background: #6b1fff;
+}
+
+.btn-secondary {
+  background: #c4c4c4;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #a8a8a8;
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+h2 {
+  color: #5C2D91;
+  font-size: 1.6em;
+  margin-bottom: 20px;
+}
