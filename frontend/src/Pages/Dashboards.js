@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp, Settings, AlertCircle, ShieldCheck } from 'lucide-react';
 import '../styles/Dashboards.css';
 import { dashboardsApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 
 const Dashboard = () => {
@@ -94,7 +95,7 @@ const Dashboard = () => {
         <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+        <LogoutButton className='BotaoLogout' />
         </div>
         
       <div className='ConteudoDashboard'>

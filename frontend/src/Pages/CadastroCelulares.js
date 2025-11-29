@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/CadastroCelulares.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { celularesApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os estados' },
@@ -114,11 +115,11 @@ function CadastroCelulares() {
           <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
           <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
           <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celualres</Link>
-          <Link to="/cliente" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
+          <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
           <div className='BotoesNavegacao'>Fornecedores</div>
           <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
           <div className='BotoesNavegacao'>Relatórios</div>
-          <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+          <LogoutButton className='BotaoLogout' /> 
           </div>
         
 
