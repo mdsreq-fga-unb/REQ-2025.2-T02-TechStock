@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/NovoCadastroPecas.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { pecasApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 function CadastroPecas() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ function CadastroPecas() {
         <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+        <LogoutButton className='BotaoLogout' /> 
         </div>
        
 
@@ -83,7 +84,7 @@ function CadastroPecas() {
         <div className="actions-bar">
           <input
             type="text"
-            placeholder="Buscar por nome ou código"
+            placeholder="Buscar por nome, código, fornecedor ou compatibilidade"
             className="search-input"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}

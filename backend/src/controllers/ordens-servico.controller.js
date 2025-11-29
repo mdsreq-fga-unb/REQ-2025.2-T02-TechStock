@@ -75,6 +75,20 @@ async function registrarPecas(req, res, next) {
   }
 }
 
+async function atualizarPecas(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const itens = Array.isArray(req.body.itens) ? req.body.itens : [];
+    const updated = await ordensService.sincronizarPecas(id, itens, req.user);
+    res.status(200).json(updated);
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ message: err.message });
+    }
+    next(err);
+  }
+}
+
 async function remove(req, res, next) {
   try {
     const id = Number(req.params.id);
@@ -88,4 +102,4 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { list, getById, create, update, registrarPecas, remove };
+module.exports = { list, getById, create, update, registrarPecas, atualizarPecas, remove };

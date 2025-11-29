@@ -69,12 +69,23 @@
 
 .Gestao{ width: 90%; margin: 30px auto; border: 1px solid #C8A3DB; border-radius: 12px; padding: 22px; background-color: #FFFFFF; }
 
-.barra-acoes{ display: flex; justify-content: space-between; margin-top: 18px; }
+.barra-acoes{ display: flex; justify-content: flex-start; margin-top: 18px; gap: 12px; flex-wrap: wrap; align-items: center; }
 
-.campo-busca{ width: 65%; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+.campo-busca{ flex: 1 1 280px; min-width: 220px; max-width: 480px; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+
+.select-evento{ min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #bbb; background-color: #fff; }
 
 .botao-primario{ background-color: #5C2D91; color: #fff; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; }
 .botao-primario:hover{ background-color: #4b197a; }
+
+.pagination-bar{ margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.pagination-info{ font-size: 14px; color: #5C2D91; }
+.pagination-controls{ display: flex; align-items: center; gap: 12px; }
+.page-size-label{ display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5C2D91; }
+.page-size-label select{ border-radius: 6px; border: 1px solid #bbb; padding: 6px 8px; }
+.btn-secondary{ background-color: transparent; border: 1px solid #C8A3DB; border-radius: 8px; padding: 8px 14px; color: #5C2D91; cursor: pointer; }
+.btn-secondary:disabled{ opacity: 0.6; cursor: not-allowed; }
+.pagination-status{ font-size: 13px; color: #757575; }
 
 .tabela-historico{ width: 100%; border-collapse: collapse; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #C8A3DB; overflow: hidden; }
 .tabela-historico th{ background-color: #F3EAFF; padding: 14px; text-align: left; color: #5C2D91; }
@@ -182,6 +193,8 @@ td {
 .text-yellow-600 { color: #ca8a04; } .bg-yellow-100 { background-color: #fef3c7; }
 .text-blue-600 { color: #2563eb; } .bg-blue-100 { background-color: #dbeafe; }
 .text-indigo-600 { color: #4f46e5; } .bg-indigo-100 { background-color: #e0e7ff; }
+.text-purple-600 { color: #9333ea; } .bg-purple-100 { background-color: #f3e8ff; }
+.text-gray-700 { color: #374151; } .bg-gray-200 { background-color: #e5e7eb; }
 
 /* =========================================
  * ESTILOS DE SCROLLBAR (PERSONALIZADOS)

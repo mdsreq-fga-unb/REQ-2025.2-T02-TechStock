@@ -1,66 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/HistoricoCelular.css';
+import { celularesHistoricoApi } from '../services/api';
 
-// =========================================================
-// MOCKS E API SIMULADA - Definição dos dados
-// =========================================================
-
-// Dados simulados para o Histórico de Celulares (Movimentações)
-const mockHistorico = [
-    { id: 101, celularId: 1, modelo: 'iPhone 13 Pro', data_movimentacao: new Date(Date.now() - 86400000 * 30).toISOString(), tipo_movimentacao: 'Entrada Estoque', usuario: 'João Silva', detalhes: 'Lote inicial' },
-    { id: 102, celularId: 2, modelo: 'Samsung Galaxy S21', data_movimentacao: new Date(Date.now() - 86400000 * 15).toISOString(), tipo_movimentacao: 'Reparo Interno', usuario: 'Pedro Técnico', detalhes: 'Troca de bateria' },
-    { id: 103, celularId: 1, modelo: 'iPhone 13 Pro', data_movimentacao: new Date(Date.now() - 86400000 * 5).toISOString(), tipo_movimentacao: 'Venda', usuario: 'Maria Souza', detalhes: 'Venda para Cliente X' },
-    { id: 104, celularId: 3, modelo: 'Motorola G9', data_movimentacao: new Date(Date.now() - 86400000 * 2).toISOString(), tipo_movimentacao: 'Devolução/Estoque', usuario: 'João Silva', detalhes: 'Devolução por arrependimento' },
-    { id: 105, celularId: 2, modelo: 'Samsung Galaxy S21', data_movimentacao: new Date(Date.now() - 86400000 * 1).toISOString(), tipo_movimentacao: 'Transferência', usuario: 'Ana Logística', detalhes: 'Movido para filial B' },
-];
-
-// Mock da API para Histórico
-const celularesHistoricoApi = {
-    list: (params) => new Promise((resolve) => {
-      setTimeout(() => {
-        // Lógica de filtro: verifica se a query está contida no modelo, usuário ou ID do celular
-        const q = (params.q || '').toLowerCase();
-        const filteredItems = mockHistorico.filter(h => 
-          h.modelo.toLowerCase().includes(q) || 
-          h.usuario.toLowerCase().includes(q) ||
-          h.celularId.toString().includes(q)
-        );
-        // Ordena por data de movimentação decrescente (mais recente primeiro)
-        const sortedItems = filteredItems.sort((a, b) => new Date(b.data_movimentacao) - new Date(a.data_movimentacao));
-        resolve({ items: sortedItems });
-      }, 500); // Simula o atraso da rede
-    }),
+const EVENT_LABELS = {
+    OrdemServicoCriada: 'OS aberta',
+    OrdemServicoAtualizada: 'OS atualizada',
+    OrdemServicoConcluida: 'OS concluída',
+    OrdemServicoPecaRegistrada: 'Peças registradas',
+    GarantiaRegistrada: 'Garantia registrada',
+    GarantiaAlerta: 'Alerta de garantia',
+    TesteTecnicoRegistrado: 'Teste técnico',
+    CelularCadastrado: 'Entrada no estoque',
+    CelularVendido: 'Venda registrada',
 };
 
-// =========================================================
-// COMPONENTE DE TABELA DE HISTÓRICO
-// =========================================================
+const EVENT_COLORS = {
+    OrdemServicoCriada: 'text-indigo-600 bg-indigo-100',
+    OrdemServicoAtualizada: 'text-blue-600 bg-blue-100',
+    OrdemServicoConcluida: 'text-green-600 bg-green-100',
+    OrdemServicoPecaRegistrada: 'text-yellow-600 bg-yellow-100',
+    GarantiaRegistrada: 'text-purple-600 bg-purple-100',
+    GarantiaAlerta: 'text-red-600 bg-red-100',
+    TesteTecnicoRegistrado: 'text-gray-700 bg-gray-200',
+    CelularCadastrado: 'text-emerald-700 bg-emerald-100',
+    CelularVendido: 'text-orange-700 bg-orange-100',
+};
+
+const KEYWORD_EVENT = {
+    abertura: 'OrdemServicoCriada',
+    aberta: 'OrdemServicoCriada',
+    concluida: 'OrdemServicoConcluida',
+    concluída: 'OrdemServicoConcluida',
+    finalizada: 'OrdemServicoConcluida',
+    garantia: 'GarantiaRegistrada',
+    alerta: 'GarantiaAlerta',
+    teste: 'TesteTecnicoRegistrado',
+    entrada: 'CelularCadastrado',
+    cadastro: 'CelularCadastrado',
+    estoque: 'CelularCadastrado',
+    venda: 'CelularVendido',
+    vendido: 'CelularVendido',
+};
 
 const HistoricoCelularesTable = () => {
     const [historico, setHistorico] = useState([]);
+    const [meta, setMeta] = useState({ page: 1, pageSize: 20, total: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
-  
-    // Efeito para criar um 'debounce' na busca, esperando o usuário terminar de digitar
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [reloadKey, setReloadKey] = useState(0);
+    const [eventFilter, setEventFilter] = useState('');
+
     useEffect(() => {
         const timer = setTimeout(() => setSearch(searchInput), 400);
         return () => clearTimeout(timer);
     }, [searchInput]);
 
-    // Efeito para buscar os dados sempre que o termo de busca (search) mudar
+    useEffect(() => {
+        setPage(1);
+    }, [search, eventFilter]);
+
+    const { filters } = useMemo(() => {
+        const base = { page, pageSize };
+        if (eventFilter) {
+            base.tipo_evento = eventFilter;
+        }
+        const trimmed = search.trim();
+        if (trimmed) {
+            const osMatch = trimmed.match(/os\s*#?(\d+)/i);
+            if (osMatch) {
+                base.ordem_servico_id = Number(osMatch[1]);
+                return { filters: base };
+            }
+            const celularMatch = trimmed.match(/(?:celular|id)\s*#?(\d+)/i);
+            if (celularMatch) {
+                base.celular_id = Number(celularMatch[1]);
+                return { filters: base };
+            }
+            const numericMatch = trimmed.match(/^#?(\d+)$/);
+            if (numericMatch) {
+                base.celular_id = Number(numericMatch[1]);
+                return { filters: base };
+            }
+            if (!eventFilter) {
+                const keyword = Object.keys(KEYWORD_EVENT).find((key) => trimmed.toLowerCase().includes(key));
+                if (keyword) {
+                    base.tipo_evento = KEYWORD_EVENT[keyword];
+                } else {
+                    base.q = trimmed;
+                }
+            } else {
+                base.q = trimmed;
+            }
+        }
+        return { filters: base };
+    }, [page, pageSize, search, eventFilter]);
+
     useEffect(() => {
         let active = true;
         setLoading(true);
         setError('');
-        
+
         celularesHistoricoApi
-            .list(search ? { q: search } : {})
+            .list(filters)
             .then((data) => {
                 if (!active) return;
                 setHistorico(data?.items || []);
+                const nextMeta = data?.meta || { page, pageSize, total: data?.items?.length || 0 };
+                setMeta({
+                    page: nextMeta.page || page,
+                    pageSize: nextMeta.pageSize || pageSize,
+                    total: typeof nextMeta.total === 'number' ? nextMeta.total : data?.items?.length || 0,
+                });
+                if (nextMeta.page && nextMeta.page !== page) {
+                    setPage(nextMeta.page);
+                }
+                if (nextMeta.pageSize && nextMeta.pageSize !== pageSize) {
+                    setPageSize(nextMeta.pageSize);
+                }
             })
             .catch((err) => {
                 if (!active) return;
@@ -69,23 +130,54 @@ const HistoricoCelularesTable = () => {
             .finally(() => {
                 if (active) setLoading(false);
             });
-            
-        // Cleanup function para evitar a atualização de estado em componente desmontado
+
         return () => {
             active = false;
         };
-    }, [search]);
+    }, [filters, reloadKey]);
 
-    // Função auxiliar para determinar a cor do badge de status
-    const getStatusColor = (tipo) => {
-        switch (tipo) {
-            case 'Entrada Estoque': return 'text-green-600 bg-green-100';
-            case 'Venda': return 'text-red-600 bg-red-100';
-            case 'Reparo Interno': return 'text-yellow-600 bg-yellow-100';
-            case 'Devolução/Estoque': return 'text-blue-600 bg-blue-100';
-            case 'Transferência': return 'text-indigo-600 bg-indigo-100';
-            default: return 'text-gray-600 bg-gray-100';
-        }
+    const handleReload = () => {
+        setReloadKey((prev) => prev + 1);
+    };
+
+    const handlePageSizeChange = (event) => {
+        const value = Number(event.target.value);
+        setPageSize(value);
+        setPage(1);
+    };
+
+    const goToPage = (targetPage) => {
+        setPage(() => {
+            const requested = Number(targetPage) || 1;
+            const totalRecords = meta?.total || 0;
+            const limit = totalRecords ? Math.ceil(totalRecords / (meta?.pageSize || pageSize)) : 1;
+            if (requested < 1) return 1;
+            if (requested > limit) return limit;
+            return requested;
+        });
+    };
+
+    const currentPage = meta?.page || page;
+    const currentPageSize = meta?.pageSize || pageSize;
+    const totalRecords = meta?.total ?? historico.length;
+    const totalPages = totalRecords ? Math.max(1, Math.ceil(totalRecords / currentPageSize)) : 1;
+    const firstItemIndex = historico.length ? (currentPage - 1) * currentPageSize + 1 : 0;
+    const lastItemIndex = historico.length ? firstItemIndex + historico.length - 1 : 0;
+
+    const formatEvento = (tipoEvento) => EVENT_LABELS[tipoEvento] || tipoEvento || '-';
+
+    const getEventoColor = (tipoEvento) => EVENT_COLORS[tipoEvento] || 'text-gray-600 bg-gray-100';
+
+    const formatDescricao = (descricao) => descricao || '-';
+
+    const formatCelular = (entry) => {
+        if (!entry?.celular) return '-';
+        const { id, modelo, imei } = entry.celular;
+        const parts = [];
+        if (modelo) parts.push(modelo);
+        if (id) parts.push(`ID ${id}`);
+        if (imei) parts.push(`IMEI ${imei}`);
+        return parts.join(' • ');
     };
 
     return (
@@ -116,58 +208,96 @@ const HistoricoCelularesTable = () => {
                 <div className="barra-acoes">
                     <input
                         type="text"
-                        placeholder="Buscar no histórico..."
+                        placeholder="Busque por ID do celular, OS ou palavra-chave (ex: venda)"
                         className="campo-busca"
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
                     />
 
-                    <button className="botao-primario" onClick={() => window.location.reload()} title="Atualizar lista">Atualizar</button>
+                    <select
+                        className="select-evento"
+                        value={eventFilter}
+                        onChange={(event) => setEventFilter(event.target.value)}
+                    >
+                        <option value="">Todos os eventos</option>
+                        {Object.entries(EVENT_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
+                    </select>
+
+                    <button className="botao-primario" onClick={handleReload} disabled={loading} title="Atualizar lista">
+                        Atualizar
+                    </button>
+                </div>
+
+                <div className="pagination-bar">
+                    <div className="pagination-info">
+                        {totalRecords
+                            ? `Mostrando ${firstItemIndex}-${lastItemIndex} de ${totalRecords} movimentações`
+                            : 'Nenhuma movimentação encontrada.'}
+                    </div>
+                    <div className="pagination-controls">
+                        <label className="page-size-label">
+                            Itens por página
+                            <select value={pageSize} onChange={handlePageSizeChange} disabled={loading}>
+                                {[10, 20, 50].map((size) => (
+                                    <option key={size} value={size}>{size}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <button className="btn-secondary" onClick={() => goToPage(currentPage - 1)} disabled={loading || currentPage <= 1}>
+                            Anterior
+                        </button>
+                        <span className="pagination-status">Página {currentPage} de {totalPages}</span>
+                        <button className="btn-secondary" onClick={() => goToPage(currentPage + 1)} disabled={loading || currentPage >= totalPages}>
+                            Próxima
+                        </button>
+                    </div>
                 </div>
 
                 <div className="container-tabela" style={{ marginTop: 18 }}>
                     <table className="tabela-historico">
                         <thead>
                             <tr>
-                                <th>ID Mov.</th>
+                                <th>ID Hist.</th>
                                 <th>Data/Hora</th>
-                                <th>ID Celular</th>
-                                <th>Modelo</th>
-                                <th>Tipo Movimentação</th>
-                                <th>Usuário Resp.</th>
-                                <th>Detalhes</th>
+                                <th>Celular</th>
+                                <th>Evento</th>
+                                <th>OS</th>
+                                <th>Descrição</th>
                             </tr>
                         </thead>
                         <tbody>
                             {error && (
                                 <tr>
-                                    <td colSpan={7} className="linha-erro">{error}</td>
+                                    <td colSpan={6} className="linha-erro">{error}</td>
                                 </tr>
                             )}
 
                             {loading && !error && (
                                 <tr>
-                                    <td colSpan={7}>Carregando Histórico...</td>
+                                    <td colSpan={6}>Carregando Histórico...</td>
                                 </tr>
                             )}
 
                             {!loading && !error && historico.length === 0 && (
                                 <tr>
-                                    <td colSpan={7}>Nenhuma movimentação histórica encontrada.</td>
+                                    <td colSpan={6}>Nenhum evento encontrado.</td>
                                 </tr>
                             )}
 
                             {!loading && !error && historico.map((item) => (
                                 <tr key={item.id}>
                                     <td>{item.id}</td>
-                                    <td>{item.data_movimentacao ? new Date(item.data_movimentacao).toLocaleString('pt-BR') : '-'}</td>
-                                    <td>{item.celularId}</td>
-                                    <td>{item.modelo}</td>
+                                    <td>{item.data_evento ? new Date(item.data_evento).toLocaleString('pt-BR') : '-'}</td>
+                                    <td>{formatCelular(item)}</td>
                                     <td>
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.tipo_movimentacao)}`}>{item.tipo_movimentacao}</span>
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getEventoColor(item.tipo_evento)}`}>
+                                            {formatEvento(item.tipo_evento)}
+                                        </span>
                                     </td>
-                                    <td>{item.usuario}</td>
-                                    <td>{item.detalhes}</td>
+                                    <td>{item.ordem_servico?.id ?? '-'}</td>
+                                    <td>{formatDescricao(item.descricao)}</td>
                                 </tr>
                             ))}
                         </tbody>

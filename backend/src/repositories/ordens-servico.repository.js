@@ -1,5 +1,6 @@
 const { getPrisma } = require('../database/prisma');
 const { pick } = require('../utils/pick');
+const testesRepository = require('./ordens-servico-testes.repository');
 
 const LIST_INCLUDE = { cliente: true, celular: true };
 const DETAIL_INCLUDE = {
@@ -7,8 +8,12 @@ const DETAIL_INCLUDE = {
   celular: true,
   historico: { orderBy: { data_evento: 'desc' } },
   pecas_utilizadas: {
-    include: { peca: { select: { id: true, nome: true, codigo_interno: true } } },
+    include: { peca: { select: { id: true, nome: true, codigo_interno: true, quantidade: true } } },
     orderBy: { data_uso: 'desc' },
+  },
+  testes: {
+    include: { executor: { select: { id: true, nome: true, email: true } } },
+    orderBy: { data_execucao: 'desc' },
   },
 };
 
@@ -27,6 +32,7 @@ function mapPecasUtilizadas(entries = []) {
           id: entry.peca.id,
           nome: entry.peca.nome,
           codigo_interno: entry.peca.codigo_interno,
+          quantidade_disponivel: entry.peca.quantidade,
         }
       : null,
   }));
@@ -37,6 +43,7 @@ function mapOrdemDetalhe(ordem) {
   return {
     ...ordem,
     pecas_utilizadas: mapPecasUtilizadas(ordem.pecas_utilizadas),
+    testes: Array.isArray(ordem.testes) ? ordem.testes.map(testesRepository.serialize) : [],
   };
 }
 
@@ -45,12 +52,22 @@ function buildWhere(q, filters = {}) {
 
   if (q && q.trim()) {
     const contains = q.trim();
-    AND.push({
+    const search = {
       OR: [
         { descricao: { contains, mode: 'insensitive' } },
         { observacoes: { contains, mode: 'insensitive' } },
+        { cliente: { nome: { contains, mode: 'insensitive' } } },
+        { celular: { modelo: { contains, mode: 'insensitive' } } },
+        { celular: { imei: { contains, mode: 'insensitive' } } },
       ],
-    });
+    };
+    const numericValue = Number(contains);
+    if (!Number.isNaN(numericValue)) {
+      search.OR.push({ id: { equals: numericValue } });
+      search.OR.push({ cliente_id: { equals: numericValue } });
+      search.OR.push({ celular_id: { equals: numericValue } });
+    }
+    AND.push(search);
   }
 
   if (filters && typeof filters === 'object') {

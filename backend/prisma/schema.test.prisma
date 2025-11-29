@@ -17,6 +17,7 @@ model usuarios {
   celulares  celulares[]
   pecas      pecas[]
   movimentacoes movimentacoes_estoque[]
+  testes_execucao ordens_servico_testes[]
 }
 
 model clientes {
@@ -30,6 +31,7 @@ model clientes {
 
   ordens_servico ordens_servico[]
   vendas         vendas[]
+  garantias      garantias[]
 }
 
 model celulares {
@@ -42,6 +44,7 @@ model celulares {
   garantia_padrao_dias   Int       @default(365)
   defeitos_identificados String?
   tipo                   String
+  finalidade             String    @default("REVENDA")
   status                 String    @default("EmEstoque")
   data_cadastro          DateTime? @default(now())
   nome_fornecedor        String
@@ -55,6 +58,7 @@ model celulares {
   historico       celulares_historico[]
   vendas          vendas[]
   movimentacoes   movimentacoes_estoque[]
+  garantias       garantias[]
 }
 
 model pecas {
@@ -95,6 +99,27 @@ model ordens_servico {
   celular celulares @relation(fields: [celular_id], references: [id])
   historico celulares_historico[]
   pecas_utilizadas ordens_servico_pecas[]
+  testes           ordens_servico_testes[]
+}
+
+model ordens_servico_testes {
+  id               Int      @id @default(autoincrement())
+  ordem_servico_id Int
+  criterios        String
+  observacoes      String?
+  aprovado         Boolean
+  resultado        String   @default("PENDENTE")
+  midia_urls       String?
+  etapa            String?  @default("INICIAL")
+  executado_por    Int?
+  data_execucao    DateTime? @default(now())
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @updatedAt
+
+  ordem_servico ordens_servico @relation(fields: [ordem_servico_id], references: [id])
+  executor       usuarios?     @relation(fields: [executado_por], references: [id])
+
+  @@index([ordem_servico_id], name: "ordem_servico_testes_ordem_idx")
 }
 
 model celulares_historico {
@@ -154,4 +179,27 @@ model movimentacoes_estoque {
   usuario usuarios @relation(fields: [usuario_id], references: [id])
   celular celulares? @relation(fields: [celular_id], references: [id])
   peca     pecas?    @relation(fields: [peca_id], references: [id])
+}
+
+model garantias {
+  id               Int      @id @default(autoincrement())
+  cliente_id       Int
+  celular_id       Int
+  origem_tipo      String
+  origem_id        Int?
+  tipo             String
+  prazo_dias       Int
+  data_inicio      DateTime
+  data_fim         DateTime
+  alerta_enviado_em DateTime?
+  observacoes      String?
+  created_by       Int?     @default(1)
+  updated_by       Int?     @default(1)
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @updatedAt
+
+  cliente clientes @relation(fields: [cliente_id], references: [id])
+  celular celulares @relation(fields: [celular_id], references: [id])
+
+  @@unique([origem_tipo, origem_id], name: "garantia_origem_unique")
 }

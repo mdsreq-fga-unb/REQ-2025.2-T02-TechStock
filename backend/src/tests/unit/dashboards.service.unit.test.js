@@ -17,6 +17,7 @@ describe('dashboards.service', () => {
       ordens_servico: { count: jest.fn(), findMany: jest.fn() },
       vendas: { count: jest.fn(), findMany: jest.fn() },
       pecas: { findMany: jest.fn() },
+      garantias: { findMany: jest.fn() },
     };
     getPrisma.mockReturnValue(mockPrisma);
 
@@ -53,6 +54,16 @@ describe('dashboards.service', () => {
       { nome: 'Bateria iPhone 11', quantidade: 4 },
     ]);
 
+    mockPrisma.garantias.findMany.mockResolvedValue([
+      {
+        id: 5,
+        data_fim: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        prazo_dias: 30,
+        cliente: { nome: 'Marcos' },
+        celular: { modelo: 'iPhone 14', imei: '123' },
+      },
+    ]);
+
     const resumo = await getResumo();
 
     expect(getPrisma).toHaveBeenCalledTimes(1);
@@ -62,6 +73,7 @@ describe('dashboards.service', () => {
     expect(resumo.filaManutencao[0]).toMatchObject({ servico: 'Troca de bateria', cliente: 'João' });
     expect(resumo.ordensServico[0]).toMatchObject({ id: 'OS-009', aparelho: 'Galaxy S22' });
     expect(resumo.estoqueBaixo[0]).toMatchObject({ item: 'Tela iPhone 14', atual: 2 });
+    expect(resumo.alertasGarantia[0]).toMatchObject({ produto: 'iPhone 14', status: 'Urgente' });
   });
 
   it('retorna dados neutros quando o delegate de vendas não existe', async () => {
@@ -87,5 +99,6 @@ describe('dashboards.service', () => {
 
     expect(resumo.vendasRecentes).toEqual([]);
     expect(resumo.metricas[3]).toMatchObject({ titulo: 'Vendas do Mês', valor: 0, crescimeto: '0%' });
+    expect(resumo.alertasGarantia).toEqual([]);
   });
 });

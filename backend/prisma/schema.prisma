@@ -16,6 +16,7 @@ model usuarios {
   celulares  celulares[]
   pecas      pecas[]
   movimentacoes movimentacoes_estoque[]
+  testes_execucao ordens_servico_testes[]
 }
 
 model clientes {
@@ -29,6 +30,7 @@ model clientes {
 
   ordens_servico ordens_servico[]
   vendas         vendas[]
+  garantias      garantias[]
 }
 
 model celulares {
@@ -41,6 +43,7 @@ model celulares {
   garantia_padrao_dias   Int       @default(365)
   defeitos_identificados String?
   tipo                   TipoEstoqueCelular
+  finalidade             FinalidadeCelular @default(REVENDA)
   status                 StatusCelular @default(EmEstoque)
   data_cadastro          DateTime? @default(now()) @db.Timestamptz(6)
   nome_fornecedor        String    @db.VarChar(255)
@@ -54,6 +57,7 @@ model celulares {
   historico       celulares_historico[]
   vendas          vendas[]
   movimentacoes   movimentacoes_estoque[]
+  garantias       garantias[]
 }
 
 model pecas {
@@ -94,6 +98,27 @@ model ordens_servico {
   celular celulares @relation(fields: [celular_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   historico celulares_historico[]
   pecas_utilizadas ordens_servico_pecas[]
+  testes           ordens_servico_testes[]
+}
+
+model ordens_servico_testes {
+  id               Int      @id @default(autoincrement())
+  ordem_servico_id Int
+  criterios        String   @db.Text
+  observacoes      String?
+  aprovado         Boolean
+  resultado        String   @default("PENDENTE") @db.VarChar(30)
+  midia_urls       String?  @db.Text
+  etapa            String?  @default("INICIAL") @db.VarChar(50)
+  executado_por    Int?
+  data_execucao    DateTime? @default(now()) @db.Timestamptz(6)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @db.Timestamptz(6)
+
+  ordem_servico ordens_servico @relation(fields: [ordem_servico_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  executor       usuarios?     @relation(fields: [executado_por], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([ordem_servico_id], name: "ordem_servico_testes_ordem_idx")
 }
 
 model celulares_historico {
@@ -155,13 +180,63 @@ enum StatusOrdemServico {
   @@map("status_ordem_servico")
 }
 
+enum FinalidadeCelular {
+  REVENDA
+  MANUTENCAO
+
+  @@map("finalidade_celular")
+}
+
 enum TipoEventoCelular {
   OrdemServicoCriada
   OrdemServicoAtualizada
   OrdemServicoConcluida
   OrdemServicoPecaRegistrada
+  GarantiaRegistrada
+  GarantiaAlerta
+  TesteTecnicoRegistrado
+  CelularCadastrado
+  CelularVendido
 
   @@map("tipo_evento_celular")
+}
+
+model garantias {
+  id              Int             @id @default(autoincrement())
+  cliente_id      Int
+  celular_id      Int
+  origem_tipo     GarantiaOrigem
+  origem_id       Int?
+  tipo            TipoGarantia
+  prazo_dias      Int
+  data_inicio     DateTime        @db.Timestamptz(6)
+  data_fim        DateTime        @db.Timestamptz(6)
+  alerta_enviado_em DateTime?     @db.Timestamptz(6)
+  observacoes     String?         @db.Text
+  created_by      Int?            @default(1)
+  updated_by      Int?            @default(1)
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?       @db.Timestamptz(6)
+
+  cliente clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  celular celulares @relation(fields: [celular_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([origem_tipo, origem_id], name: "garantia_origem_unique")
+}
+
+enum GarantiaOrigem {
+  VENDA
+  ORDEM_SERVICO
+  MANUAL
+
+  @@map("garantia_origem")
+}
+
+enum TipoGarantia {
+  PRODUTO
+  SERVICO
+
+  @@map("tipo_garantia")
 }
 
 model vendas {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp, Settings, AlertCircle, ShieldCheck } from 'lucide-react';
 import '../styles/Dashboards.css';
 import { dashboardsApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 
 const Dashboard = () => {
@@ -12,6 +13,7 @@ const Dashboard = () => {
     filaManutencao: [],
     ordensServico: [],
     estoqueBaixo: [],
+    alertasGarantia: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,6 +32,7 @@ const Dashboard = () => {
           filaManutencao: payload?.filaManutencao || [],
           ordensServico: payload?.ordensServico || [],
           estoqueBaixo: payload?.estoqueBaixo || [],
+          alertasGarantia: payload?.alertasGarantia || [],
         });
       })
       .catch((err) => {
@@ -56,6 +59,27 @@ const Dashboard = () => {
     }
   };
 
+  const formatDiasRestantes = (dias) => {
+    if (dias === 0) return 'Vence hoje';
+    if (dias === 1) return 'Vence em 1 dia';
+    if (dias > 1) return `Vence em ${dias} dias`;
+    return 'Prazo não informado';
+  };
+
+  const classBadgeGarantia = (status) => (status === 'Urgente' ? 'BadgeUrgente' : 'BadgeAtiva');
+
+  const widthGarantia = (percent) => {
+    const safePercent = Math.min(100, Math.max(0, percent || 0));
+    return `${safePercent}%`;
+  };
+
+  const formatDescricaoGarantia = (alerta) => {
+    if (alerta?.imei) {
+      return `${alerta.produto} - IMEI ${alerta.imei}`;
+    }
+    return alerta?.produto || 'Produto não informado';
+  };
+
   return (
     <div className='Container'>
       <div className='BarraSuperior'>
@@ -71,7 +95,7 @@ const Dashboard = () => {
         <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+        <LogoutButton className='BotaoLogout' />
         </div>
         
       <div className='ConteudoDashboard'>
@@ -208,28 +232,26 @@ const Dashboard = () => {
               <h3>Alertas de Garantia</h3>
             </div>
             <p className='SubtituloAlerta'>Produtos próximos do vencimento</p>
-            
-            <div className='ItemAlertaGarantia'>
+            {dados.alertasGarantia.map((alerta) => (
+              <div key={alerta.id} className='ItemAlertaGarantia'>
                 <div className='InfoGarantia'>
-                  <strong>iPhone 13 - IMEI 123456789</strong>
-                  <span className='BadgeUrgente'>Urgente</span>
+                  <strong>{formatDescricaoGarantia(alerta)}</strong>
+                  <span className={classBadgeGarantia(alerta.status)}>{alerta.status}</span>
                 </div>
-                <div className='TextoDireitaPequeno'>Vence em 1 dias</div>
+                <div className='TextoDireitaPequeno'>
+                  {alerta.cliente} • {formatDiasRestantes(alerta.diasRestantes)}
+                </div>
                 <div className='BarraFundo'>
-                   <div className='BarraProgresso Vermelho' style={{width: '90%'}}></div>
+                  <div
+                    className={`BarraProgresso ${alerta.status === 'Urgente' ? 'Vermelho' : 'Roxo'}`}
+                    style={{ width: widthGarantia(alerta.progresso) }}
+                  ></div>
                 </div>
-            </div>
-
-             <div className='ItemAlertaGarantia'>
-                <div className='InfoGarantia'>
-                  <strong>iPhone 13 - IMEI 123456789</strong>
-                  <span className='BadgeAtiva'>Ativa</span>
-                </div>
-                <div className='TextoDireitaPequeno'>Vence em 30 dias</div>
-                <div className='BarraFundo'>
-                   <div className='BarraProgresso Roxo' style={{width: '40%'}}></div>
-                </div>
-            </div>
+              </div>
+            ))}
+            {!loading && !dados.alertasGarantia.length && !error && (
+              <p className='TextoCinzaPequeno'>Nenhum alerta de garantia no momento.</p>
+            )}
           </div>
 
         </div>

@@ -1,10 +1,16 @@
 const vendasRepository = require('../repositories/vendas.repository');
 const celularesRepository = require('../repositories/celulares.repository');
+const historicoRepository = require('../repositories/celulares-historico.repository');
 const { getPrisma } = require('../database/prisma');
+const garantiasService = require('./garantias.service');
 
 const StatusCelular = {
     EM_ESTOQUE: 'EmEstoque',
     VENDIDO: 'Vendido',
+};
+
+const EVENTOS = {
+    CELULAR_VENDIDO: 'CelularVendido',
 };
 
 function httpError(status, message) {
@@ -49,6 +55,17 @@ function addDays(base, days) {
     const date = new Date(base);
     date.setDate(date.getDate() + Number(days));
     return date;
+}
+
+function formatCurrencyBR(value) {
+    if (value == null) return null;
+    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function buildDescricaoVenda({ vendaId, cliente, valor }) {
+    const clienteInfo = cliente ? `Cliente #${cliente.id}${cliente.nome ? ` - ${cliente.nome}` : ''}` : 'cliente não identificado';
+    const valorInfo = valor != null ? ` (${formatCurrencyBR(valor)})` : '';
+    return `Venda #${vendaId} registrada para ${clienteInfo}${valorInfo}.`;
 }
 
 function resolveGarantia({ garantia_dias, garantia_validade, fallbackDias, dataVenda, current }) {
@@ -140,7 +157,7 @@ async function create(data, user) {
     const valorVenda = normalizeValor(data.valor_venda, true);
 
     const created = await prisma.$transaction(async (tx) => {
-        await ensureCliente(tx, data.cliente_id);
+        const cliente = await ensureCliente(tx, data.cliente_id);
         const celular = await ensureCelularDisponivel(tx, data.celular_id);
 
         const garantiaPayload = resolveGarantia({
@@ -161,6 +178,31 @@ async function create(data, user) {
 
         const venda = await vendasRepository.create(payload, userId, tx);
         await celularesRepository.update(celular.id, { status: StatusCelular.VENDIDO }, userId, tx);
+        const prazoGarantia = garantiaPayload.garantia_dias ?? celular.garantia_padrao_dias;
+        if (prazoGarantia != null) {
+            await garantiasService.registrarGarantia(
+                {
+                    origemTipo: garantiasService.GarantiaOrigem.VENDA,
+                    origemId: venda.id,
+                    clienteId: data.cliente_id,
+                    celularId: celular.id,
+                    tipoGarantia: garantiasService.TipoGarantia.PRODUTO,
+                    prazoDias: prazoGarantia,
+                    dataInicio: dataVenda,
+                    observacoes: data.observacoes,
+                },
+                { tx, userId, descricao: `Garantia de produto registrada para venda #${venda.id}.` },
+            );
+        }
+        await historicoRepository.addEvent(
+            {
+                celular_id: celular.id,
+                tipo_evento: EVENTOS.CELULAR_VENDIDO,
+                descricao: buildDescricaoVenda({ vendaId: venda.id, cliente, valor: valorVenda }),
+                data_evento: dataVenda,
+            },
+            tx,
+        );
         return venda;
     });
 
@@ -215,6 +257,24 @@ async function update(id, data, user) {
             await celularesRepository.update(targetCelularId, { status: StatusCelular.VENDIDO }, userId, tx);
         }
 
+        if (venda.garantia_dias != null) {
+            await garantiasService.registrarGarantia(
+                {
+                    origemTipo: garantiasService.GarantiaOrigem.VENDA,
+                    origemId: venda.id,
+                    clienteId: venda.cliente_id,
+                    celularId: venda.celular_id,
+                    tipoGarantia: garantiasService.TipoGarantia.PRODUTO,
+                    prazoDias: venda.garantia_dias,
+                    dataInicio: venda.data_venda,
+                    observacoes: venda.observacoes,
+                },
+                { tx, userId, descricao: `Garantia de produto atualizada para venda #${venda.id}.` },
+            );
+        } else {
+            await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.VENDA, venda.id, { tx });
+        }
+
         return venda;
     });
 
@@ -233,6 +293,7 @@ async function remove(id, user) {
     await prisma.$transaction(async (tx) => {
         await vendasRepository.remove(id, tx);
         await celularesRepository.update(atual.celular_id, { status: StatusCelular.EM_ESTOQUE }, userId, tx);
+        await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.VENDA, id, { tx });
     });
 
     return atual;

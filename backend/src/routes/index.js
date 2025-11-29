@@ -2,16 +2,20 @@ const { Router } = require('express');
 const { getPrisma } = require('../database/prisma');
 const usuariosController = require('../controllers/usuarios.controller');
 const celularesController = require('../controllers/celulares.controller');
+const celularesHistoricoController = require('../controllers/celulares-historico.controller');
 const pecasController = require('../controllers/pecas.controller');
 const clientesController = require('../controllers/clientes.controller');
 const ordensServicoController = require('../controllers/ordens-servico.controller');
+const ordensServicoTestesController = require('../controllers/ordens-servico-testes.controller');
 const dashboardsController = require('../controllers/dashboards.controller');
+const authController = require('../controllers/auth.controller');
 const { validate } = require('../middlewares/validate');
 const { body, param, query } = require('express-validator');
 const { validateRequest } = require('../middlewares/validateRequest');
 const { isValidCPF } = require('../validators/cpf');
 const vendasController = require('../controllers/vendas.controller');
 const movimentacoesEstoqueController = require('../controllers/movimentacoes-estoque.controller');
+const garantiasController = require('../controllers/garantias.controller');
 
 const router = Router();
 
@@ -31,6 +35,39 @@ router.get('/dashboard/resumo', dashboardsController.getResumo);
 // Usuarios
 router.get('/usuarios', usuariosController.list);
 router.post('/usuarios', validate(['nome', 'email', 'senha']), usuariosController.create);
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Autentica um usuário
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, senha]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               senha: { type: string }
+ *     responses:
+ *       200:
+ *         description: Token gerado
+ *         content:
+ *           application/json:
+ *             example:
+ *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               user: { id: 1, nome: "Admin", email: "admin@exemplo.com" }
+ *       401: { description: Credenciais inválidas }
+ */
+router.post(
+  '/auth/login',
+  [body('email').isEmail(), body('senha').isString().notEmpty()],
+  validateRequest,
+  authController.login,
+);
 
 /**
  * @swagger
@@ -112,6 +149,222 @@ router.post(
   ],
   validateRequest,
   clientesController.create,
+);
+
+/**
+ * @swagger
+ * /api/clientes/historico:
+ *   get:
+ *     summary: Lista celulares comprados ou reparados por cliente
+ *     tags: [Clientes]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: cliente_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: tipo
+ *         schema: { type: string, enum: [compra, comprado, reparo, reparado, garantia] }
+ *     responses:
+ *       200:
+ *         description: Lista combinada de compras e reparos
+ *         content:
+ *           application/json:
+ *             example:
+ *               meta: { page: 1, pageSize: 20, total: 2 }
+ *               items:
+ *                 - tipo: "compra"
+ *                   origem_id: 7
+ *                   data_evento: "2025-01-05T12:00:00.000Z"
+ *                   cliente: { id: 1, nome: "João" }
+ *                   celular: { id: 3, modelo: "iPhone 12", imei: "123" }
+ *                   detalhes: { valor_venda: 2500, garantia_dias: 365, garantia_validade: "2026-01-05T12:00:00.000Z" }
+ *                 - tipo: "reparo"
+ *                   origem_id: 10
+ *                   data_evento: "2025-01-02T10:00:00.000Z"
+ *                   cliente: { id: 1, nome: "João" }
+ *                   celular: { id: 2, modelo: "Moto G", imei: "456" }
+ *                   detalhes: { status: "Concluido", descricao: "Troca de tela" }
+ */
+router.get(
+  '/clientes/historico',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    query('tipo').optional().isIn(['compra', 'comprado', 'reparo', 'reparado', 'garantia', 'garantias', 'warranty']),
+  ],
+  validateRequest,
+  clientesController.historico,
+);
+
+/**
+ * @swagger
+ * /api/garantias:
+ *   get:
+ *     summary: Lista garantias registradas
+ *     tags: [Garantias]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: cliente_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: celular_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: tipo
+ *         schema: { type: string, enum: [PRODUTO, SERVICO] }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [ATIVA, PROXIMO_VENCIMENTO, VENCIDA] }
+ *   post:
+ *     summary: Registra uma nova garantia
+ *     tags: [Garantias]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [cliente_id, celular_id]
+ *             properties:
+ *               cliente_id: { type: integer }
+ *               celular_id: { type: integer }
+ *               origem_tipo: { type: string, enum: [VENDA, ORDEM_SERVICO, MANUAL] }
+ *               origem_id: { type: integer }
+ *               tipo: { type: string, enum: [PRODUTO, SERVICO] }
+ *               prazo_dias: { type: integer }
+ *               data_inicio: { type: string, format: date-time }
+ *               observacoes: { type: string }
+ */
+router.get(
+  '/garantias',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+    query('tipo').optional().isIn(['PRODUTO', 'SERVICO']),
+    query('status').optional().isIn(['ATIVA', 'PROXIMO_VENCIMENTO', 'VENCIDA']),
+  ],
+  validateRequest,
+  garantiasController.list,
+);
+
+router.post(
+  '/garantias',
+  [
+    body('cliente_id').isInt({ min: 1 }).toInt(),
+    body('celular_id').isInt({ min: 1 }).toInt(),
+    body('origem_tipo').optional().isIn(['VENDA', 'ORDEM_SERVICO', 'MANUAL']),
+    body('origem_id').optional().isInt({ min: 1 }).toInt(),
+    body('tipo').optional().isIn(['PRODUTO', 'SERVICO']),
+    body('prazo_dias').optional().isInt({ min: 1 }).toInt(),
+    body('data_inicio').optional().isISO8601().toDate(),
+    body('observacoes').optional().isString(),
+  ],
+  validateRequest,
+  garantiasController.create,
+);
+
+/**
+ * @swagger
+ * /api/garantias/{id}:
+ *   get:
+ *     summary: Detalha uma garantia
+ *     tags: [Garantias]
+ *   put:
+ *     summary: Atualiza dados de uma garantia
+ *     tags: [Garantias]
+ *   delete:
+ *     summary: Remove uma garantia
+ *     tags: [Garantias]
+ */
+router.get(
+  '/garantias/:id',
+  [param('id').isInt({ min: 1 }).toInt()],
+  validateRequest,
+  garantiasController.getById,
+);
+
+router.put(
+  '/garantias/:id',
+  [
+    param('id').isInt({ min: 1 }).toInt(),
+    body('cliente_id').optional().isInt({ min: 1 }).toInt(),
+    body('celular_id').optional().isInt({ min: 1 }).toInt(),
+    body('origem_tipo').optional().isIn(['VENDA', 'ORDEM_SERVICO', 'MANUAL']),
+    body('origem_id').optional().isInt({ min: 1 }).toInt(),
+    body('tipo').optional().isIn(['PRODUTO', 'SERVICO']),
+    body('prazo_dias').optional().isInt({ min: 1 }).toInt(),
+    body('data_inicio').optional().isISO8601().toDate(),
+    body('data_fim').optional().isISO8601().toDate(),
+    body('observacoes').optional().isString(),
+  ],
+  validateRequest,
+  garantiasController.update,
+);
+
+router.delete(
+  '/garantias/:id',
+  [param('id').isInt({ min: 1 }).toInt()],
+  validateRequest,
+  garantiasController.remove,
+);
+
+/**
+ * @swagger
+ * /api/garantias/alertas/processar:
+ *   post:
+ *     summary: Marca garantias próximas ao vencimento e gera alertas
+ *     tags: [Garantias]
+ */
+router.post('/garantias/alertas/processar', garantiasController.processarAlertas);
+
+router.get(
+  '/ordens-servico/:id/testes',
+  [
+    param('id').isInt({ min: 1 }).toInt(),
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoTestesController.listByOrdem,
+);
+
+router.post(
+  '/ordens-servico/:id/testes',
+  [
+    param('id').isInt({ min: 1 }).toInt(),
+    body('criterios')
+      .optional()
+      .custom((value) => typeof value === 'object')
+      .withMessage('Critérios inválidos para o teste técnico.'),
+    body('passedTests').optional().isObject(),
+    body('observacoes').optional().isString(),
+    body('resultado').optional().isIn(['APROVADO', 'REPROVADO', 'NAO_TESTADO', 'PENDENTE']),
+    body('etapa').optional().isIn(['INICIAL', 'INTERMEDIARIA', 'FINAL']),
+    body('midia_urls')
+      .optional()
+      .custom((value) => {
+        if (Array.isArray(value)) return value.length <= 5;
+        return typeof value === 'string';
+      })
+      .withMessage('Evidências devem ser uma URL ou uma lista com até 5 itens.'),
+  ],
+  validateRequest,
+  ordensServicoTestesController.create,
 );
 
 /**
@@ -459,8 +712,10 @@ router.get(
     query('page').optional().isInt({ min: 1 }).toInt(),
     query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
     query('q').optional().isString(),
+    query('id').optional().isInt({ min: 1 }).toInt(),
     query('status').optional().isString(),
     query('tipo').optional().isString(),
+    query('finalidade').optional().isIn(['REVENDA', 'MANUTENCAO']),
     query('fornecedor').optional().isString(),
     query('capacidade').optional().isString(),
   ],
@@ -474,6 +729,7 @@ router.post(
     body('imei').isString().notEmpty(),
     body('nome_fornecedor').isString().notEmpty(),
     body('tipo').isString().notEmpty(),
+    body('finalidade').isIn(['REVENDA', 'MANUTENCAO']),
     body('valor_compra').optional().isFloat({ min: 0 }),
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
@@ -486,11 +742,25 @@ router.put(
     param('id').isInt().toInt(),
     body('status').optional().isString(),
     body('tipo').optional().isString(),
+    body('finalidade').optional().isIn(['REVENDA', 'MANUTENCAO']),
     body('valor_compra').optional().isFloat({ min: 0 }),
     body('garantia_padrao_dias').optional().isInt({ min: 0 }),
   ],
   validateRequest,
   celularesController.update,
+);
+router.get(
+  '/celulares/historico',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('celular_id').optional().isInt({ min: 1 }).toInt(),
+    query('ordem_servico_id').optional().isInt({ min: 1 }).toInt(),
+    query('tipo_evento').optional().isString(),
+    query('q').optional().isString(),
+  ],
+  validateRequest,
+  celularesHistoricoController.list,
 );
 router.get('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.getById);
 router.delete('/celulares/:id', [param('id').isInt().toInt()], validateRequest, celularesController.remove);
@@ -623,6 +893,25 @@ router.post(
     body('observacoes').optional().isString(),
     body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
     body('garantia_validade').optional().isISO8601().toDate(),
+    body('testes')
+      .isArray({ min: 1 })
+      .withMessage('Informe os testes técnicos iniciais da OS.'),
+    body('testes.*.criterios')
+      .exists()
+      .withMessage('Cada registro de teste deve informar os critérios avaliados.'),
+    body('testes.*.etapa')
+      .optional()
+      .isIn(['INICIAL', 'INTERMEDIARIA', 'FINAL'])
+      .withMessage('Etapa de teste inválida.'),
+    body('pecas').optional().isArray({ min: 1 }),
+    body('pecas.*.peca_id')
+      .if(body('pecas').exists())
+      .isInt({ min: 1 })
+      .toInt(),
+    body('pecas.*.quantidade')
+      .if(body('pecas').exists())
+      .isInt({ min: 1 })
+      .toInt(),
   ],
   validateRequest,
   ordensServicoController.create,
@@ -782,6 +1071,18 @@ router.post(
   ],
   validateRequest,
   ordensServicoController.registrarPecas,
+);
+
+router.put(
+  '/ordens-servico/:id/pecas',
+  [
+    param('id').isInt().toInt(),
+    body('itens').isArray(),
+    body('itens.*.peca_id').isInt({ min: 1 }).toInt(),
+    body('itens.*.quantidade').isInt({ min: 0 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoController.atualizarPecas,
 );
 
 // Vendas

@@ -4,12 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Package, Users, Wrench, TrendingUp } from 'lucide-react';
 import '../styles/OrdemDeServiço.css';
 import { dashboardsApi, ordensServicoApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
   { value: 'EmAndamento', label: 'Em andamento' },
   { value: 'Concluido', label: 'Concluídas' },
 ];
+
+const getTodayInputValue = () => new Date().toISOString().split('T')[0];
 
 function formatDate(value) {
   if (!value) return '-';
@@ -28,6 +31,12 @@ const OrdensServico = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [metricas, setMetricas] = useState([]);
   const [metricasLoading, setMetricasLoading] = useState(true);
+  const [concludeModalOpen, setConcludeModalOpen] = useState(false);
+  const [ordemSelecionada, setOrdemSelecionada] = useState(null);
+  const [concludeDate, setConcludeDate] = useState('');
+  const [concludeGarantia, setConcludeGarantia] = useState('');
+  const [concludeError, setConcludeError] = useState('');
+  const [concludeSaving, setConcludeSaving] = useState(false);
   useEffect(() => {
     let active = true;
     dashboardsApi
@@ -80,22 +89,77 @@ const OrdensServico = () => {
     navigate('/novaOS', { state: { editId: id } });
   };
 
-  const handleToggleStatus = async (ordem) => {
-    const nextStatus = ordem.status === 'EmAndamento' ? 'Concluido' : 'EmAndamento';
-    const confirmMessage =
-      nextStatus === 'Concluido'
-        ? 'Deseja marcar esta ordem como concluída?'
-        : 'Deseja reabrir esta ordem?';
-    if (!window.confirm(confirmMessage)) return;
+  const openConcludeModal = (ordem) => {
+    setOrdemSelecionada(ordem);
+    setConcludeDate(getTodayInputValue());
+    setConcludeGarantia(ordem.garantia_dias != null ? String(ordem.garantia_dias) : '');
+    setConcludeError('');
+    setConcludeModalOpen(true);
+  };
 
+  const closeConcludeModal = () => {
+    setConcludeModalOpen(false);
+    setOrdemSelecionada(null);
+    setConcludeError('');
+    setConcludeSaving(false);
+  };
+
+  const handleConfirmConclude = async () => {
+    if (!ordemSelecionada) return;
+    if (!concludeDate) {
+      setConcludeError('Informe a data de conclusão.');
+      return;
+    }
+
+    const garantiaValue = concludeGarantia.trim();
+    let parsedGarantia;
+    if (garantiaValue !== '') {
+      parsedGarantia = Number(garantiaValue);
+      if (Number.isNaN(parsedGarantia)) {
+        setConcludeError('Informe um número válido para a garantia.');
+        return;
+      }
+      if (parsedGarantia < 0) {
+        setConcludeError('A garantia deve ser maior ou igual a zero.');
+        return;
+      }
+    }
+
+    setConcludeSaving(true);
     try {
-      await ordensServicoApi.update(ordem.id, {
-        status: nextStatus,
-        data_conclusao: nextStatus === 'Concluido' ? new Date().toISOString() : undefined,
-      });
-      setOrdens((prev) => prev.map((item) => (item.id === ordem.id ? { ...item, status: nextStatus } : item)));
+      const payload = {
+        status: 'Concluido',
+        data_conclusao: new Date(concludeDate).toISOString(),
+      };
+      if (garantiaValue !== '') {
+        payload.garantia_dias = parsedGarantia;
+      }
+      const updated = await ordensServicoApi.update(ordemSelecionada.id, payload);
+      setOrdens((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      closeConcludeModal();
     } catch (err) {
-      alert(err.message || 'Não foi possível atualizar a ordem.');
+      setConcludeError(err.message || 'Não foi possível concluir a ordem.');
+    } finally {
+      setConcludeSaving(false);
+    }
+  };
+
+  const handleReopen = async (ordem) => {
+    const confirmMessage = 'Deseja reabrir esta ordem?';
+    if (!window.confirm(confirmMessage)) return;
+    try {
+      const updated = await ordensServicoApi.update(ordem.id, { status: 'EmAndamento' });
+      setOrdens((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+    } catch (err) {
+      alert(err.message || 'Não foi possível reabrir a ordem.');
+    }
+  };
+
+  const handleToggleStatus = (ordem) => {
+    if (ordem.status === 'EmAndamento') {
+      openConcludeModal(ordem);
+    } else {
+      handleReopen(ordem);
     }
   };
 
@@ -136,7 +200,7 @@ const OrdensServico = () => {
         <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
-        <Link to="/" style={{ textDecoration: 'none' }} className='BotaoLogout'>Sair</Link> 
+        <LogoutButton className='BotaoLogout' /> 
         </div>
         
 
@@ -197,6 +261,7 @@ const OrdensServico = () => {
             <th>Cliente</th>
             <th>Celular</th>
             <th>Data de abertura</th>
+            <th>Data de conclusão</th>
             <th>Descrição</th>
             <th>Status</th>
             <th>Garantia (dias)</th>
@@ -207,17 +272,17 @@ const OrdensServico = () => {
         <tbody>
           {error && (
             <tr>
-              <td colSpan={8} className="error-row">{error}</td>
+              <td colSpan={9} className="error-row">{error}</td>
             </tr>
           )}
           {loading && !error && (
             <tr>
-              <td colSpan={8}>Carregando...</td>
+              <td colSpan={9}>Carregando...</td>
             </tr>
           )}
           {!loading && !error && ordens.length === 0 && (
             <tr>
-              <td colSpan={8}>Nenhuma ordem encontrada.</td>
+              <td colSpan={9}>Nenhuma ordem encontrada.</td>
             </tr>
           )}
           {!loading && !error &&
@@ -227,6 +292,7 @@ const OrdensServico = () => {
                 <td>{ordem.cliente?.nome || '-'}</td>
                 <td>{ordem.celular?.modelo || '-'}</td>
                 <td>{formatDate(ordem.data_abertura)}</td>
+                <td>{formatDate(ordem.data_conclusao)}</td>
                 <td>{ordem.descricao || '-'}</td>
                 <td>{ordem.status === 'Concluido' ? 'Concluída' : 'Em andamento'}</td>
                 <td>{ordem.garantia_dias ?? '-'}</td>
@@ -245,6 +311,45 @@ const OrdensServico = () => {
         </tbody>
 
       </table>
+
+      {concludeModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Concluir OS #{ordemSelecionada?.id}</h3>
+            <p>Informe a data de conclusão e, se desejar, o prazo de garantia.</p>
+            <label>Data de conclusão</label>
+            <div className="modal-input-row">
+              <input
+                type="date"
+                value={concludeDate}
+                onChange={(event) => setConcludeDate(event.target.value)}
+              />
+              <button type="button" onClick={() => setConcludeDate(getTodayInputValue())}>
+                Hoje
+              </button>
+            </div>
+
+            <label>Garantia (dias)</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="Ex: 90"
+              value={concludeGarantia}
+              onChange={(event) => setConcludeGarantia(event.target.value)}
+            />
+            {concludeError && <div className="modal-error">{concludeError}</div>}
+
+            <div className="modal-actions">
+              <button className="btn-secondary" type="button" onClick={closeConcludeModal} disabled={concludeSaving}>
+                Cancelar
+              </button>
+              <button className="btn-primary" type="button" onClick={handleConfirmConclude} disabled={concludeSaving}>
+                {concludeSaving ? 'Salvando...' : 'Concluir' }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
