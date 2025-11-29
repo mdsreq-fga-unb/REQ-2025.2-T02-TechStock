@@ -11,6 +11,7 @@ function buildWhere(q) {
     OR: [
       { nome: { contains, mode: 'insensitive' } },
       { codigo_interno: { contains, mode: 'insensitive' } },
+        { compatibilidade: { contains, mode: 'insensitive' } },
       { nome_fornecedor: { contains, mode: 'insensitive' } },
     ],
   };

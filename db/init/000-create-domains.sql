@@ -77,6 +77,16 @@ END $$;
 
 DO $$
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'finalidade_celular' AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.finalidade_celular AS ENUM ('REVENDA', 'MANUTENCAO');
+  END IF;
+END $$;
+
+DO $$
+BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
     WHERE t.typname = 'tipo_evento_celular' AND n.nspname = 'public'
@@ -88,6 +98,21 @@ BEGIN
     END;
     BEGIN
       ALTER TYPE public.tipo_evento_celular ADD VALUE 'GarantiaAlerta';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_evento_celular ADD VALUE 'TesteTecnicoRegistrado';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_evento_celular ADD VALUE 'CelularCadastrado';
+    EXCEPTION
+      WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE public.tipo_evento_celular ADD VALUE 'CelularVendido';
     EXCEPTION
       WHEN duplicate_object THEN NULL;
     END;

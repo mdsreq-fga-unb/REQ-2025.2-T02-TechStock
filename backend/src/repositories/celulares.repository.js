@@ -9,20 +9,27 @@ function buildWhere(q, filters = {}) {
 
   if (q && q.trim()) {
     const contains = q.trim();
-    AND.push({
-      OR: [
-        { modelo: { contains, mode: 'insensitive' } },
-        { imei: { contains, mode: 'insensitive' } },
-        { cor: { contains, mode: 'insensitive' } },
-        { capacidade: { contains, mode: 'insensitive' } },
-        { nome_fornecedor: { contains, mode: 'insensitive' } },
-      ],
-    });
+    const orGroup = [
+      { modelo: { contains, mode: 'insensitive' } },
+      { imei: { contains, mode: 'insensitive' } },
+      { cor: { contains, mode: 'insensitive' } },
+      { capacidade: { contains, mode: 'insensitive' } },
+      { nome_fornecedor: { contains, mode: 'insensitive' } },
+    ];
+
+    const numericValue = Number(contains);
+    if (!Number.isNaN(numericValue)) {
+      orGroup.push({ id: { equals: numericValue } });
+    }
+
+    AND.push({ OR: orGroup });
   }
 
   if (filters && typeof filters === 'object') {
+    if (filters.id) AND.push({ id: { equals: filters.id } });
     if (filters.status) AND.push({ status: { equals: filters.status } });
     if (filters.tipo) AND.push({ tipo: { equals: filters.tipo } });
+    if (filters.finalidade) AND.push({ finalidade: { equals: filters.finalidade } });
     if (filters.fornecedor) AND.push({ nome_fornecedor: { contains: filters.fornecedor, mode: 'insensitive' } });
     if (filters.capacidade) AND.push({ capacidade: { contains: filters.capacidade, mode: 'insensitive' } });
   }
@@ -72,6 +79,7 @@ async function create(data, userId, tx) {
     'garantia_padrao_dias',
     'defeitos_identificados',
     'tipo',
+    'finalidade',
     'status',
     'nome_fornecedor',
     'usuario_cadastro_id',
@@ -91,6 +99,7 @@ async function update(id, data, userId, tx) {
     'garantia_padrao_dias',
     'defeitos_identificados',
     'tipo',
+    'finalidade',
     'status',
     'nome_fornecedor',
   ];

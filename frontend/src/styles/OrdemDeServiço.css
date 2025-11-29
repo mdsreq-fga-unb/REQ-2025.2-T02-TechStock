@@ -155,3 +155,71 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content h3 {
+  margin: 0;
+}
+
+.modal-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.modal-input-row button {
+  background: #f0e6f7;
+  color: #5b21b6;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+  flex: 1;
+}
+
+.modal-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}

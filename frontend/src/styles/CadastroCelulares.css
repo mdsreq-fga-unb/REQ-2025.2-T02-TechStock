@@ -81,14 +81,21 @@
 .actions-bar{
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 18px;
 }
 
 .search-input{
-  width: 65%;
+  flex: 1;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #bbb;
+}
+
+.actions-buttons{
+  display: flex;
+  gap: 12px;
 }
 
 .btn-primary{
@@ -102,6 +109,42 @@
 }
 .btn-primary:hover{
   background-color: #4b197a;
+}
+
+.btn-outline{
+  background-color: transparent;
+  color: #5C2D91;
+  border: 1px solid #5C2D91;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-outline:hover{
+  background-color: #f4ebff;
+}
+
+.filters-row{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  align-items: end;
+}
+
+.filter-field{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.filter-field input,
+.filter-field select{
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
 }
 
 /* Tabela */

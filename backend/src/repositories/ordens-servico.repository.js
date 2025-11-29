@@ -8,7 +8,7 @@ const DETAIL_INCLUDE = {
   celular: true,
   historico: { orderBy: { data_evento: 'desc' } },
   pecas_utilizadas: {
-    include: { peca: { select: { id: true, nome: true, codigo_interno: true } } },
+    include: { peca: { select: { id: true, nome: true, codigo_interno: true, quantidade: true } } },
     orderBy: { data_uso: 'desc' },
   },
   testes: {
@@ -32,6 +32,7 @@ function mapPecasUtilizadas(entries = []) {
           id: entry.peca.id,
           nome: entry.peca.nome,
           codigo_interno: entry.peca.codigo_interno,
+          quantidade_disponivel: entry.peca.quantidade,
         }
       : null,
   }));
