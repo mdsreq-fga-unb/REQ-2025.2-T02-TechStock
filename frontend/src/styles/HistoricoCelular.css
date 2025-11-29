@@ -1,0 +1,210 @@
+/* * Estilos CSS para o componente de Tabela de Histórico.
+ * As classes utilitárias que seguem o padrão Tailwind são recriadas aqui.
+ */
+
+/* =========================================
+ * ESTILOS DE BASE E LAYOUT
+ * ========================================= */
+
+/* Garante a fonte Inter e fallback */
+.font-sans {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+/* ===================================================================
+     Estilos compartilhados com outras páginas (Container / Header etc.)
+     =================================================================== */
+.Container{
+    width: 100%;
+    min-height: 100vh;
+    background-color: #F6F6F6;
+    font-family: "Poppins", sans-serif;
+}
+
+.BarraSuperior{
+    width: 100%;
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.LogoCellVex{
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    color: #5C2D91;
+}
+
+.SistemaDeGestao{
+    font-size: 11px;
+    margin-top: -2px;
+    color: #6f6f6f;
+}
+
+.BotoesNavegacao{
+    background-color: #E9DFF1;
+    padding: 10px 24px;
+    border-radius: 10px;
+    color: #5C2D91;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.Clientes{
+    margin: 40px 80px 0px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #5C2D91;
+}
+
+.gerencie-1{ margin-left: 80px; font-size: 13px; color: #757575; }
+.gerencie-2{ margin-left: 20px; font-size: 13px; color: #757575; }
+
+.Gestao{ width: 90%; margin: 30px auto; border: 1px solid #C8A3DB; border-radius: 12px; padding: 22px; background-color: #FFFFFF; }
+
+.barra-acoes{ display: flex; justify-content: space-between; margin-top: 18px; }
+
+.campo-busca{ width: 65%; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+
+.botao-primario{ background-color: #5C2D91; color: #fff; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; }
+.botao-primario:hover{ background-color: #4b197a; }
+
+.tabela-historico{ width: 100%; border-collapse: collapse; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #C8A3DB; overflow: hidden; }
+.tabela-historico th{ background-color: #F3EAFF; padding: 14px; text-align: left; color: #5C2D91; }
+.tabela-historico td{ padding: 14px; border-top: 1px solid #eee; }
+.titulo { font-size: 20px; margin-top: 5px; font-weight: 600; margin-left: 20px; }
+.linha-erro{ color: #b91c1c; padding: 12px; }
+
+.container-tabela{ width: 100%; overflow-x: auto; }
+.min-h-screen {
+    min-height: 100vh;
+}
+.bg-gray-50 {
+    background-color: #f9fafb; /* Cor de fundo da tela */
+}
+
+/* Container Principal e Espaçamento */
+.max-w-7xl {
+    max-width: 80rem; /* 1280px */
+}
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+.p-4 { padding: 1rem; }
+.sm\:p-8 { 
+    /* Estilo para telas maiores, aplicado como padrão para demonstração */
+    padding: 2rem;
+}
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.pb-4 { padding-bottom: 1rem; }
+.border-b { border-bottom: 1px solid #e5e7eb; }
+
+/* Cartão (Card) de Busca */
+.bg-white { background-color: #ffffff; }
+.rounded-xl { border-radius: 0.75rem; }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+/* Tipografia e Cores */
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-red-800 { color: #991b1b; }
+.text-gray-600 { color: #4b5563; }
+.font-extrabold { font-weight: 800; }
+
+/* Input de Busca */
+.relative { position: relative; }
+.flex-grow { flex-grow: 1; }
+.w-full { width: 100%; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.pl-10 { padding-left: 2.5rem; }
+.pr-4 { padding-right: 1rem; }
+.border { border-width: 1px; }
+.border-gray-300 { border-color: #d1d5db; }
+/* Estilos de Focus (simulando ring e border) */
+.focus\:ring-red-500:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5); border-color: #ef4444; }
+.focus\:border-red-500:focus { border-color: #ef4444; }
+
+
+/* =========================================
+ * ESTILOS DA TABELA (HistoricoCelularesTable)
+ * ========================================= */
+
+.overflow-x-auto { overflow-x: auto; }
+.min-w-full { min-width: 100%; }
+.divide-y > * + * { border-top-width: 1px; }
+.divide-gray-200 { border-color: #e5e7eb; }
+
+/* Cabeçalho */
+.bg-red-600 { background-color: #dc2626; }
+.text-white { color: #ffffff; }
+th {
+    padding: 0.75rem 1.5rem; /* px-6 py-3 */
+    text-align: left;
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 700; /* font-bold */
+    letter-spacing: 0.05em; /* tracking-wider */
+    text-transform: uppercase;
+}
+.rounded-tl-xl { border-top-left-radius: 0.75rem; }
+.rounded-tr-xl { border-top-right-radius: 0.75rem; }
+
+/* Corpo da Tabela */
+.bg-white { background-color: #ffffff; }
+td {
+    padding: 1rem 1.5rem; /* px-6 py-4 */
+    font-size: 0.875rem; /* text-sm */
+    color: #374151; /* text-gray-700 */
+    white-space: nowrap;
+}
+.hover\:bg-red-50:hover { background-color: #fef2f2; }
+.transition { transition: all 0.15s ease-in-out; }
+
+/* Badges de Status/Tipo de Movimentação */
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.inline-flex { display: inline-flex; }
+.text-xs { font-size: 0.75rem; }
+.leading-5 { line-height: 1.25rem; }
+.font-semibold { font-weight: 600; }
+.rounded-full { border-radius: 9999px; }
+
+/* Cores específicas dos Badges */
+.text-green-600 { color: #059669; } .bg-green-100 { background-color: #d1fae5; }
+.text-red-600 { color: #dc2626; } .bg-red-100 { background-color: #fee2e2; }
+.text-yellow-600 { color: #ca8a04; } .bg-yellow-100 { background-color: #fef3c7; }
+.text-blue-600 { color: #2563eb; } .bg-blue-100 { background-color: #dbeafe; }
+.text-indigo-600 { color: #4f46e5; } .bg-indigo-100 { background-color: #e0e7ff; }
+
+/* =========================================
+ * ESTILOS DE SCROLLBAR (PERSONALIZADOS)
+ * ========================================= */
+
+/* Estilo customizado para a barra de rolagem horizontal da tabela (Webkit browsers) */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ef4444; /* Cor vermelha para combinar com o tema */
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #dc2626;
+}
+
+/* Configurações da barra de rolagem para o Firefox */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #ef4444 #f1f1f1;
+}

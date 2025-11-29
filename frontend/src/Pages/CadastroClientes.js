@@ -59,7 +59,7 @@ function CadastroClientes() {
           CellVex 
           <p className='SistemaDeGestao'>Sistema De Gestão</p>
         </div>
-
+        <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
         <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
         <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
         <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
@@ -68,6 +68,7 @@ function CadastroClientes() {
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
         <div className='BotoesNavegacao'>Relatórios</div>
         </div>
+       
 
       <h2 className="Clientes">Clientes</h2>
       <h2 className="gerencie-1">Gestão de clientes e histórico</h2> 
@@ -84,6 +85,12 @@ function CadastroClientes() {
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
+          <button 
+            className="btn-primary" 
+            onClick={() => navigate('/historicocliente')} // Usa navigateTo para simular a rota
+            title="Ver histórico de movimentações"
+          > + Histórico de clientes
+          </button>
           
           {/*botão agora navega para tela de cadastro */}
           <button className="btn-primary" onClick={() => navigate("/clientes/novo")}>
