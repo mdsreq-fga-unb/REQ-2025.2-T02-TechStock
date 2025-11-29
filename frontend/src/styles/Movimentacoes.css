@@ -1,0 +1,144 @@
+/* ======== ESTILOS GERAIS ======== */
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.titulo {
+  font-size: 26px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+}
+
+/* ======== MENU SUPERIOR ======== */
+
+.menu-navegacao {
+  display: flex;
+  gap: 20px;
+  background-color: #222;
+  padding: 14px;
+  justify-content: center;
+}
+
+.menu-navegacao a {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.menu-navegacao a:hover {
+  background-color: #444;
+}
+
+/* ======== FORMULÁRIO MOVIMENTAÇÃO ======== */
+
+.pagina-movimentacoes {
+  max-width: 600px;
+  margin: 30px auto;
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.formulario-movimentacao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.campo-selecao,
+.campo-numero {
+  padding: 10px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.campo-selecao:focus,
+.campo-numero:focus {
+  border-color: #008cff;
+}
+
+/* ======== BOTÃO REGISTRAR ======== */
+
+.botao-registrar {
+  background-color: #008cff;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.botao-registrar:hover {
+  background-color: #0077d1;
+}
+
+/* MENSAGENS */
+
+.mensagem-retorno {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ======== ESTOQUE ======== */
+
+.pagina-estoque,
+.pagina-historico {
+  max-width: 900px;
+  margin: 30px auto;
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.tabela-estoque,
+.tabela-historico {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.tabela-estoque th,
+.tabela-historico th {
+  background-color: #008cff;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.tabela-estoque td,
+.tabela-historico td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabela-estoque tr:hover,
+.tabela-historico tr:hover {
+  background-color: #f2f7ff;
+}
+
+/* ======== FILTROS DO HISTÓRICO ======== */
+
+.filtros {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 15px;
+}

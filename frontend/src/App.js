@@ -14,15 +14,16 @@ import Vendas from "./Pages/Vendas"
 import TestesOrdemServico from "./Pages/TestesOrdemServico";
 import HistoricoCelular from "./Pages/HistoricoCelular";
 import HistoricoClientes from "./Pages/HistoricoCliente";
+import Movimentacoes from "./Pages/Movimentacoes";
+import Estoque from "./Pages/Estoque";
+import NovoVendas from "./Pages/NovoVendas";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota para a lista de clientes (path foi mudado de /CadastroClientes para /clientes) */}
-        <Route path="/" element={<CadastroClientes />} />
-        
-        {/*rota do novo cadastro deve ser "/clientes/novo" para corresponder à navegação */}
+        <Route path="/" element={<Login />} />
+        <Route path="/cliente" element={<CadastroClientes />} />  
         <Route path="/clientes/novo" element={<NovoCadastro />} />
         <Route path="/pecas" element={<CadastroPecas />} />
         <Route path="/pecas/novo" element={<NovoCadastroPecas />} /> 
@@ -36,6 +37,9 @@ export default function App() {
         <Route path="/testesordemservico" element={<TestesOrdemServico/>} />
         <Route path="/historicocelular" element={<HistoricoCelular/>} />
         <Route path ="/historicocliente" element={<HistoricoClientes/>} />
+        <Route path="/movimentacoes" element={<Movimentacoes/>} />
+        <Route path="/estoque" element={<Estoque/>} />
+        <Route path="/novavenda" element={<NovoVendas/>} />
       </Routes>
     </BrowserRouter>
   );
