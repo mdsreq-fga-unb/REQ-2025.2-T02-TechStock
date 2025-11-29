@@ -4,6 +4,7 @@ const celularesRepository = require('../repositories/celulares.repository');
 const historicoRepository = require('../repositories/celulares-historico.repository');
 const { getPrisma } = require('../database/prisma');
 const garantiasService = require('./garantias.service');
+const testesService = require('./ordens-servico-testes.service');
 
 const STATUS = {
   EM_ANDAMENTO: 'EmAndamento',
@@ -25,6 +26,12 @@ async function ensureClienteExists(clienteId) {
     throw err;
   }
   return cliente;
+}
+
+function normalizeTestPayload(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  return [raw];
 }
 
 function formatDataConclusao(data) {
@@ -63,6 +70,12 @@ async function getById(id) {
 
 async function create(data, user) {
   await Promise.all([ensureClienteExists(data.cliente_id), ensureCelularExists(data.celular_id)]);
+  const testesPayload = normalizeTestPayload(data.testes);
+  if (!testesPayload.length) {
+    const err = new Error('Os testes iniciais são obrigatórios para abrir uma ordem de serviço.');
+    err.status = 400;
+    throw err;
+  }
 
   const prisma = getPrisma();
   const userId = user?.id || 1;
@@ -88,6 +101,9 @@ async function create(data, user) {
       },
       tx,
     );
+    for (const teste of testesPayload) {
+      await testesService.registrarTeste(ordem.id, { ...teste, etapa: teste.etapa || 'INICIAL' }, user, { tx });
+    }
     return ordem;
   });
 
@@ -131,6 +147,7 @@ async function update(id, data, user) {
   const retornando = data.status === STATUS.EM_ANDAMENTO && atual.status === STATUS.CONCLUIDO;
 
   if (concluindo) {
+    await testesService.garantirTestesAntesDeOperacao(id);
     const dataConclusao = normalizeDate(data.data_conclusao) || new Date();
     updates.data_conclusao = dataConclusao;
     if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
@@ -286,6 +303,8 @@ async function registrarPecas(id, itens, user) {
       err.status = 404;
       throw err;
     }
+
+    await testesService.garantirTestesAntesDeOperacao(id);
 
     const ids = Array.from(agregados.keys());
     const pecas = await tx.pecas.findMany({ where: { id: { in: ids } } });

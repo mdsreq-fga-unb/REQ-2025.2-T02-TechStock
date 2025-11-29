@@ -1,66 +1,93 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/HistoricoCelular.css';
+import { movimentacoesEstoqueApi } from '../services/api';
 
-// =========================================================
-// MOCKS E API SIMULADA - Definição dos dados
-// =========================================================
-
-// Dados simulados para o Histórico de Celulares (Movimentações)
-const mockHistorico = [
-    { id: 101, celularId: 1, modelo: 'iPhone 13 Pro', data_movimentacao: new Date(Date.now() - 86400000 * 30).toISOString(), tipo_movimentacao: 'Entrada Estoque', usuario: 'João Silva', detalhes: 'Lote inicial' },
-    { id: 102, celularId: 2, modelo: 'Samsung Galaxy S21', data_movimentacao: new Date(Date.now() - 86400000 * 15).toISOString(), tipo_movimentacao: 'Reparo Interno', usuario: 'Pedro Técnico', detalhes: 'Troca de bateria' },
-    { id: 103, celularId: 1, modelo: 'iPhone 13 Pro', data_movimentacao: new Date(Date.now() - 86400000 * 5).toISOString(), tipo_movimentacao: 'Venda', usuario: 'Maria Souza', detalhes: 'Venda para Cliente X' },
-    { id: 104, celularId: 3, modelo: 'Motorola G9', data_movimentacao: new Date(Date.now() - 86400000 * 2).toISOString(), tipo_movimentacao: 'Devolução/Estoque', usuario: 'João Silva', detalhes: 'Devolução por arrependimento' },
-    { id: 105, celularId: 2, modelo: 'Samsung Galaxy S21', data_movimentacao: new Date(Date.now() - 86400000 * 1).toISOString(), tipo_movimentacao: 'Transferência', usuario: 'Ana Logística', detalhes: 'Movido para filial B' },
-];
-
-// Mock da API para Histórico
-const celularesHistoricoApi = {
-    list: (params) => new Promise((resolve) => {
-      setTimeout(() => {
-        // Lógica de filtro: verifica se a query está contida no modelo, usuário ou ID do celular
-        const q = (params.q || '').toLowerCase();
-        const filteredItems = mockHistorico.filter(h => 
-          h.modelo.toLowerCase().includes(q) || 
-          h.usuario.toLowerCase().includes(q) ||
-          h.celularId.toString().includes(q)
-        );
-        // Ordena por data de movimentação decrescente (mais recente primeiro)
-        const sortedItems = filteredItems.sort((a, b) => new Date(b.data_movimentacao) - new Date(a.data_movimentacao));
-        resolve({ items: sortedItems });
-      }, 500); // Simula o atraso da rede
-    }),
+const OPERACAO_LABELS = {
+    COMPRA: 'Entrada em Estoque',
+    VENDA: 'Venda',
+    DEVOLUCAO: 'Devolução/Estoque',
+    CONSERTO: 'Conserto / Manutenção',
 };
 
-// =========================================================
-// COMPONENTE DE TABELA DE HISTÓRICO
-// =========================================================
+const OPERACAO_KEYWORDS = {
+    venda: 'VENDA',
+    vendido: 'VENDA',
+    compra: 'COMPRA',
+    entrada: 'COMPRA',
+    devolucao: 'DEVOLUCAO',
+    devolução: 'DEVOLUCAO',
+    retorno: 'DEVOLUCAO',
+    conserto: 'CONSERTO',
+    reparo: 'CONSERTO',
+};
+
+const STATUS_COLOR = {
+    COMPRA: 'text-green-600 bg-green-100',
+    VENDA: 'text-red-600 bg-red-100',
+    DEVOLUCAO: 'text-blue-600 bg-blue-100',
+    CONSERTO: 'text-yellow-600 bg-yellow-100',
+};
 
 const HistoricoCelularesTable = () => {
     const [historico, setHistorico] = useState([]);
+    const [meta, setMeta] = useState({ page: 1, pageSize: 20, total: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
-  
-    // Efeito para criar um 'debounce' na busca, esperando o usuário terminar de digitar
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [reloadKey, setReloadKey] = useState(0);
+
     useEffect(() => {
         const timer = setTimeout(() => setSearch(searchInput), 400);
         return () => clearTimeout(timer);
     }, [searchInput]);
 
-    // Efeito para buscar os dados sempre que o termo de busca (search) mudar
+    useEffect(() => {
+        setPage(1);
+    }, [search]);
+
+    const { filters } = useMemo(() => {
+        const base = { page, pageSize, tipo_item: 'CELULAR' };
+        const trimmed = search.trim();
+        if (trimmed) {
+            if (/^\d+$/.test(trimmed)) {
+                base.celular_id = Number(trimmed);
+            } else {
+                const normalized = trimmed.toLowerCase();
+                const matchKey = Object.keys(OPERACAO_KEYWORDS).find((key) => normalized.includes(key));
+                if (matchKey) {
+                    base.tipo_operacao = OPERACAO_KEYWORDS[matchKey];
+                }
+            }
+        }
+        return { filters: base };
+    }, [page, pageSize, search]);
+
     useEffect(() => {
         let active = true;
         setLoading(true);
         setError('');
-        
-        celularesHistoricoApi
-            .list(search ? { q: search } : {})
+
+        movimentacoesEstoqueApi
+            .list(filters)
             .then((data) => {
                 if (!active) return;
                 setHistorico(data?.items || []);
+                const nextMeta = data?.meta || { page, pageSize, total: data?.items?.length || 0 };
+                setMeta({
+                    page: nextMeta.page || page,
+                    pageSize: nextMeta.pageSize || pageSize,
+                    total: typeof nextMeta.total === 'number' ? nextMeta.total : data?.items?.length || 0,
+                });
+                if (nextMeta.page && nextMeta.page !== page) {
+                    setPage(nextMeta.page);
+                }
+                if (nextMeta.pageSize && nextMeta.pageSize !== pageSize) {
+                    setPageSize(nextMeta.pageSize);
+                }
             })
             .catch((err) => {
                 if (!active) return;
@@ -69,23 +96,50 @@ const HistoricoCelularesTable = () => {
             .finally(() => {
                 if (active) setLoading(false);
             });
-            
-        // Cleanup function para evitar a atualização de estado em componente desmontado
+
         return () => {
             active = false;
         };
-    }, [search]);
+    }, [filters, reloadKey]);
 
-    // Função auxiliar para determinar a cor do badge de status
-    const getStatusColor = (tipo) => {
-        switch (tipo) {
-            case 'Entrada Estoque': return 'text-green-600 bg-green-100';
-            case 'Venda': return 'text-red-600 bg-red-100';
-            case 'Reparo Interno': return 'text-yellow-600 bg-yellow-100';
-            case 'Devolução/Estoque': return 'text-blue-600 bg-blue-100';
-            case 'Transferência': return 'text-indigo-600 bg-indigo-100';
-            default: return 'text-gray-600 bg-gray-100';
-        }
+    const handleReload = () => {
+        setReloadKey((prev) => prev + 1);
+    };
+
+    const handlePageSizeChange = (event) => {
+        const value = Number(event.target.value);
+        setPageSize(value);
+        setPage(1);
+    };
+
+    const goToPage = (targetPage) => {
+        setPage(() => {
+            const requested = Number(targetPage) || 1;
+            const totalRecords = meta?.total || 0;
+            const limit = totalRecords ? Math.ceil(totalRecords / (meta?.pageSize || pageSize)) : 1;
+            if (requested < 1) return 1;
+            if (requested > limit) return limit;
+            return requested;
+        });
+    };
+
+    const currentPage = meta?.page || page;
+    const currentPageSize = meta?.pageSize || pageSize;
+    const totalRecords = meta?.total ?? historico.length;
+    const totalPages = totalRecords ? Math.max(1, Math.ceil(totalRecords / currentPageSize)) : 1;
+    const firstItemIndex = historico.length ? (currentPage - 1) * currentPageSize + 1 : 0;
+    const lastItemIndex = historico.length ? firstItemIndex + historico.length - 1 : 0;
+
+    const formatTipoMovimentacao = (tipoOperacao) => OPERACAO_LABELS[tipoOperacao] || tipoOperacao || '-';
+
+    const getStatusColor = (tipoOperacao) => STATUS_COLOR[tipoOperacao] || 'text-gray-600 bg-gray-100';
+
+    const formatDetalhes = (item) => {
+        const detalhes = [];
+        if (item.quantidade != null) detalhes.push(`Qtd: ${item.quantidade}`);
+        if (item.saldo_resultante != null) detalhes.push(`Saldo: ${item.saldo_resultante}`);
+        if (item.observacoes) detalhes.push(item.observacoes);
+        return detalhes.join(' • ') || '-';
     };
 
     return (
@@ -116,13 +170,40 @@ const HistoricoCelularesTable = () => {
                 <div className="barra-acoes">
                     <input
                         type="text"
-                        placeholder="Buscar no histórico..."
+                        placeholder="Busque por ID do celular ou tipo (ex: venda, devolução)"
                         className="campo-busca"
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
                     />
 
-                    <button className="botao-primario" onClick={() => window.location.reload()} title="Atualizar lista">Atualizar</button>
+                    <button className="botao-primario" onClick={handleReload} disabled={loading} title="Atualizar lista">
+                        Atualizar
+                    </button>
+                </div>
+
+                <div className="pagination-bar">
+                    <div className="pagination-info">
+                        {totalRecords
+                            ? `Mostrando ${firstItemIndex}-${lastItemIndex} de ${totalRecords} movimentações`
+                            : 'Nenhuma movimentação encontrada.'}
+                    </div>
+                    <div className="pagination-controls">
+                        <label className="page-size-label">
+                            Itens por página
+                            <select value={pageSize} onChange={handlePageSizeChange} disabled={loading}>
+                                {[10, 20, 50].map((size) => (
+                                    <option key={size} value={size}>{size}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <button className="btn-secondary" onClick={() => goToPage(currentPage - 1)} disabled={loading || currentPage <= 1}>
+                            Anterior
+                        </button>
+                        <span className="pagination-status">Página {currentPage} de {totalPages}</span>
+                        <button className="btn-secondary" onClick={() => goToPage(currentPage + 1)} disabled={loading || currentPage >= totalPages}>
+                            Próxima
+                        </button>
+                    </div>
                 </div>
 
                 <div className="container-tabela" style={{ marginTop: 18 }}>
@@ -161,13 +242,15 @@ const HistoricoCelularesTable = () => {
                                 <tr key={item.id}>
                                     <td>{item.id}</td>
                                     <td>{item.data_movimentacao ? new Date(item.data_movimentacao).toLocaleString('pt-BR') : '-'}</td>
-                                    <td>{item.celularId}</td>
-                                    <td>{item.modelo}</td>
+                                    <td>{item.celular?.id ?? '-'}</td>
+                                    <td>{item.celular?.modelo ?? '-'}</td>
                                     <td>
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.tipo_movimentacao)}`}>{item.tipo_movimentacao}</span>
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.tipo_operacao)}`}>
+                                            {formatTipoMovimentacao(item.tipo_operacao)}
+                                        </span>
                                     </td>
-                                    <td>{item.usuario}</td>
-                                    <td>{item.detalhes}</td>
+                                    <td>{item.usuario?.nome ?? '-'}</td>
+                                    <td>{formatDetalhes(item)}</td>
                                 </tr>
                             ))}
                         </tbody>

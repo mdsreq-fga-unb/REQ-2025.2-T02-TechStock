@@ -33,6 +33,19 @@
 .campo-busca{ width:65%; padding:10px; border-radius:8px; border:1px solid #bbb; }
 .botao-primario{ background-color:#5C2D91; color:#fff; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; }
 .botao-primario:hover{ background-color:#4b197a; }
+.botao-primario:disabled{ opacity:0.7; cursor:not-allowed; }
+.acoes-direita{ display:flex; align-items:center; gap:12px; }
+.filtro-select{ padding:10px 14px; border-radius:8px; border:1px solid #bbb; background-color:#fff; min-width:180px; }
+.filtro-select:disabled{ opacity:0.7; cursor:not-allowed; }
+
+.pagination-bar{ margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+.pagination-info{ font-size:14px; color:#5C2D91; }
+.pagination-controls{ display:flex; align-items:center; gap:12px; }
+.page-size-label{ display:flex; align-items:center; gap:6px; font-size:13px; color:#5C2D91; }
+.page-size-label select{ border-radius:6px; border:1px solid #bbb; padding:6px 8px; }
+.btn-secondary{ background-color:transparent; border:1px solid #C8A3DB; border-radius:8px; padding:8px 14px; color:#5C2D91; cursor:pointer; }
+.btn-secondary:disabled{ opacity:0.6; cursor:not-allowed; }
+.pagination-status{ font-size:13px; color:#757575; }
 
 .container-tabela{ width:100%; overflow-x:auto; }
 .tabela-historico{ width:100%; border-collapse:collapse; background-color:#FFFFFF; border-radius:12px; border:1px solid #C8A3DB; overflow:hidden; }

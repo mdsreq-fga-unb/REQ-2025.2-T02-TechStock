@@ -43,7 +43,7 @@ app.get('/health', async (req, res) => {
 // API routes
 const apiRouter = require('./routes');
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/auth')) {
+  if (req.path.startsWith('/auth') || req.path.startsWith('/usuarios')) {
     return next();
   }
   return ensureAuthenticated(req, res, next);

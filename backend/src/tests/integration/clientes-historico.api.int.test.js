@@ -17,6 +17,7 @@ async function resetDB() {
   await prisma.$executeRawUnsafe('DELETE FROM celulares_historico');
   await prisma.$executeRawUnsafe('DELETE FROM garantias');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico_pecas');
+  await prisma.$executeRawUnsafe('DELETE FROM ordens_servico_testes');
   await prisma.$executeRawUnsafe('DELETE FROM vendas');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico');
   await prisma.$executeRawUnsafe('DELETE FROM movimentacoes_estoque');

@@ -5,6 +5,7 @@ const celularesController = require('../controllers/celulares.controller');
 const pecasController = require('../controllers/pecas.controller');
 const clientesController = require('../controllers/clientes.controller');
 const ordensServicoController = require('../controllers/ordens-servico.controller');
+const ordensServicoTestesController = require('../controllers/ordens-servico-testes.controller');
 const dashboardsController = require('../controllers/dashboards.controller');
 const authController = require('../controllers/auth.controller');
 const { validate } = require('../middlewares/validate');
@@ -329,6 +330,41 @@ router.delete(
  *     tags: [Garantias]
  */
 router.post('/garantias/alertas/processar', garantiasController.processarAlertas);
+
+router.get(
+  '/ordens-servico/:id/testes',
+  [
+    param('id').isInt({ min: 1 }).toInt(),
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('pageSize').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ],
+  validateRequest,
+  ordensServicoTestesController.listByOrdem,
+);
+
+router.post(
+  '/ordens-servico/:id/testes',
+  [
+    param('id').isInt({ min: 1 }).toInt(),
+    body('criterios')
+      .optional()
+      .custom((value) => typeof value === 'object')
+      .withMessage('Critérios inválidos para o teste técnico.'),
+    body('passedTests').optional().isObject(),
+    body('observacoes').optional().isString(),
+    body('resultado').optional().isIn(['APROVADO', 'REPROVADO', 'NAO_TESTADO', 'PENDENTE']),
+    body('etapa').optional().isIn(['INICIAL', 'INTERMEDIARIA', 'FINAL']),
+    body('midia_urls')
+      .optional()
+      .custom((value) => {
+        if (Array.isArray(value)) return value.length <= 5;
+        return typeof value === 'string';
+      })
+      .withMessage('Evidências devem ser uma URL ou uma lista com até 5 itens.'),
+  ],
+  validateRequest,
+  ordensServicoTestesController.create,
+);
 
 /**
  * @swagger
@@ -839,6 +875,16 @@ router.post(
     body('observacoes').optional().isString(),
     body('garantia_dias').optional().isInt({ min: 0 }).toInt(),
     body('garantia_validade').optional().isISO8601().toDate(),
+    body('testes')
+      .isArray({ min: 1 })
+      .withMessage('Informe os testes técnicos iniciais da OS.'),
+    body('testes.*.criterios')
+      .exists()
+      .withMessage('Cada registro de teste deve informar os critérios avaliados.'),
+    body('testes.*.etapa')
+      .optional()
+      .isIn(['INICIAL', 'INTERMEDIARIA', 'FINAL'])
+      .withMessage('Etapa de teste inválida.'),
   ],
   validateRequest,
   ordensServicoController.create,

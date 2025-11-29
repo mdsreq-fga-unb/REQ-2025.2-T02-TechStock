@@ -39,3 +39,103 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
+.testes-section {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+  background: #faf5ff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.testes-section.info {
+  background: #f3f4f6;
+}
+
+.testes-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.badge-required {
+  background: #7d2cff;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.test-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.test-card select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.testes-extra textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.testes-extra label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.evidence-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.evidence-row input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.remove-evidence {
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.link-button {
+  border: none;
+  background: transparent;
+  color: #7d2cff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.error-text {
+  color: #b91c1c;
+  margin: 0;
+}

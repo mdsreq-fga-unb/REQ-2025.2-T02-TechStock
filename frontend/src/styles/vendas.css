@@ -104,6 +104,59 @@
   background-color: #4b197a;
 }
 
+.pagination-bar{
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pagination-info{
+  font-size: 14px;
+  color: #5C2D91;
+}
+
+.pagination-controls{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-size-label{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #5C2D91;
+}
+
+.page-size-label select{
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  padding: 6px 8px;
+}
+
+.btn-secondary{
+  background-color: transparent;
+  border: 1px solid #C8A3DB;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #5C2D91;
+  cursor: pointer;
+}
+
+.btn-secondary:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pagination-status{
+  font-size: 13px;
+  color: #757575;
+}
+
 /* Tabela */
 .client-table{
   width: 90%;
