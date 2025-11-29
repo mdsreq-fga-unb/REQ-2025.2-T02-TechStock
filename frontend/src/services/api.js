@@ -72,6 +72,10 @@ export const clientesApi = {
   remove: (id) => apiFetch(`/clientes/${id}`, { method: 'DELETE' }),
 };
 
+export const clientesHistoricoApi = {
+  list: (filters = {}) => apiFetch(`/clientes/historico${buildQuery(filters)}`),
+};
+
 export const pecasApi = {
   list: (filters = {}) => apiFetch(`/pecas${buildQuery(filters)}`),
   getById: (id) => apiFetch(`/pecas/${id}`),
@@ -95,6 +99,17 @@ export const ordensServicoApi = {
   update: (id, payload) => apiFetch(`/ordens-servico/${id}`, { method: 'PATCH', body: payload }),
   remove: (id) => apiFetch(`/ordens-servico/${id}`, { method: 'DELETE' }),
   registrarPecas: (id, itens) => apiFetch(`/ordens-servico/${id}/pecas`, { method: 'POST', body: { itens } }),
+};
+
+export const ordensServicoTestesApi = {
+  listByOrdem: (id, filters = {}) => apiFetch(`/ordens-servico/${id}/testes${buildQuery(filters)}`),
+  create: (id, payload) => apiFetch(`/ordens-servico/${id}/testes`, { method: 'POST', body: payload }),
+};
+
+export const movimentacoesEstoqueApi = {
+  list: (filters = {}) => apiFetch(`/movimentacoes-estoque${buildQuery(filters)}`),
+  getById: (id) => apiFetch(`/movimentacoes-estoque/${id}`),
+  create: (payload) => apiFetch('/movimentacoes-estoque', { method: 'POST', body: payload }),
 };
 
 export const vendasApi = {

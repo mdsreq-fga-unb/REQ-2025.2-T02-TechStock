@@ -9,6 +9,29 @@ const STATUS_OPTIONS = [
   { value: 'Concluido', label: 'Concluída' },
 ];
 
+const TEST_CRITERIA = [
+  { key: 'tela_touch', label: 'Tela / Touch' },
+  { key: 'bateria_carregamento', label: 'Bateria / Carregamento' },
+  { key: 'camera_traseira', label: 'Câmera Traseira' },
+  { key: 'camera_frontal', label: 'Câmera Frontal' },
+  { key: 'microfone', label: 'Microfone' },
+  { key: 'alto_falante', label: 'Alto-falante' },
+  { key: 'conectividade', label: 'Wi-Fi / Bluetooth' },
+  { key: 'botoes_fisicos', label: 'Botões Físicos' },
+  { key: 'sensores', label: 'Sensores (Proximidade/Luz)' },
+];
+
+const TEST_RESULT_OPTIONS = [
+  { value: 'APROVADO', label: 'Aprovado' },
+  { value: 'REPROVADO', label: 'Reprovado' },
+  { value: 'NAO_TESTADO', label: 'Não testado' },
+];
+
+const buildInitialTestResults = () => TEST_CRITERIA.reduce((acc, criterio) => {
+  acc[criterio.key] = 'NAO_TESTADO';
+  return acc;
+}, {});
+
 const customStyles = {
   control: (provided) => ({
     ...provided,
@@ -54,6 +77,10 @@ function NovoOS() {
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [showModalCelular, setShowModalCelular] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
+  const [testResults, setTestResults] = useState(() => buildInitialTestResults());
+  const [testObservacoes, setTestObservacoes] = useState('');
+  const [testEvidence, setTestEvidence] = useState(['']);
+  const [testError, setTestError] = useState('');
 
   const isEditing = Boolean(editingId);
 
@@ -154,6 +181,16 @@ function NovoOS() {
       setMessage('Selecione um cliente e um celular.');
       return;
     }
+
+    if (!isEditing) {
+      const algumCriterioRegistrado = Object.values(testResults).some((status) => status !== 'NAO_TESTADO');
+      if (!algumCriterioRegistrado) {
+        setTestError('Informe o resultado de pelo menos um critério antes de criar a OS.');
+        return;
+      }
+      setTestError('');
+    }
+
     setLoading(true);
     setMessage('');
     try {
@@ -173,6 +210,24 @@ function NovoOS() {
         payload.data_conclusao = null; 
       }
 
+      if (!isEditing) {
+        const criteriosPayload = TEST_CRITERIA.map(({ label, key }) => ({
+          nome: label,
+          status: testResults[key] || 'NAO_TESTADO',
+        }));
+        const midiaPayload = testEvidence
+          .map((url) => (typeof url === 'string' ? url.trim() : ''))
+          .filter(Boolean);
+        payload.testes = [
+          {
+            etapa: 'INICIAL',
+            criterios: criteriosPayload,
+            observacoes: testObservacoes || undefined,
+            midia_urls: midiaPayload,
+          },
+        ];
+      }
+
       if (isEditing) {
         await ordensServicoApi.update(editingId, payload);
         setMessage('Ordem atualizada com sucesso!');
@@ -181,6 +236,9 @@ function NovoOS() {
         payload.celular_id = Number(celularId);
         await ordensServicoApi.create(payload);
         setMessage('Ordem criada com sucesso!');
+        setTestResults(buildInitialTestResults());
+        setTestObservacoes('');
+        setTestEvidence(['']);
       }
       setTimeout(() => navigate('/ordemdeservico'), 800);
     } catch (err) {
@@ -188,6 +246,99 @@ function NovoOS() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTestResultChange = (key, value) => {
+    setTestResults((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleEvidenceChange = (index, value) => {
+    setTestEvidence((prev) => {
+      const clone = [...prev];
+      clone[index] = value;
+      return clone;
+    });
+  };
+
+  const handleAddEvidence = () => {
+    setTestEvidence((prev) => (prev.length >= 5 ? prev : [...prev, '']));
+  };
+
+  const handleRemoveEvidence = (index) => {
+    setTestEvidence((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const renderTestSection = () => {
+    if (isEditing) {
+      return (
+        <div className="testes-section info">
+          <h3>Testes técnicos já registrados</h3>
+          <p>Para registrar novas inspeções utilize a tela "Controle de Qualidade".</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="testes-section">
+        <div className="testes-header">
+          <div>
+            <h3>Testes técnicos iniciais</h3>
+            <p>Informe o resultado de cada critério para documentar o estado do aparelho.</p>
+          </div>
+          <span className="badge-required">Obrigatório antes do reparo</span>
+        </div>
+        {testError && <p className="error-text">{testError}</p>}
+        <div className="test-grid">
+          {TEST_CRITERIA.map((criterio) => (
+            <div key={criterio.key} className="test-card">
+              <label>{criterio.label}</label>
+              <select
+                value={testResults[criterio.key]}
+                onChange={(e) => handleTestResultChange(criterio.key, e.target.value)}
+              >
+                {TEST_RESULT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+
+        <div className="testes-extra">
+          <label>Observações gerais dos testes:</label>
+          <textarea
+            rows="3"
+            value={testObservacoes}
+            onChange={(e) => setTestObservacoes(e.target.value)}
+            placeholder="Ex: Tela com micro riscos, aparelho chegou sem parafusos."
+          />
+        </div>
+
+        <div className="testes-extra">
+          <label>Evidências (URLs de fotos ou vídeos):</label>
+          {testEvidence.map((url, index) => (
+            <div key={`evidencia-${index}`} className="evidence-row">
+              <input
+                type="url"
+                value={url}
+                placeholder="https://..."
+                onChange={(e) => handleEvidenceChange(index, e.target.value)}
+              />
+              {testEvidence.length > 1 && (
+                <button type="button" onClick={() => handleRemoveEvidence(index)} className="remove-evidence">
+                  Remover
+                </button>
+              )}
+            </div>
+          ))}
+          {testEvidence.length < 5 && (
+            <button type="button" onClick={handleAddEvidence} className="link-button">
+              + Adicionar evidência
+            </button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const getSelectedCliente = () => opcoesClientes.find(c => c.value === Number(clienteId));
@@ -263,6 +414,8 @@ function NovoOS() {
 
         <label>Garantia válida até:</label>
         <input type="date" value={garantiaValidade} onChange={(e) => setGarantiaValidade(e.target.value)} />
+
+        {renderTestSection()}
 
         <button className="btn-primary" onClick={handleSave} disabled={loading || loadingOptions}>
           {isEditing ? 'Salvar alterações' : 'Cadastrar OS'}

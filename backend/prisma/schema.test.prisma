@@ -17,6 +17,7 @@ model usuarios {
   celulares  celulares[]
   pecas      pecas[]
   movimentacoes movimentacoes_estoque[]
+  testes_execucao ordens_servico_testes[]
 }
 
 model clientes {
@@ -97,6 +98,27 @@ model ordens_servico {
   celular celulares @relation(fields: [celular_id], references: [id])
   historico celulares_historico[]
   pecas_utilizadas ordens_servico_pecas[]
+  testes           ordens_servico_testes[]
+}
+
+model ordens_servico_testes {
+  id               Int      @id @default(autoincrement())
+  ordem_servico_id Int
+  criterios        String
+  observacoes      String?
+  aprovado         Boolean
+  resultado        String   @default("PENDENTE")
+  midia_urls       String?
+  etapa            String?  @default("INICIAL")
+  executado_por    Int?
+  data_execucao    DateTime? @default(now())
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @updatedAt
+
+  ordem_servico ordens_servico @relation(fields: [ordem_servico_id], references: [id])
+  executor       usuarios?     @relation(fields: [executado_por], references: [id])
+
+  @@index([ordem_servico_id], name: "ordem_servico_testes_ordem_idx")
 }
 
 model celulares_historico {

@@ -16,6 +16,7 @@ async function resetDB() {
   await prisma.$executeRawUnsafe('DELETE FROM celulares_historico');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico_pecas');
   await prisma.$executeRawUnsafe('DELETE FROM garantias');
+  await prisma.$executeRawUnsafe('DELETE FROM ordens_servico_testes');
   await prisma.$executeRawUnsafe('DELETE FROM ordens_servico');
   await prisma.$executeRawUnsafe("DELETE FROM pecas WHERE codigo_interno LIKE 'OS-TEST-%'");
   await prisma.$executeRawUnsafe("DELETE FROM celulares WHERE modelo LIKE 'Modelo-%'");
@@ -69,6 +70,21 @@ async function seedClienteCelular() {
   return { cliente, celular };
 }
 
+function buildTestesPayload(overrides = {}) {
+  return [
+    {
+      etapa: 'INICIAL',
+      criterios: [
+        { nome: 'Tela / Touch', status: 'APROVADO' },
+        { nome: 'Bateria / Carregamento', status: 'REPROVADO', observacao: 'Não liga' },
+      ],
+      observacoes: 'Checklist inicial automatizado',
+      midia_urls: ['https://example.com/foto-inicial.jpg'],
+      ...overrides,
+    },
+  ];
+}
+
 async function seedPeca(quantidade = 5) {
   const prisma = getPrisma();
   const codigo = `OS-TEST-${Date.now()}-${Math.random()}`.replace(/[^A-Za-z0-9]/g, '');
@@ -103,24 +119,36 @@ describe('API /api/ordens-servico', () => {
     const { cliente, celular } = await seedClienteCelular();
     const response = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de tela' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de tela', testes: buildTestesPayload() })
       .expect(201);
 
     expect(response.body.status).toBe('EmAndamento');
     expect(Array.isArray(response.body.historico)).toBe(true);
-    expect(response.body.historico[0].tipo_evento).toBe('OrdemServicoCriada');
+    const eventos = response.body.historico.map((event) => event.tipo_evento);
+    expect(eventos).toContain('OrdemServicoCriada');
+    expect(eventos).toContain('TesteTecnicoRegistrado');
+    expect(response.body.testes.length).toBeGreaterThan(0);
+    expect(response.body.testes[0].resultado).toBeDefined();
+  });
+
+  test('POST rejeita criação sem testes iniciais', async () => {
+    const { cliente, celular } = await seedClienteCelular();
+    await withAuth(request(app)
+      .post('/api/ordens-servico'))
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de placa' })
+      .expect(400);
   });
 
   test('GET lista com filtros por status e cliente', async () => {
     const { cliente, celular } = await seedClienteCelular();
     const aberta = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Bateria' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Bateria', testes: buildTestesPayload() })
       .expect(201);
 
     const concluida = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Tela' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Tela', testes: buildTestesPayload() })
       .expect(201);
 
     await withAuth(request(app)
@@ -140,7 +168,7 @@ describe('API /api/ordens-servico', () => {
     const { cliente, celular } = await seedClienteCelular();
     const ordem = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Placa' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Placa', testes: buildTestesPayload({ criterios: [{ nome: 'Microfone', status: 'APROVADO' }] }) })
       .expect(201);
 
     const patch = await withAuth(request(app)
@@ -155,14 +183,14 @@ describe('API /api/ordens-servico', () => {
 
     const prisma = getPrisma();
     const historicoCount = await prisma.celulares_historico.count({ where: { ordem_servico_id: ordem.body.id } });
-    expect(historicoCount).toBe(3);
+    expect(historicoCount).toBe(4);
   });
 
   test('PATCH impede garantia sem concluir', async () => {
     const { cliente, celular } = await seedClienteCelular();
     const ordem = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Limpeza' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Limpeza', testes: buildTestesPayload() })
       .expect(201);
 
     await withAuth(request(app).patch(`/api/ordens-servico/${ordem.body.id}`)).send({ garantia_dias: 10 }).expect(400);
@@ -173,7 +201,7 @@ describe('API /api/ordens-servico', () => {
     const inexistente = 999999;
     await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: inexistente, celular_id: celular.id, descricao: 'Bateria' })
+      .send({ cliente_id: inexistente, celular_id: celular.id, descricao: 'Bateria', testes: buildTestesPayload() })
       .expect(404);
   });
 
@@ -182,7 +210,7 @@ describe('API /api/ordens-servico', () => {
     const peca = await seedPeca(5);
     const ordem = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de bateria' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de bateria', testes: buildTestesPayload() })
       .expect(201);
 
     const registro = await withAuth(request(app)
@@ -208,7 +236,7 @@ describe('API /api/ordens-servico', () => {
     const peca = await seedPeca(10);
     const ordem = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca completa' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca completa', testes: buildTestesPayload() })
       .expect(201);
 
     const registro = await withAuth(request(app)
@@ -236,7 +264,7 @@ describe('API /api/ordens-servico', () => {
     const peca = await seedPeca(1);
     const ordem = await withAuth(request(app)
       .post('/api/ordens-servico'))
-      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de conector' })
+      .send({ cliente_id: cliente.id, celular_id: celular.id, descricao: 'Troca de conector', testes: buildTestesPayload() })
       .expect(201);
 
     await withAuth(request(app)
