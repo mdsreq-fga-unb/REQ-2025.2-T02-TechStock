@@ -4,21 +4,20 @@
 
 | Papel  | Descrição | Responsável | Participantes |
 |--------|------------------|-------------------|---------|
-| **Gerente de Projeto** | Coordena o projeto, garante a comunicação entre cliente e equipe, controla prazos e entregas. | Mariana | Renan |
+| **Gerente de Projeto** | Coordena o projeto, garante a comunicação entre cliente e equipe, controla prazos e entregas. | Mariana |
 | **Desenvolvedor Frontend** | Responsável pela interface do usuário, design e implementação das funcionalidades no lado do cliente. | Gabriel | Brenda, Mariana|
 | **Desenvolvedor Backend** | Implementa a lógica de negócios, integração com banco de dados e APIs | João Victor | Daniel, Renan |
-| **Analista de QA** | Garante a qualidade do produto, executando testes de funcionalidade, performance e usabilidade. | Brenda | Daniel |
 | **Analista de Requisitos** | Define os requisitos funcionais e não funcionais do sistema e garante que eles sejam atendidos. | Gabriel | Brenda, Daniel, João Victor, Mariana e Renan |
 
 ## 5.2 Comunicação
 **Ferramentas de Comunicação**
-- **Whatsapp**: será utilizado para discussões gerais a respeito do projeto por meio do envio rápido de mensagens de texto, incluindo o agendamento de reuniões e atualizações rápidas sobre os trabalhos em progresso. Também será utilizado para interações rápidas com o cliente ao longo do projeto. 
+- **Whatsapp**: será utilizado para discussões gerais a respeito do projeto por meio do envio rápido de mensagens de texto, incluindo o agendamento de reuniões e atualizações rápidas sobre os trabalhos em progresso. Também será utilizado para interações rápidas com o cliente ao longo do projeto.
 
-- **Discord**: será utilizado para reuniões entre os membros por meio dos canais de voz, e ocasionalmente incluindo o uso das funções de mensagem de texto como auxílio para a discussão e apresentação de ideias durante as reuniões da equipe. 
+- **Discord**: será utilizado para reuniões entre os membros por meio dos canais de voz, e ocasionalmente incluindo o uso das funções de mensagem de texto como auxílio para a discussão e apresentação de ideias durante as reuniões da equipe.
  
-- **Microsoft Teams**: será utilizado para reuniões com o cliente por meio de chamadas que serão gravadas utilizando as funções da plataforma. 
+- **Microsoft Teams**: será utilizado para reuniões com o cliente por meio de chamadas que serão gravadas utilizando as funções da plataforma.
 
-- **Trello**: Ferramenta visual e colaborativa, que facilita a organização do backlog, o acompanhamento das tarefas e a comunicação entre os membros da equipe. 
+- **Trello**: Ferramenta visual e colaborativa, que facilita a organização do backlog, o acompanhamento das tarefas e a comunicação entre os membros da equipe.
 
 **Métodos e Frequências de Reuniões**
 

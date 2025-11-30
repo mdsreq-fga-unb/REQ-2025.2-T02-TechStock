@@ -14,36 +14,72 @@ Os requisitos funcionais descrevem as funcionalidades que o sistema deve ter par
 
 **RF05 - Diferenciar estoque de celulares:** Separar estoque de celulares para revenda e para manutenção.
 
-**RF06 - Manter histórico de celulares:** Registrar todo o ciclo do celular (entrada, peças utilizadas, venda e cliente).
+**RF06 - Manter histórico de celulares:**
 
-**RF07 - Vincular peças utilizadas:** Associar peças usadas em concertos ao histórico do celular.
+- **RF06.1:** Permitir o registro de entrada de celulares, a partir da data. 
 
-**RF08 - Cadastrar clientes:** Permitir o registro de clientes com nome, contato, CPF e histórico de compras/consertos.
+- **RF06.2:** Permitir registrar peças utilizadas com nome ou código da peça. 
 
-**RF09 - Classificar clientes:** Diferenciar clientes como consumidores finais, revendedores ou clientes de manutenção.
+- **RF06.3:** Permitir registrar venda do celular, a partir da data. 
 
-**RF10 - Consultar histórico por cliente:** Mostrar automaticamente os celulares comprados ou com reparo realizado por cada cliente.
+- **RF06.4:** Permitir vincular celular ao nome do cliente. 
 
-**RF11 - Gerar relatórios de clientes:** Emitir relatórios de clientes mais ativos (quem comprou ou trouxe celular para manutenção em 30, 60 ou 90 dias) com garantia ativa (avisar sobre vencimento, manter relacionamento com o cliente, evitar reclamações) e inadimplentes (pagamentos pendentes e ou atrasados, lembrete de clientes inadimplentes). Lista de clientes que foram criados no último mês para entender se o fluxo de clientes está crescendo ou se mantendo.
+**RF07 - Cadastrar clientes:** Permitir o registro de clientes com nome, contato, CPF e histórico de compras/consertos.
 
-**RF12 - Gerenciar garantias:** Permitir registro de garantias vinculadas ao celular e ao cliente, configurando seus respectivos prazos (ex.: 90 dias, 1 ano) e emissão de mensagens de alertas próximo ao vencimento da garantia (2 meses antes do vencimento).
+**RF08 - Classificar clientes:** Diferenciar clientes como consumidores finais, revendedores ou clientes de manutenção.
 
-**RF13 - Registrar vendas:** Permitir o registro de vendas, vinculado ao nome do cliente, modelo do dispositivo, data da venda, telefone do comprador, garantia do produto.
+**RF09 - Consultar histórico por cliente:** Mostrar automaticamente os celulares comprados ou com reparo realizado por cada cliente.
 
-**RF14 - Registrar movimentações financeiras:** Registrar entradas e saídas financeiras vinculadas a vendas e serviços e permitir o registro de pagamento por PIX, cartão e boleto.
+**RF10 - Gerar relatórios de clientes:** 
+- **RF10.1:** Gerar relatórios de clientes ativos e permitir filtrar por prazo (30,60 ou 90 dias). 
 
-**RF15 - Gerar relatórios de estoque:** Listar produtos disponíveis, estoque mínimo e produtos parados.
+- **RF10.2:** Gerar relatório de clientes com garantia ativa e emitir alerta de vencimento de garantia. 
 
-**RF16 - Gerar gráficos de manutenção:** Mostrar peças mais utilizadas em consertos e celulares com mais problemas.
+- **RF10.3:** Gerar relatório de clientes inadimplentes e lembrete de inadimplência. 
+
+- **RF10.4:** Gerar relatórios de novos clientes. 
+
+
+**RF11 - Gerenciar garantias:** 
+
+- **RF11.1:** Registrar garantia vinculada ao celular. 
+
+- **RF11.2:** Registrar garantia vinculada ao celular. 
+
+- **RF11.3:** Configurar prazos de garantias. 
+
+- **RF11.4:** Calcular vencimento da garantia e emitir alerta de vencimento e emitir alerta de vencimento. 
+
+- **RF11.5:** Consultar status da garantia (ativa/inativa). 
+
+**RF12 - Registrar vendas:** Permitir o registro de vendas, vinculado ao nome do cliente, modelo do dispositivo, data da venda, telefone do comprador, garantia do produto.
+
+**RF13 - Registrar movimentações financeiras:** Registrar entradas e saídas financeiras vinculadas a vendas e serviços e permitir o registro de pagamento por PIX, cartão e boleto.
+
+**RF14 - Gerar relatórios de estoque:** 
+
+- **RF14.1:** Relatório de produtos disponíveis (peças e celulares). 
+
+- **RF14.2:** Relatório de estoque mínimo. 
+
+- **RF14.3:** Relatório de produtos parados. 
+
+**RF15 - Gerar gráficos de manutenção:** 
+- **RF15.1:** Gráfico de peças mais utilizadas em concertos. 
+
+- **RF15.2:** Gráficos de celulares que mais apresentam problemas. 
+
+- **RF15.3:** Exibir gráficos em dashboard. 
+
 
 ## 7.2 Lista de Requisitos Não Funcionais
 
 Os requisitos não funcionais consistem nas restrições as aplicações de funções do sistema. Visando garantir a eficiência e qualidade das funcionalidades implementadas considerando o seu desempenho, segurança e usabilidade.
 
-**RNF01 - Usabilidade:** O sistema deve possuir uma interface simples e intuitiva, com elementos visuais que auxiliam a organização e sua utilização no dia a dia, contendo dashboards de vendas, estoque e clientes, com gráficos e indicadores em sua forma resumida. O sistema também deve permitir que operações e registros de movimentação sejam feitas de forma rápida (até 3 cliques), além de botões com marcações descritivas.
+**RNF01 - Usabilidade:** O sistema deve possuir uma interface simples e intuitiva, com elementos visuais que auxiliam a organização e sua utilização no dia a dia, contendo dashboards de vendas, estoque e clientes, com gráficos e indicadores em sua forma resumida. O sistema também deve permitir que operações e registros de movimentação sejam feitos de forma rápida (até 3 cliques), além de botões com marcações descritivas. 
 
-**RNF02 - Confiabilidade:** O sistema deve exigir login e senha para a sua utilização. As sessões devem ser encerradas após 2h de inatividade. Além de se recuperar de forma rápida (em até 5 minutos) após uma falha.
+**RNF02 - Confiabilidade:**  O sistema deve exigir login e senha para a sua utilização. As sessões devem ser encerradas após 2h de inatividade. Além de se recuperar de forma rápida (em até 5 minutos) após uma falha.
 
 **RNF03 - Desempenho:** Consultas no sistema devem responder em até 60 segundos, e o sistema deve ser capaz de suportar pelo menos 5.000 registros sem perda de desempenho. Além disso, operações como cadastro e edição não devem exceder o tempo de 60 segundos.
 
-**RNF04 - Suportabilidade:** O sistema deve ser uma aplicação web responsiva, funcionando corretamente em navegadores modernos (Google Chrome, Mozilla Firefox, Microsoft Edge…) é capaz de se adaptar automáticamente a diferentes tamanhos de tela, de 360x640 px a 1920x1080 px, sem perda de usabilidade.
+**RNF04 - Suportabilidade:** O sistema deve ser uma aplicação web responsiva, funcionando corretamente em navegadores modernos (Google Chrome, Mozilla Firefox, Microsoft Edge…) é capaz de se adaptar automaticamente a diferentes tamanhos de tela, de 360x640 px a 1920x1080 px, sem perda de usabilidade.  
