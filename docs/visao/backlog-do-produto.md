@@ -327,6 +327,25 @@ Como Administrador, gostaria de registrar as entradas e saídas financeiras vinc
 
 - [ ] O sistema deve armazenar essas movimentações para que possam ser utlizadas na geração de relatórios de faturamento e lucro. 
 
+
+**US13 – Gerar relatórios de estoque (RF14)** 
+
+Como Administrador, gostaria de visualizar relatórios com informações relevantes do estoque. Como os produtos disponíveis, estoque mínimo e produtos parados. Para ter uma visão mais ampla da situação do estoque da loja. 
+ 
+**Critérios de aceitação:**   
+
+- [ ] O sistema deve ter uma funcionalidade dedicada para Gerar Relatórios de Estoque. 
+
+- [ ] Deve ser possível gerar um relatório que liste todos os produtos disponíveis (celulares e peças). 
+
+- [ ] O sistema deve gerar específico para itens que atingirem ou estão abaixo do estoque mínimo. 
+
+- [ ] O sistema deve gerar um relatório de Produtos parados (itens que não tiveram movimentação de saída, como venda ou uso em conserto, em um período específico). 
+
+- [ ] Os relatórios devem incluir informações esses como: Nome/Modelo do item, quantidade atual, localização no estoque e data da última movimentação. 
+
+- [ ] Os dados de cada relatório devem ser apresentados em uma lista que suporte a exportação em formato (PDF ou CSV). 
+
 **US13.1 – Relatório de produtos disponíveis (RF14):**   
 
 Como Administrador, gostaria de visualizar um relatório com todos os produtos disponíveis (celulares e peças), para acompanhar o inventário atual. 
