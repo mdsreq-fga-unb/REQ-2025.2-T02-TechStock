@@ -52,7 +52,7 @@ A equipe de desenvolvedores do projeto TechStock é composta por membros do curs
   <div class="team-card">
     <img src="assets/Daniel_perfil.jpg" alt="Daniel Teles"/>
     <h3>Daniel Teles</h3>
-    <p class="role">Analista de QA & Desenvolvedor Backend</p>
+    <p class="role">Desenvolvedor Backend</p>
     <div class="social-links">
       <a href="https://github.com/dtdanielteles" target="_blank">GitHub</a>
       <a href="https://www.linkedin.com/in/daniel-teles-brito" target="_blank">LinkedIn</a>
@@ -73,7 +73,7 @@ A equipe de desenvolvedores do projeto TechStock é composta por membros do curs
   <div class="team-card">
     <img src="assets/Brenda_img.jpeg" alt="Brenda Beatriz"/>
     <h3>Brenda Beatriz</h3>
-    <p class="role">Desenvolvedora Frontend & Analista de QA</p>
+    <p class="role">Desenvolvedora Frontend</p>
     <div class="social-links">
       <a href="https://github.com/Brwnds" target="_blank">GitHub</a>
       <a href="https://www.linkedin.com/in/brenda-beatriz" target="_blank">LinkedIn</a>

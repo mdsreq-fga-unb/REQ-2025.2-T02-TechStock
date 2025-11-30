@@ -46,3 +46,15 @@
 **Dificuldade**: Enfrentamos dificuldades na execução das sprints da Unidade 2, o que impactou o andamento planejado das atividades.
 
 **Como foi superado**: Enfrentamos dificuldades na execução das sprints da Unidade 2, o que impactou o andamento planejado das atividades.
+
+## 10.3 Unidade 3
+
+**Dificuldade**: Durante algumas sprints, percebeu-se que quando a equipe trabalhava de forma mais isolada sem compartilhar dúvidas, avanços e problemas o desenvolvimento ficava mais lento e sujeito a erros. Situações que poderiam ser resolvidas rapidamente acabavam se tornando bloqueios maiores porque não eram discutidas a tempo. 
+
+**Como foi superado**: A equipe passou a realizar mais alinhamentos rápidos ao longo do dia, além das dailys. A comunicação entre front-end, back-end e PO foi reforçada em momentos críticos do desenvolvimento. Dúvidas passaram a ser levantadas imediatamente, evitando suposições ou implementações isoladas. A equipe estabeleceu uma cultura de apoio mútuo: quando alguém terminava uma tarefa, ajudava quem estava com dificuldades. 
+
+# 11 LIÇÕES APRENDIDAS
+
+MARSICANO, George. Requisitos de Software: Fundamentos, Evolução e Práticas. Maio de 2025. 
+
+SCHWABER, Ken; SUTHERLAND, Jeff. O Guia do Scrum: o guia definitivo para o Scrum — as regras do jogo. Tradução de Fábio Cruz, Eduardo Rodrigues Sucena e Rodrigo Paulo Camargo. Novembro de 2020.  
