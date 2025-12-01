@@ -92,9 +92,7 @@ const Dashboard = () => {
         <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
         <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
         <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-        <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
-        <div className='BotoesNavegacao'>Relatórios</div>
         <LogoutButton className='BotaoLogout' />
         </div>
         
@@ -231,7 +229,7 @@ const Dashboard = () => {
               <ShieldCheck className='TextoRoxo' />
               <h3>Alertas de Garantia</h3>
             </div>
-            <p className='SubtituloAlerta'>Produtos próximos do vencimento</p>
+            <p className='SubtituloAlerta'>Garantias próximas do vencimento</p>
             {dados.alertasGarantia.map((alerta) => (
               <div key={alerta.id} className='ItemAlertaGarantia'>
                 <div className='InfoGarantia'>

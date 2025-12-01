@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/NovoCadastroCelulares.css';
 import { celularesApi } from '../services/api';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 function NovoCadastroCelulares() {
   const navigate = useNavigate();
@@ -129,16 +130,38 @@ function NovoCadastroCelulares() {
         )}
 
         <label>Modelo:</label>
-        <input type="text" value={modelo} onChange={(event) => setModelo(event.target.value)} required />
+        <input
+          type="text"
+          value={modelo}
+          onChange={(event) => setModelo(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>IMEI:</label>
-        <input type="text" value={imei} onChange={(event) => setIMEI(event.target.value)} required />
+        <input
+          type="text"
+          value={imei}
+          onChange={(event) => setIMEI(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.IMEI}
+        />
 
         <label>Cor:</label>
-        <input type="text" value={cor} onChange={(event) => setCor(event.target.value)} />
+        <input
+          type="text"
+          value={cor}
+          onChange={(event) => setCor(event.target.value)}
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Capacidade:</label>
-        <input type="text" value={capacidade} onChange={(event) => setCapacidade(event.target.value)} />
+        <input
+          type="text"
+          value={capacidade}
+          onChange={(event) => setCapacidade(event.target.value)}
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Status:</label>
         <select value={status} onChange={(event) => setStatus(event.target.value)}>
@@ -162,7 +185,13 @@ function NovoCadastroCelulares() {
         </select>
 
         <label>Fornecedor:</label>
-        <input type="text" value={fornecedor} onChange={(event) => setFornecedor(event.target.value)} required />
+        <input
+          type="text"
+          value={fornecedor}
+          onChange={(event) => setFornecedor(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Valor de Compra:</label>
         <input type="number" min="0" step="0.01" value={valorCompra} onChange={(event) => setValorCompra(event.target.value)} />
@@ -171,7 +200,12 @@ function NovoCadastroCelulares() {
         <input type="number" min="0" value={garantiaDias} onChange={(event) => setGarantiaDias(event.target.value)} />
 
         <label>Defeitos Identificados:</label>
-        <input type="text" value={defeito} onChange={(event) => setDefeito(event.target.value)} />
+        <input
+          type="text"
+          value={defeito}
+          onChange={(event) => setDefeito(event.target.value)}
+          maxLength={INPUT_LIMITS.LONG_TEXT}
+        />
 
         <button className="btn-primary" type="submit" disabled={loading || initialLoading}>
           {loading ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar Celular'}

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Select from 'react-select';
 import { vendasApi, clientesApi, celularesApi } from '../services/api';
 import "../styles/NovaVenda.css";
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const DEFAULT_GARANTIA = 90;
 const TODAY = new Date().toISOString().substring(0, 10);
@@ -306,6 +307,7 @@ function NovaVenda() {
                         onChange={handleFieldChange}
                         rows="4"
                         placeholder="Notas adicionais sobre a venda"
+                        maxLength={INPUT_LIMITS.LONG_TEXT}
                     />
                 </div>
 

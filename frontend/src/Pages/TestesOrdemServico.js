@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ordensServicoApi, ordensServicoTestesApi } from '../services/api';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const TEST_CRITERIA = [
   { key: 'tela_touch', label: 'Tela / Touch' },
@@ -50,11 +52,24 @@ const styles = {
     padding: '2rem', textAlign: 'center', background: '#d4edda', color: '#155724', borderRadius: '12px',
     border: '1px solid #a3d5a1',
   },
+  backButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    border: '1px solid #5C2D91',
+    background: '#fff',
+    color: '#5C2D91',
+    cursor: 'pointer',
+    fontWeight: 600,
+  },
 };
 
 const formatDateTime = (value) => (value ? new Date(value).toLocaleString('pt-BR') : '-');
 
 const TesteCelulares = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [orders, setOrders] = useState([]);
@@ -198,6 +213,7 @@ const TesteCelulares = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ width: '100%', padding: '10px', marginTop: '6px', borderRadius: '8px', border: '1px solid #d4d4d4' }}
+        maxLength={INPUT_LIMITS.SEARCH}
       />
       <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 220px' }}>
@@ -351,6 +367,7 @@ const TesteCelulares = () => {
             onChange={(e) => setObservations(e.target.value)}
             placeholder="Ex: Aparelho voltou a apresentar falha intermitente."
             style={{ width: '100%', marginTop: '6px', padding: '10px', borderRadius: '8px', border: '1px solid #d4d4d4' }}
+            maxLength={INPUT_LIMITS.LONG_TEXT}
           />
         </div>
       </div>
@@ -384,7 +401,10 @@ const TesteCelulares = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={{ marginBottom: '1rem' }}>Controle de Qualidade - Gerência</h2>
+      <button type="button" onClick={() => navigate('/ordemdeservico')} style={styles.backButton}>
+        ← Voltar para Ordens de Serviço
+      </button>
+      <h2 style={{ margin: '1rem 0' }}>Controle de Qualidade - Gerência</h2>
       {!selectedOrder && renderSearchCard()}
       {selectedOrder && !submitted && renderForm()}
       {submitted && renderSuccess()}

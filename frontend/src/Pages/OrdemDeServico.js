@@ -5,6 +5,7 @@ import { Package, Users, Wrench, TrendingUp } from 'lucide-react';
 import '../styles/OrdemDeServiço.css';
 import { dashboardsApi, ordensServicoApi } from '../services/api';
 import LogoutButton from '../components/LogoutButton';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos os status' },
@@ -21,6 +22,13 @@ function formatDate(value) {
   return date.toLocaleDateString('pt-BR');
 }
 
+const DEFAULT_GARANTIA_DIAS = 90;
+
+const buildIsoDateAtNoon = (dateOnly) => {
+  if (!dateOnly) return null;
+  return new Date(`${dateOnly}T12:00:00`).toISOString();
+};
+
 const OrdensServico = () => {
   const navigate = useNavigate();
   const [ordens, setOrdens] = useState([]);
@@ -34,7 +42,7 @@ const OrdensServico = () => {
   const [concludeModalOpen, setConcludeModalOpen] = useState(false);
   const [ordemSelecionada, setOrdemSelecionada] = useState(null);
   const [concludeDate, setConcludeDate] = useState('');
-  const [concludeGarantia, setConcludeGarantia] = useState('');
+  const [concludeGarantia, setConcludeGarantia] = useState(String(DEFAULT_GARANTIA_DIAS));
   const [concludeError, setConcludeError] = useState('');
   const [concludeSaving, setConcludeSaving] = useState(false);
   useEffect(() => {
@@ -92,7 +100,9 @@ const OrdensServico = () => {
   const openConcludeModal = (ordem) => {
     setOrdemSelecionada(ordem);
     setConcludeDate(getTodayInputValue());
-    setConcludeGarantia(ordem.garantia_dias != null ? String(ordem.garantia_dias) : '');
+    setConcludeGarantia(
+      ordem.garantia_dias != null ? String(ordem.garantia_dias) : String(DEFAULT_GARANTIA_DIAS)
+    );
     setConcludeError('');
     setConcludeModalOpen(true);
   };
@@ -102,6 +112,7 @@ const OrdensServico = () => {
     setOrdemSelecionada(null);
     setConcludeError('');
     setConcludeSaving(false);
+    setConcludeGarantia(String(DEFAULT_GARANTIA_DIAS));
   };
 
   const handleConfirmConclude = async () => {
@@ -129,7 +140,7 @@ const OrdensServico = () => {
     try {
       const payload = {
         status: 'Concluido',
-        data_conclusao: new Date(concludeDate).toISOString(),
+        data_conclusao: buildIsoDateAtNoon(concludeDate),
       };
       if (garantiaValue !== '') {
         payload.garantia_dias = parsedGarantia;
@@ -197,9 +208,7 @@ const OrdensServico = () => {
         <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
         <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
         <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-        <div className='BotoesNavegacao'>Fornecedores</div>
         <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
-        <div className='BotoesNavegacao'>Relatórios</div>
         <LogoutButton className='BotaoLogout' /> 
         </div>
         
@@ -235,6 +244,7 @@ const OrdensServico = () => {
             className="search-input"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
+            maxLength={INPUT_LIMITS.SEARCH}
           />
 
           <select

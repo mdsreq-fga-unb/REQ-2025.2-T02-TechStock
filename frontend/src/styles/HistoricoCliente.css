@@ -22,6 +22,8 @@
 .SistemaDeGestao{ font-size:11px; margin-top:-2px; color:#6f6f6f; }
 .BotoesNavegacao{ background-color:#E9DFF1; padding:10px 24px; border-radius:10px; color:#5C2D91; font-weight:500; cursor:pointer; transition:0.25s ease; display:flex; align-items:center; justify-content:center; }
 .BotoesNavegacao:hover{ background-color:#D9C9EB; transform:translateY(-1px); }
+.BotaoLogout{ background-color:#FFE8E8; color:#B42318; padding:10px 24px; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:0.2s ease; display:flex; align-items:center; justify-content:center; }
+.BotaoLogout:hover{ background-color:#FFD1D1; transform:translateY(-1px); }
 .Clientes{ margin:40px 80px 0px; font-size:22px; font-weight:600; color:#5C2D91; }
 .gerencie-1{ margin-left:80px; font-size:13px; color:#757575; }
 .gerencie-2{ margin-left:20px; font-size:13px; color:#757575; }

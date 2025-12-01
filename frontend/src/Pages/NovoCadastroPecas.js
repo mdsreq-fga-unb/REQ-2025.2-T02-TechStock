@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/NovoCadastroPecas.css';
 import { pecasApi } from '../services/api';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 function NovoCadastroPecas() {
   const navigate = useNavigate();
@@ -115,10 +116,22 @@ function NovoCadastroPecas() {
         )}
 
         <label>Nome:</label>
-        <input type="text" value={name} onChange={(event) => setName(event.target.value)} required />
+        <input
+          type="text"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Código Interno:</label>
-        <input type="text" value={codigoInterno} onChange={(event) => setCodigoInterno(event.target.value)} required />
+        <input
+          type="text"
+          value={codigoInterno}
+          onChange={(event) => setCodigoInterno(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.CODE}
+        />
 
         <label>Compatibilidade:</label>
         <input
@@ -126,13 +139,20 @@ function NovoCadastroPecas() {
           value={compatibilidade}
           onChange={(event) => setCompatibilidade(event.target.value)}
           required
+          maxLength={INPUT_LIMITS.LONG_TEXT}
         />
 
         <label>Quantidade:</label>
         <input type="number" min="0" value={quantidade} onChange={(event) => setQuantidade(event.target.value)} />
 
         <label>Nome do Fornecedor:</label>
-        <input type="text" value={fornecedor} onChange={(event) => setFornecedor(event.target.value)} required />
+        <input
+          type="text"
+          value={fornecedor}
+          onChange={(event) => setFornecedor(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Garantia padrão (dias):</label>
         <input
