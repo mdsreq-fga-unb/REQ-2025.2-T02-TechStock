@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import '../styles/Login.css';
 import { useAuth } from '../context/AuthContext';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 
 
@@ -52,10 +53,18 @@ function Login(){
                 <h1 className="Logo"> CellVex</h1>
                 <div className="BotaoUseraname"> 
                     <h4>E-mail</h4>
-                <input type="email" placeholder="seu@gmail.com" value={username} onChange={(e)=> setUsername(e.target.value)} required autoComplete="email" />
+                    <input
+                      type="email"
+                      placeholder="seu@gmail.com"
+                      value={username}
+                      onChange={(e)=> setUsername(e.target.value)}
+                      required
+                      autoComplete="email"
+                      maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+                    />
                 </div>
                 <div className="BotaoPassword"> <h4>Senha</h4><input type="password" placeholder="Senha"
-                value={password} onChange={(e)=> setPassword(e.target.value)} required autoComplete="current-password" />
+                                value={password} onChange={(e)=> setPassword(e.target.value)} required autoComplete="current-password" maxLength={INPUT_LIMITS.DEFAULT_TEXT} />
                 </div>
                 <button className="BotaoEntrarNoSistema" type="submit" disabled={loading}>
                     {loading ? 'Entrando...' : 'Entrar no Sistema'}

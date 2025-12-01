@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/HistoricoCelular.css';
 import { celularesHistoricoApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const EVENT_LABELS = {
     OrdemServicoCriada: 'OS aberta',
@@ -191,11 +193,10 @@ const HistoricoCelularesTable = () => {
                 <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
                 <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
                 <Link to="/dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-                <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+                <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
                 <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-                <div className='BotoesNavegacao'>Fornecedores</div>
-                <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Manutenção</Link>
-                <div className='BotoesNavegacao'>Relatórios</div>
+                <Link to="/pecas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Peças</Link>
+                <LogoutButton className='BotaoLogout' />
             </div>
 
             <h2 className="Clientes">Histórico</h2>
@@ -212,6 +213,7 @@ const HistoricoCelularesTable = () => {
                         className="campo-busca"
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
+                        maxLength={INPUT_LIMITS.SEARCH}
                     />
 
                     <select
@@ -313,11 +315,5 @@ const HistoricoCelularesTable = () => {
 // COMPONENTE PRINCIPAL (App) - Apenas renderiza a tabela isolada
 // =========================================================
 export default function HistoricoCelular() {
-    return (
-        <div className="font-sans antialiased bg-gray-100">
-            <div className="max-w-7xl mx-auto">
-                <HistoricoCelularesTable />
-            </div>
-        </div>
-    );
+    return <HistoricoCelularesTable />;
 }

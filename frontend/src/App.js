@@ -15,9 +15,7 @@ import RequireAuth from "./components/RequireAuth";
 import Vendas from "./Pages/Vendas"
 import TestesOrdemServico from "./Pages/TestesOrdemServico";
 import HistoricoCelular from "./Pages/HistoricoCelular";
-import HistoricoClientes from "./Pages/HistoricoCliente";
-import Movimentacoes from "./Pages/Movimentacoes";
-import Estoque from "./Pages/Estoque";
+import HistoricoClientes from "./Pages/HistoricoCliente";;
 import NovoVendas from "./Pages/NovoVendas";
 
 export default function App() {
@@ -135,22 +133,6 @@ export default function App() {
             element={(
               <RequireAuth>
                 <HistoricoClientes />
-              </RequireAuth>
-            )}
-          />
-          <Route
-            path="/movimentacoes"
-            element={(
-              <RequireAuth>
-                <Movimentacoes />
-              </RequireAuth>
-            )}
-          />
-          <Route
-            path="/estoque"
-            element={(
-              <RequireAuth>
-                <Estoque />
               </RequireAuth>
             )}
           />

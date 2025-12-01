@@ -44,6 +44,25 @@
   justify-content: center;
 }
 
+.BotaoLogout{
+  background-color: #FFE8E8;
+  color: #B42318;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.BotaoLogout:hover{
+  background-color: #FFD6D6;
+  transform: translateY(-1px);
+}
+
 .BotoesNavegacao:hover{
   background-color: #D9C9EB;
   transform: translateY(-1px);

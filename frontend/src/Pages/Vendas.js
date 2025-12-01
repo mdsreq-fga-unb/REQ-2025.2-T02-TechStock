@@ -3,6 +3,7 @@ import '../styles/vendas.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { vendasApi } from '../services/api';
 import LogoutButton from '../components/LogoutButton';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 function Vendas() {
   const navigate = useNavigate();
@@ -130,9 +131,7 @@ function Vendas() {
                 <Link to="/Dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
                 <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
                 <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-                <div className='BotoesNavegacao'>Fornecedores</div>
                 <Link to="/pecas" style={{ textDecoration: 'none' }}className='BotoesNavegacao'>Peças</Link>
-                <div className='BotoesNavegacao'>Relatórios</div>
                     <LogoutButton className='BotaoLogout' /> 
           </div>
 
@@ -151,6 +150,7 @@ function Vendas() {
                      className="search-input"
                      value={searchInput}
                      onChange={(event) => setSearchInput(event.target.value)}
+                     maxLength={INPUT_LIMITS.SEARCH}
                    /> 
                    
 
@@ -158,18 +158,6 @@ function Vendas() {
                      + Novas Vendas
                    </button>
 
-                   <button
-                     className="btn-primary"
-                     onClick={() => navigate("/movimentacoes")}
-                   >
-                     + Movimentações
-                   </button>
-                     <button
-                     className="btn-primary"
-                     onClick={() => navigate("/estoque")}
-                   >
-                     + Estoque
-                   </button>
               </div>
 
           <div className="pagination-bar">
