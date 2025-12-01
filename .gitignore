@@ -48,6 +48,7 @@ backend/coverage/
 # Python/MkDocs caches
 __pycache__/
 .site/
+site/
 .pytest_cache/
 
 # Tooling caches

@@ -358,7 +358,7 @@ Como Administrador, gostaria de visualizar um relatório com todos os produtos d
 
 - [ ] O relatório deve ser atualizado em tempo real com base no estoque atual. 
 
-**US13.2 – Relatório de estoque mínimo (RF14):**  
+**US13.2 – Relatório de estoque mínimo (RF14.2):**  
 
 Como Administrador, gostaria de gerar um relatório com os produtos que atingiram ou estão abaixo do estoque mínimo, para facilitar reposições. 
 
@@ -368,7 +368,7 @@ Como Administrador, gostaria de gerar um relatório com os produtos que atingira
 
 - [ ] O relatório deve apresentar: item, quantidade atual, estoque mínimo definido e última movimentação. 
 
-**US13.3 – Relatório de produtos parados (RF14)** 
+**US13.3 – Relatório de produtos parados (RF14.3)** 
 
 Como Administrador, gostaria de visualizar um relatório de produtos parados, ou seja, itens sem movimentação de saída em um período específico, para auxiliar decisões de compra. 
 
@@ -396,7 +396,7 @@ Como Administrador, gostaria de visualizar um relatório de produtos parados, ou
 
 - [ ] O sistema deve exibir os gráficos em um dashboard ou tela de relatórios gerenciais de forma resumida e intuitiva. 
 
-**US14.1 – Gráfico de peças mais utilizadas em consertos (RF15)** Como Administrador, gostaria de visualizar um gráfico que mostre as peças mais utilizadas em consertos, para auxiliar no controle e reposição do estoque. 
+**US14.1 – Gráfico de peças mais utilizadas em consertos (RF15.1)** Como Administrador, gostaria de visualizar um gráfico que mostre as peças mais utilizadas em consertos, para auxiliar no controle e reposição do estoque. 
 
 **Critérios de aceitação:**   
 
@@ -408,7 +408,7 @@ Como Administrador, gostaria de visualizar um relatório de produtos parados, ou
 
 - [ ] Caso não haja dados no período, o sistema deve exibir uma mensagem informativa (“Não há peças utilizadas nesse período”). 
 
-**US14.2 – Gráfico de celulares que mais apresentam problemas (RF15)** 
+**US14.2 – Gráfico de celulares que mais apresentam problemas (RF15.2)** 
 
 Como Administrador, gostaria de ver um gráfico que identifique os modelos de celular com maior recorrência de problemas, para apoiar o plano de manutenção e decisões estratégicas. 
 
@@ -420,7 +420,7 @@ Como Administrador, gostaria de ver um gráfico que identifique os modelos de ce
 
 - [ ] O sistema deve exibir uma mensagem caso não haja OS registradas no período. 
 
-** US14.3 – Exibir gráficos em Dashboard (RF15)**   
+**US14.3 – Exibir gráficos em Dashboard (RF15.3)**   
 
 Como Administrador, gostaria de visualizar os gráficos diretamente em um dashboard centralizado, facilitando a análise rápida. 
 
