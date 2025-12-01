@@ -208,8 +208,7 @@ Validação do Minimum Viable Product com o cliente, apresentando as funcionalid
 
 ---
 
-## Reunião de RF e RNF (Unidade 2)
-
+## Reunião de RF e RNF 
 Reunião de discussão e alinhamento dos Requisitos Funcionais (RF) e Requisitos Não-Funcionais (RNF) do projeto.
 
 ### Gravação da Reunião
