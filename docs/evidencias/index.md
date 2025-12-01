@@ -141,7 +141,7 @@ Gravação de áudio da conversa com o cliente sobre a priorização do MVP:
 
 <div style="margin: 16px 0; padding: 16px; background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f8 100%); border-left: 4px solid #0052cc; border-radius: 6px;">
   <audio controls style="width: 100%;">
-    <source src="../assets/Priorização MVP.mp3" type="audio/mpeg">
+    <source src="../assets/Priorizacao-MVP.mp3" type="audio/mpeg">
     Seu navegador não suporta o elemento de áudio.
   </audio>
 </div>
@@ -254,7 +254,7 @@ Gravação de áudio da conversa sobre a validação do protótipo de baixo nív
 
 <div style="margin: 16px 0; padding: 16px; background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f8 100%); border-left: 4px solid #0052cc; border-radius: 6px;">
   <audio controls style="width: 100%;">
-    <source src="../assets/Validação protótipo de baixo nível.mp3" type="audio/mpeg">
+    <source src="../assets/validacao.mp3" type="audio/mpeg">
     Seu navegador não suporta o elemento de áudio.
   </audio>
 </div>

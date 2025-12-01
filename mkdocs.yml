@@ -1,7 +1,12 @@
 site_name: TechStock
 docs_dir: ./docs
+site_dir: ./site
 repo_url: https://mdsreq-fga-unb.github.io/REQ-2025.2-T02-TechStock/
 repo_name: REQ-2025.2-T02-TechStock
+
+plugins:
+  - search
+  - offline
 
 theme:
   name: material
