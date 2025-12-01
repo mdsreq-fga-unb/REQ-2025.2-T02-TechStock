@@ -1,7 +1,7 @@
 site_name: TechStock
 docs_dir: ./docs
 site_dir: ./site
-repo_url: https://mdsreq-fga-unb.github.io/REQ-2025.2-T02-TechStock/
+repo_url: https://github.com/mdsreq-fga-unb/REQ-2025.2-T02-TechStock
 repo_name: REQ-2025.2-T02-TechStock
 
 plugins:
@@ -86,8 +86,5 @@ nav:
     - PBB: estudo-caso/pbb/index.md
     - Casos de Uso: estudo-caso/casos-de-uso/index.md
 
-  - Entregas:
-    - Unidade 1: entregas/unidade1.md
-    - Unidade 2: entregas/unidade2.md
-    - Unidade 3: entregas/unidade3.md
-    - Unidade 4: entregas/unidade4.md
+  - Cellvex - Sistema: cellvex-sistema/index.md
+ 
