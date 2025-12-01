@@ -40,10 +40,9 @@ O projeto é desenvolvido por uma equipe multidisciplinar, com responsabilidades
 
 | Papel | Responsáveis | Atividades |
 |-------|--------------|-----------|
-| Gerente de Projeto | Mariana, Renan | Coordena o projeto, comunicação com stakeholders, controle de prazos e entregas. |
+| Gerente de Projeto | Mariana | Coordena o projeto, comunicação com stakeholders, controle de prazos e entregas. |
 | Desenvolvedor Frontend | Gabriel, Brenda, Mariana | Implementa a interface do usuário, design e funcionalidades do lado cliente. |
 | Desenvolvedor Backend | João Victor, Daniel, Renan | Desenvolve a lógica de negócios, integração com banco de dados e APIs. |
-| Analista de QA | Brenda, Daniel | Realiza testes de funcionalidade, performance e usabilidade. |
 | Analista de Requisitos | Gabriel, Mariana, Brenda, Daniel, João Victor, Renan | Define requisitos funcionais e não funcionais e garante que sejam atendidos.
 
 ---
