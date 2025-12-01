@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/HistoricoCliente.css';
 import { clientesHistoricoApi } from '../services/api';
+import LogoutButton from '../components/LogoutButton';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const TIPO_LABELS = {
   compra: 'Compra',
@@ -211,11 +213,10 @@ const HistoricoClientesTable = () => {
         <Link to="/vendas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Vendas</Link>
         <Link to="/ordemdeservico" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Serviços</Link>
         <Link to="/dashboards" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Dashboard</Link>
-        <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Produtos</Link>
+        <Link to="/celulares" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Celulares</Link>
         <Link to="/" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Clientes</Link>
-        <div className='BotoesNavegacao'>Fornecedores</div>
-        <Link to="/pecas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Manutenção</Link>
-        <div className='BotoesNavegacao'>Relatórios</div>
+        <Link to="/pecas" style={{ textDecoration: 'none' }} className='BotoesNavegacao'>Peças</Link>
+        <LogoutButton className='BotaoLogout' />
       </div>
 
       <h2 className="Clientes">Histórico</h2>
@@ -232,6 +233,7 @@ const HistoricoClientesTable = () => {
             className="campo-busca"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
+            maxLength={INPUT_LIMITS.SEARCH}
           />
           <div className="acoes-direita">
             <select className="filtro-select" value={tipoFiltro} onChange={handleTipoChange} disabled={loading}>
@@ -324,11 +326,5 @@ const HistoricoClientesTable = () => {
 };
 
 export default function HistoricoCliente() {
-  return (
-    <div className="font-sans antialiased bg-gray-100">
-      <div className="max-w-7xl mx-auto">
-        <HistoricoClientesTable />
-      </div>
-    </div>
-  );
+  return <HistoricoClientesTable />;
 }

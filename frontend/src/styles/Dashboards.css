@@ -51,6 +51,25 @@ body {
   transition: 0.3s;
 }
 
+.BotaoLogout {
+  background-color: #ffe8e8;
+  color: #b42318;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.BotaoLogout:hover {
+  background-color: #ffd1d1;
+  transform: translateY(-1px);
+}
+
 
 /* --- Layout do Dashboard --- */
 .ConteudoDashboard {

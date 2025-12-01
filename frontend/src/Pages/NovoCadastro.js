@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/NovoCadastro.css';
 import { clientesApi } from '../services/api';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 function NovoCadastro() {
   const navigate = useNavigate();
@@ -88,7 +89,13 @@ function NovoCadastro() {
         {message && <div className="error-row">{message}</div>}
 
         <label>Nome Completo:</label>
-        <input type="text" value={name} onChange={(event) => setName(event.target.value)} required />
+        <input
+          type="text"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>CPF:</label>
         <input
@@ -97,13 +104,24 @@ function NovoCadastro() {
           onChange={(event) => setCpf(event.target.value)}
           required={!isEditing}
           disabled={isEditing || initialLoading}
+          maxLength={INPUT_LIMITS.CPF_CNPJ}
         />
 
         <label>Telefone:</label>
-        <input type="text" value={phone} onChange={(event) => setPhone(event.target.value)} />
+        <input
+          type="text"
+          value={phone}
+          onChange={(event) => setPhone(event.target.value)}
+          maxLength={INPUT_LIMITS.PHONE}
+        />
 
         <label>Email:</label>
-        <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+        <input
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Tipo de Cliente:</label>
         <select value={type} onChange={(event) => setType(event.target.value)}>

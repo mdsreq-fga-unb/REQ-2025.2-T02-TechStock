@@ -248,7 +248,6 @@ async function getAlertasGarantia(prisma, reference = new Date()) {
       celular: { select: { modelo: true, imei: true } },
     },
     orderBy: { data_fim: 'asc' },
-    take: 5,
   });
 
   return garantias.map((garantia) => {

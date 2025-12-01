@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Select from "react-select";
 import '../styles/NovoOrdemDeSevico.css';
 import { ordensServicoApi, clientesApi, celularesApi, pecasApi } from '../services/api';
+import { INPUT_LIMITS } from '../constants/inputLimits';
 
 const STATUS_OPTIONS = [
   { value: 'EmAndamento', label: 'Em andamento' },
@@ -622,6 +623,7 @@ function NovoOS() {
             value={testObservacoes}
             onChange={(e) => setTestObservacoes(e.target.value)}
             placeholder="Ex: Tela com micro riscos, aparelho chegou sem parafusos."
+            maxLength={INPUT_LIMITS.LONG_TEXT}
           />
         </div>
       </div>
@@ -675,10 +677,19 @@ function NovoOS() {
         </div>
 
         <label>Descrição:</label>
-        <input type="text" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+        <input
+          type="text"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+          maxLength={INPUT_LIMITS.DEFAULT_TEXT}
+        />
 
         <label>Observações:</label>
-        <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
+        <textarea
+          value={observacoes}
+          onChange={(e) => setObservacoes(e.target.value)}
+          maxLength={INPUT_LIMITS.LONG_TEXT}
+        />
 
         {renderPecasSection()}
 

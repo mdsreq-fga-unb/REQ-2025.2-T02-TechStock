@@ -51,6 +51,25 @@ body {
   transition: 0.3s;
 }
 
+.BotaoLogout {
+  background-color: #ffe8e8;
+  color: #b42318;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.BotaoLogout:hover {
+  background-color: #ffd1d1;
+  transform: translateY(-1px);
+}
+
 
 /* --- Layout do Dashboard --- */
 .ConteudoDashboard {
@@ -198,6 +217,30 @@ body {
   align-items: center;
 }
 
+.modal-input-row input[type="date"],
+.modal-content input[type="number"] {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #1f2937;
+  background-color: #fdfdfd;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-content input[type="number"] {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.modal-content input[type="date"]:focus,
+.modal-content input[type="number"]:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
 .modal-input-row button {
   background: #f0e6f7;
   color: #5b21b6;
@@ -205,6 +248,7 @@ body {
   border-radius: 6px;
   padding: 8px 12px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .modal-actions {
