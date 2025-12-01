@@ -160,15 +160,6 @@ Gravação de áudio da conversa com o cliente sobre a priorização do MVP:
 
 Documentação da reunião de elicitação e descoberta de requisitos, onde foram identificadas as necessidades iniciais do cliente e o contexto do negócio.
 
-### Roteiro da Reunião
-
-Documento com o roteiro estruturado utilizado para guiar a reunião de elicitação:
-
-<iframe src="../../assets/Roteiroo.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 16px 0;"></iframe>
-
-<a href="../../assets/Roteiroo.pdf" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0052cc 0%, #003d99 100%); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 52, 204, 0.2);">🔗 Abrir em Nova Aba</a>
----
-
 ### Gravação da Reunião
 
 Registro em vídeo completo da reunião de elicitação e descoberta:
@@ -217,19 +208,9 @@ Validação do Minimum Viable Product com o cliente, apresentando as funcionalid
 
 ---
 
-## Reunião de RF e RNF
+## Reunião de RF e RNF (Unidade 2)
 
 Reunião de discussão e alinhamento dos Requisitos Funcionais (RF) e Requisitos Não-Funcionais (RNF) do projeto.
-
-### Documento de Requisitos
-
-Lista completa de RF e RNF documentados:
-
-<iframe src="../../assets/RF-RNF.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 16px 0;"></iframe>
-
-<a href="../../assets/RF-RNF.pdf" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0052cc 0%, #003d99 100%); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 52, 204, 0.2);">🔗 Abrir em Nova Aba</a>
-
----
 
 ### Gravação da Reunião
 
