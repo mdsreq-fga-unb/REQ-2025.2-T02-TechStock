@@ -36,9 +36,9 @@ Com base no diagrama de caso de uso apresentado acima, foram desenvolvidas seis 
 
 #### 2. Criação de perfil de paciente
 
-<iframe src="../../assets/caso_de_uso_paciente.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 16px 0;"></iframe>
+<iframe src="docs\assets\caso_de_uso_paciente.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 16px 0;"></iframe>
 
-<a href="../../assets/caso_de_uso_paciente.pdf" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0052cc 0%, #003d99 100%); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 52, 204, 0.2);">🔗 Abrir em Nova Aba</a>
+<a href="docs\assets\caso_de_uso_paciente.pdf" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0052cc 0%, #003d99 100%); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 52, 204, 0.2);">🔗 Abrir em Nova Aba</a>
 
 ---
 
