@@ -164,7 +164,7 @@ Documentação da reunião de elicitação e descoberta de requisitos, onde fora
 
 Documento com o roteiro estruturado utilizado para guiar a reunião de elicitação:
 
-<iframe src="docs\assets\Roteiro.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
+<iframe src="../assets/Roteiro.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
 
 ---
 
@@ -224,7 +224,7 @@ Reunião de discussão e alinhamento dos Requisitos Funcionais (RF) e Requisitos
 
 Lista completa de RF e RNF documentados:
 
-<iframe src="docs\assets\RF-RNF.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
+<iframe src="../assets/RF-RNF.pdf" width="100%" height="600px" style="border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
 
 ---
 
