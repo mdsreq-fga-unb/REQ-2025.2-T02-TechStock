@@ -2,63 +2,6 @@
 
 Esta seção contém todas as evidências do projeto, incluindo gravações de reuniões, apresentações, áudio e documentação de interações com o cliente.
 
-## Gravações de Reuniões com o Cliente
-
-Registros de feedbacks e comentários recebidos do cliente ao longo do projeto.
-
-| Data | Título | Participantes | Link/Arquivo |
-|------|--------|---------------|--------------|
-| 11/10/2025 | Validação do MVP com o Cliente | Todos presentes | https://drive.google.com/file/d/1VSVFv30xdbBfPfzTLTyxSRF44RgW0eRd/view?usp=drivesdk |
-
-## Apresentações e Slides
-
-Aqui você encontra os slides e apresentações utilizadas nas reuniões e demonstrações do projeto.
-
-| Data | Título | Tema | Link/Arquivo |
-|------|--------|------|--------------|
-| 16/10/2025 | Apresentação (Slidies)| Todos | https://drive.google.com/file/d/1vmVFco41wUCdLfd_fsxAcWAHY-gmcfWB/view?usp=sharing |
-
-## Áudio de Reuniões
-
-Arquivos de áudio das reuniões realizadas com o cliente para documentação e referência.
-
-| Data | Título | Duração | Link/Arquivo |
-|------|--------|---------|--------------|
-| -- | -- | -- | -- |
-
-## Atas de Reunião
-
-Documentação das reuniões realizadas com resumo de discussões, decisões e próximos passos.
-
-| Data | Título | Assunto Principal | Decisões Tomadas | Link/Arquivo |
-|------|--------|------------------|-----------------|--------------|
-| -- | -- | -- | -- | -- |
-
-
-## Protótipos e Mockups
-
-Versões de protótipos e mockups apresentados ao cliente durante o desenvolvimento.
-
-| Versão | Data | Descrição | Link/Arquivo |
-|--------|------|-----------|--------------|
-| -- | -- | -- | -- |
-
-## Validações e Testes
-
-Evidências de validações realizadas com o cliente e testes executados.
-
-| Data | Tipo | Descrição | Resultado | Link/Arquivo |
-|------|------|-----------|-----------|--------------|
-| -- | -- | -- | -- | -- |
-
-## Documentos Importantes
-
-Documentação relevante do projeto e comunicações com o cliente.
-
-| Documento | Data | Descrição | Link/Arquivo |
-|-----------|------|-----------|--------------|
-| Docs (RF) e (RNF) | 11/10/2025 | -- | https://docs.google.com/document/d/12iLfANvTRu1hUw8SZgOLxpOGYA2biz1kvy5VJyi-hIQ/edit?tab=t.0 |
-
 ---
 
 ## Priorização do MVP - Feedback do Cliente
@@ -137,18 +80,9 @@ Esta seção documenta a conversa com o cliente (Moisés) sobre a priorização 
 </script>
 
 ### Requisitos Priorizados - Essenciais para MVP
+O cliente enfatizou os requisitos essenciais para o MVP:
 
-#### Usuários e Acessos
-O cliente enfatizou a necessidade de um sistema seguro com controle de acesso:
-
-- **RF28**: Criação de usuários
-- **RNF01**: Interface simples e intuitiva
-- **RNF02**: Registro rápido (até 3 cliques)
-- **RNF06**: Login e senha por usuário
-- **RNF07**: Backup automático diário
-- **RNF10**: Acesso web responsivo
-- **RNF11**: Acesso dentro e fora da loja (nuvem)
-
+#### Evidências 1 
 <button class="view-btn" onclick="openModal('modal1')">Ver Evidência</button>
 
 <div id="modal1" class="modal">
@@ -158,11 +92,7 @@ O cliente enfatizou a necessidade de um sistema seguro com controle de acesso:
 
 ---
 
-#### Cadastro e Estoque
-Funcionalidades críticas para gerenciar produtos:
-
-- **RF06**: Alertas de estoque mínimo
-- **RF25**: Estoque automático nas plataformas
+#### Evidências 2
 
 <button class="view-btn" onclick="openModal('modal2')">Ver Evidência</button>
 
@@ -172,13 +102,7 @@ Funcionalidades críticas para gerenciar produtos:
 </div>
 
 ---
-
-#### Histórico e Manutenção
-Rastreabilidade completa das operações:
-
-- **RF08**: Registro de testes feitos nos celulares
-- **RF07**: Histórico completo de cada celular
-- **RF09**: Vincular peças usadas em consertos
+#### Evidências 3
 
 <button class="view-btn" onclick="openModal('modal3')">Ver Evidência</button>
 
@@ -189,16 +113,7 @@ Rastreabilidade completa das operações:
 
 ---
 
-#### Clientes, Garantias e Financeiro
-Gestão de informações e relatórios:
-
-- **RF11**: Classificação de clientes (consumidor, revendedor, manutenção)
-- **RF13**: Relatórios de clientes
-- **RF16**: Alertas de vencimento de garantias
-- **RF19**: Relatórios financeiros
-- **RF20**: Emitir notas fiscais/boletos
-- **RF21**: Relatórios de estoque
-- **RF22**: Gráficos de peças mais usadas e problemas comuns
+#### Evidências 4
 
 <button class="view-btn" onclick="openModal('modal4')">Ver Evidência</button>
 
@@ -209,14 +124,7 @@ Gestão de informações e relatórios:
 
 ---
 
-#### Relatórios e Indicadores
-Necessidade de dashboards e métricas consolidadas:
-
-- **RNF03**: Dashboards
-- **RNF04**: Consultas rápidas (<60s)
-- **RNF05**: Suporte a 5.000 registros
-- **RNF08**: Logs de acesso
-- **RNF12**: Uso simultâneo sem perda de dados
+#### Evidências 5
 
 <button class="view-btn" onclick="openModal('modal5')">Ver Evidência</button>
 
