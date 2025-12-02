@@ -4,15 +4,15 @@
 
 ### User Stories
 
-**US01 – Cadastrar Celulares (RF01):** Como Administrador, eu quero cadastrar as informações dos celulares (modelo, IMEI, cor, capacidade, estado, valor de compra, garantia e defeitos identificados) e peças (nome, código interno, compatibilidade, quantidade, fornecedor) para ter um controle mais prático dos itens no estoque da loja.
+**US01 – Cadastrar Celulares (RF01):** Como Administrador, eu quero cadastrar as informações dos celulares (modelo, IMEI, cor, capacidade, estado, valor de compra, garantia e defeitos identificados) para ter um controle mais prático dos itens no estoque da loja.
 
 **Critérios de aceitação:**
 
 - [ ] Permitir cadastrar um novo celular com os campos: modelo, IMEI (único), cor, capacidade, estado, valor de compra, garantia e defeitos identificado. 
-- [ ] Validar campos obrigatórios e exibir mensagem de erro quando houver dados ausentes ou duplicados (ex.: IMEI ou código interno). 
-- [ ] Permitir editar e excluir registros de celulares e peças.  
+- [ ] Validar campos obrigatórios e exibir mensagem de erro quando houver dados ausentes ou duplicados (ex.: IMEI). 
+- [ ] Permitir editar e excluir registros de celulares.  
 - [ ] Registrar automaticamente a data, hora e o usuário responsável pelo cadastro ou alteração. 
-- [ ] Exibir uma listagem de celulares e peças com opções de busca e filtros (por modelo, código interno, fornecedor, estado, etc.). 
+- [ ] Exibir uma listagem de celulares e peças com opções de busca e filtros (por modelo, fornecedor, estado, etc.). 
 - [ ] Armazenar os dados de forma segura e integrá-los ao módulo de controle de estoque. 
 
 **US02 – Cadastrar Peças (RF2):** Como Administrador, eu quero cadastrar as informações das pecas de reposição (nome, código interno, garantia, compatibilidade, quantia e fornecedor) para manter o estoque preciso e organizado dos itens disponíveis para manutenção e venda.
@@ -62,7 +62,7 @@
 
 **Critérios de aceitação:**
 
-- [ ] Permitir registrar movimentações de entrada e saída de produtos (celulares e peças).
+- [ ] Permitir registrar movimentações de entrada e saída de produtos.
 - [ ] Cada movimentação deve conter: tipo de operação (compra, venda, devolução, conserto), item, quantidade, data/hora.
 - [ ] O estoque deve ser atualizado automaticamente em tempo real após cada movimentação.
 - [ ] Exibir alerta de erro quando a quantidade de saída for maior do que o disponível em estoque.
@@ -70,11 +70,10 @@
 - [ ] Registrar automaticamente data, hora e usuário que realizou a movimentação.
 - [ ] Manter histórico detalhado de todas as movimentações (data, tipo, quantidade, responsável).
 - [ ] Permitir filtrar o histórico por tipo de operação, data ou usuário.
-- [ ] Diferenciar movimentações de celulares e peças.
 - [ ] Entradas de compras devem somar ao estoque.
 - [ ] Devoluções devem repor o item no estoque.
 - [ ] Exibir saldo atualizado de cada item na tela de controle de estoque.
-- [ ] Exibir o status atual do item (em estoque, em conserto, vendido, devolvido).
+
 
 **US05 – Diferenciar estoque de celulares (RF05):** Como Administrador, quero que o sistema mostre os celulares que estão para revenda e outros para manutenção no estoque.
 
@@ -136,7 +135,7 @@
 
 **Critérios de aceitação:**
 
-- [ ] Permitir cadastrar um novo cliente com os campos: nome, contato, CPF, histórico de compras/consertos e tipo (consumidores finais, revendedores e clientes de manutenção). 
+- [ ] Permitir cadastrar um novo cliente com os campos: nome, contato, CPF, e tipo (consumidores finais, revendedores e clientes de manutenção). 
 - [ ] Validar campos obrigatórios e exibir mensagem de erro quando houver dados ausentes ou duplicados (ex.: CPF). 
 - [ ] Permitir editar e excluir registros de clientes. 
 - [ ] Exibir uma listagem de clientes com opções de busca e filtros (por CPF, consertos e tipo).
@@ -240,7 +239,7 @@
 - [ ] 90 dias como prazo padrão para serviços de conserto/reparo.
 - [ ] 1 ano para celulares novos ou revenda.
 - [ ] O sistema deve calcular e registrar automaticamente a data de vencimento da garantia.
-- [ ] O sistema deve ser capaz de emitir mensagens de alertas próximo ao vencimento da garantia (2 meses antes do vencimento).
+- [ ] O sistema deve ser capaz alertas próximo ao vencimento (2 meses antes do vencimento).
 - [ ] A informação da garantia (prazo e status) deve ser visível no histórico do celular e do cliente.
 - [ ] O sistema deve permitir a consulta de status da garantia (ativa, vencida, próxima do vencimento).
 
@@ -249,8 +248,7 @@
 **Critérios de aceitação:**
 
 - [ ] Deve permitir selecionar o celular por lista ou código/IMEI. 
-- [ ] Deve permitir inserir a data de início da garantia. 
-- [ ] O sistema deve calcular automaticamente a data de vencimento com base no prazo padrão. 
+- [ ] O sistema deve calcular automaticamente a data de vencimento. 
 - [ ] Não deve permitir registrar duas garantias ativas para o mesmo celular. 
 - [ ] Deve exibir mensagem de confirmação após o registro. 
 
@@ -258,19 +256,10 @@
 
 **Critérios de aceitação:**
 
-- [ ] Deve permitir alterar data de início, data de vencimento ou prazo. 
+-** [ ] Deve permitir alterar data de início, data de vencimento ou prazo.** 
 - [ ] Deve exibir mensagem após salvar as atualizações. 
 
-**US10.3: Configurar prazos de garantia (RF11.3):** Como administrador, quero configurar os prazos de garantia padrão para que o sistema calcule automaticamente o vencimento. 
-
-**Critérios de aceitação:**
-
-- [ ] Deve permitir definir prazos (ex.: 30, 90, 180 dias). 
-- [ ] O prazo configurado deve ser aplicado automaticamente em novas garantias. 
-- [ ] O prazo deve ser obrigatório e maior que zero. 
-- [ ] Deve exibir mensagem após salvar as atualizações. 
-
-**US10.4: Calcular vencimento e emitir alertas (RF11.4) :** Como administrador, quero que o sistema calcule o vencimento da garantia e emita alertas quando estiver próxima de expirar para facilitar o acompanhamento. 
+**US10.3: Calcular vencimento e emitir alertas (RF11.4) :** Como administrador, quero que o sistema calcule o vencimento da garantia e emita alertas quando estiver próxima de expirar para facilitar o acompanhamento. 
 
 **Critérios de aceitação:**
 
@@ -279,25 +268,6 @@
 - [ ] Deve marcar o status como “prestes a vencer”. 
 - [ ] Deve atualizar automaticamente o status para “expirada” após a data. 
 
-**US10.5: Consultar status da garantia (RF11.5):** Como administrador, quero consultar o status da garantia de um celular para saber se está ativa, prestes a vencer ou expirada. 
-
-**Critérios de aceitação:**   
-
-- [ ] Deve permitir buscar a garantia por celular, cliente ou código/IMEI. 
-
-- [ ] Deve exibir: 
-
-    - data de início 
-
-    - data de vencimento 
-
-    - prazo configurado 
-
-    - status (ativa, prestes a vencer, expirada) 
-
-- [ ] Deve permitir filtrar por status. 
-
-- [ ] Deve exibir mensagem caso o celular não tenha garantia registrada. 
 
 **US11 - Registrar vendas (RF12):**  Como Administrador, quero registrar as informações de uma venda realizada. Vinculando as informações do cliente (nome e contato), modelo do dispositivo, data de venda e a garantia do produto. 
 

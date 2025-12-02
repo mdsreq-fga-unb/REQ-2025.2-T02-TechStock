@@ -118,6 +118,10 @@ A consolidação de informações para fins regulatórios (LGPD, auditorias, rel
 
 Abaixo está o User Story Mapping interativo do projeto:
 
+<div style="display: flex; gap: 10px; margin-bottom: 20px;">
+  <a href="https://miro.com/app/board/uXjVJxJREzY=/?share_link_id=383850552284" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #FF6B35; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">🔗 Acessar Link</a>
+</div>
+
 <iframe src="https://miro.com/app/board/uXjVJxJREzY=/?share_link_id=383850552284" width="100%" height="800px" frameborder="0" allowfullscreen></iframe>
 
 ---
