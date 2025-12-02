@@ -96,11 +96,11 @@ A equipe utiliza o aprendizado da Retrospectiva para se informar e ajustar o pla
 
 | Fases do Processo | Atividades ER | Prática | Técnica | Resultado Esperado |
 |---|---|---|---|---|
-| **Planejamento da Release** | Elicitação e Descoberta | Levantamento de requisitos | Entrevistas, Storyboard / Mockup | Requisitos identificados e objetivos definidos. |
+| **Planejamento da Release** | Elicitação e Descoberta | Levantamento de requisitos | Entrevistas | Requisitos identificados e objetivos definidos. |
 | | Análise e Consenso | Priorização de Requisitos | Priorização MosCoW, Análise de Custo / Benefício, Brainstorming | Funcionalidades priorizadas, detalhadas e acordadas. |
 | | Declaração | Registro dos Requisitos | Documento de Visão de Produto | Clareza e identificação dos requisitos. |
 | | Validação e Verificação | Validação dos requisitos e prioridade dos itens no backlog | Entrevistas com stakeholders | Requisitos e prioridades validadas para o início do desenvolvimento |
-| | Representação | Visualização dos requisitos | Prototipagem | Melhor visualização e aplicação dos requisitos. |
+| | Representação | Visualização dos requisitos | Storyboard / Mockup e Prototipagem | Melhor visualização e aplicação dos requisitos. |
 | | Organização e Atualização | Organização dos requisitos | User Story Mapping | Requisitos organizados em um backlog para agregar valor ao cliente o mais breve possível |
 | **Planejamento da Sprint** | Análise e Consenso | Priorização e Refinamento | Priorização MoSCoW (Refinamento), Discussões em Equipe, Análise de Tarefas | Discussões em Equipe, Análise de Tarefas |
 | | Declaração | Definição de Critérios de Aceitação | Definição de Ready (DoR) | User stories com critérios de aceitação claros e objetivos bem definidos |
