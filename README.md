@@ -1,5 +1,6 @@
 # 🚀 REQ-2025.2-T02-TechStock
 
+
 ---
 
 ## 📝 Sobre o Projeto
@@ -32,9 +33,7 @@
 | Backend | `Node.js` |
 | Banco de Dados | `PostgreSQL` |
 | Integração | `Express.js` |
-
 ---
-
 ## 👥 Colaboradores
 O projeto é desenvolvido por uma equipe multidisciplinar, com responsabilidades bem definidas:
 
@@ -44,6 +43,23 @@ O projeto é desenvolvido por uma equipe multidisciplinar, com responsabilidades
 | Desenvolvedor Frontend | Gabriel, Brenda, Mariana | Implementa a interface do usuário, design e funcionalidades do lado cliente. |
 | Desenvolvedor Backend | João Victor, Daniel, Renan | Desenvolve a lógica de negócios, integração com banco de dados e APIs. |
 | Analista de Requisitos | Gabriel, Mariana, Brenda, Daniel, João Victor, Renan | Define requisitos funcionais e não funcionais e garante que sejam atendidos.
+
+---
+## Sistema **CELLVEX**
+
+### Acesso à Aplicação  
+Acesse o sistema pelo link abaixo:  
+🔗 **https://techstock-710fddd4bd17.herokuapp.com**
+
+---
+
+### Credenciais de Acesso  
+Use as credenciais abaixo para entrar no sistema:
+
+| **Campo** | **Valor** |
+|----------|-----------|
+| **E-mail** | admin@techstock.com |
+| **Senha**  | admin |
 
 ---
 
