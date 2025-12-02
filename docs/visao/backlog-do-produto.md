@@ -471,10 +471,10 @@ Portanto, a tabela a seguir relaciona os requisitos funcionais, suas histórias 
 | RF 08 | US07 | OE3 | Must | 3 | x |
 | RF 09 | US08 | OE3 | Must | 3 | x |
 | RF 10 | US09 | OE5 | Should | 8 |  |
-| RF 11 | US10 | OE4 | Must | 5 | x |
+| RF 11 | US10, US10.1, US10.2, US10.3 | OE4 | Must | 5 | x |
 | RF 12 | US11 | OE3 | Must | 3 | x |
 | RF 13 | US12 | OE1 | Should | 3 |  |
-| RF 14 | US13 | OE5 | Could | 5 |  |
-| RF 15 | US14 | OE5 | Could | 8 |  |
+| RF 14 | US13, US13.1, US13.2, US13.3 | OE5 | Could | 5 |  |
+| RF 15 | US14, US14.1, US14.2, US14.3 | OE5 | Could | 8 |  |
 
 
