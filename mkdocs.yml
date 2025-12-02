@@ -1,7 +1,12 @@
 site_name: TechStock
 docs_dir: ./docs
-repo_url: https://mdsreq-fga-unb.github.io/REQ-2025.2-T02-TechStock/
+site_dir: ./site
+repo_url: https://github.com/mdsreq-fga-unb/REQ-2025.2-T02-TechStock
 repo_name: REQ-2025.2-T02-TechStock
+
+plugins:
+  - search
+  - offline
 
 theme:
   name: material
@@ -67,8 +72,22 @@ nav:
     - Referências Bibliográficas: visao/referencias-bibliograficas.md
   - Evidências: evidencias/index.md
 
+  - USM: usm/index.md
+  - Protótipos: prototipo/index.md
+  - Atas:
+    - Sprint Planning: atas/sprint-planning/index.md
+    - Sprint Review: atas/sprint-review/index.md
+    - Sprint Retrospectiva: atas/sprint-retrospectiva/index.md
+  
+  - Feedback do Cliente: feedback-cliente/index.md
+  
+  - Estudo de Caso:
+    - USM: estudo-caso/usm/index.md
+    - PBB: estudo-caso/pbb/index.md
+    - Casos de Uso: estudo-caso/casos-de-uso/index.md
   - Entregas:
     - Unidade 1: entregas/unidade1.md
     - Unidade 2: entregas/unidade2.md
     - Unidade 3: entregas/unidade3.md
-    - Unidade 4: entregas/unidade4.md
+  - CellVex - Sistema: cellvex-sistema/index.md
+ 

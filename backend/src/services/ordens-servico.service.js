@@ -1,0 +1,535 @@
+const ordensRepository = require('../repositories/ordens-servico.repository');
+const clientesRepository = require('../repositories/clientes.repository');
+const celularesRepository = require('../repositories/celulares.repository');
+const historicoRepository = require('../repositories/celulares-historico.repository');
+const { getPrisma } = require('../database/prisma');
+const garantiasService = require('./garantias.service');
+const testesService = require('./ordens-servico-testes.service');
+
+const STATUS = {
+  EM_ANDAMENTO: 'EmAndamento',
+  CONCLUIDO: 'Concluido',
+};
+
+const EVENTOS = {
+  CRIADA: 'OrdemServicoCriada',
+  ATUALIZADA: 'OrdemServicoAtualizada',
+  CONCLUIDA: 'OrdemServicoConcluida',
+  PECA_REGISTRADA: 'OrdemServicoPecaRegistrada',
+};
+
+async function ensureClienteExists(clienteId) {
+  const cliente = await clientesRepository.getById(clienteId);
+  if (!cliente) {
+    const err = new Error('Cliente não encontrado');
+    err.status = 404;
+    throw err;
+  }
+  return cliente;
+}
+
+function normalizeTestPayload(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  return [raw];
+}
+
+function formatDataConclusao(data) {
+  if (data instanceof Date) {
+    return data.toLocaleString('pt-BR');
+  }
+  if (typeof data === 'string' && !Number.isNaN(Date.parse(data))) {
+    return new Date(data).toLocaleString('pt-BR');
+  }
+  return String(data);
+}
+
+async function ensureCelularExists(celularId) {
+  const celular = await celularesRepository.getById(celularId);
+  if (!celular) {
+    const err = new Error('Celular não encontrado');
+    err.status = 404;
+    throw err;
+  }
+  return celular;
+}
+
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + Number(days));
+  return result;
+}
+
+async function list({ page = 1, pageSize = 20, q, status, cliente_id, celular_id } = {}) {
+  return ordensRepository.list({ page, pageSize, q, filters: { status, cliente_id, celular_id } });
+}
+
+async function getById(id) {
+  return ordensRepository.getById(id);
+}
+
+async function create(data, user) {
+  await Promise.all([ensureClienteExists(data.cliente_id), ensureCelularExists(data.celular_id)]);
+  const testesPayload = normalizeTestPayload(data.testes);
+  if (!testesPayload.length) {
+    const err = new Error('Os testes iniciais são obrigatórios para abrir uma ordem de serviço.');
+    err.status = 400;
+    throw err;
+  }
+
+  const possuiPecas = Array.isArray(data.pecas) && data.pecas.length > 0;
+  const pecasAgregadas = possuiPecas ? aggregateItens(data.pecas) : null;
+
+  const prisma = getPrisma();
+  const userId = user?.id || 1;
+
+  const payload = {
+    cliente_id: data.cliente_id,
+    celular_id: data.celular_id,
+    descricao: data.descricao,
+    observacoes: data.observacoes,
+    garantia_dias: data.garantia_dias,
+    garantia_validade: data.garantia_validade ? new Date(data.garantia_validade) : undefined,
+    status: STATUS.EM_ANDAMENTO,
+  };
+
+  const created = await prisma.$transaction(async (tx) => {
+    const ordem = await ordensRepository.create(payload, userId, tx);
+    await historicoRepository.addEvent(
+      {
+        celular_id: ordem.celular_id,
+        ordem_servico_id: ordem.id,
+        tipo_evento: EVENTOS.CRIADA,
+        descricao: `Ordem de serviço #${ordem.id} criada (status ${ordem.status}).`,
+      },
+      tx,
+    );
+    for (const teste of testesPayload) {
+      await testesService.registrarTeste(ordem.id, { ...teste, etapa: teste.etapa || 'INICIAL' }, user, { tx });
+    }
+    if (pecasAgregadas) {
+      await registrarPecasNaTransacao({ tx, ordem, agregados: pecasAgregadas, userId, validarTestes: false });
+    }
+    return ordem;
+  });
+
+  return ordensRepository.getById(created.id);
+}
+
+function assertGuaranteeAllowed(targetStatus, data) {
+  const wantsGuarantee = data.garantia_dias !== undefined || data.garantia_validade !== undefined;
+  if (wantsGuarantee && targetStatus !== STATUS.CONCLUIDO) {
+    const err = new Error('Garantia só pode ser registrada ao concluir a ordem');
+    err.status = 400;
+    throw err;
+  }
+}
+
+function normalizeDate(value) {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date;
+}
+
+async function update(id, data, user) {
+  const atual = await ordensRepository.getById(id);
+  if (!atual) {
+    return null;
+  }
+
+  const targetStatus = data.status || atual.status;
+  assertGuaranteeAllowed(targetStatus, data);
+
+  const updates = {};
+  if (data.descricao !== undefined) updates.descricao = data.descricao;
+  if (data.observacoes !== undefined) updates.observacoes = data.observacoes;
+
+  if (data.status) {
+    updates.status = data.status;
+  }
+
+  const concluindo = targetStatus === STATUS.CONCLUIDO && atual.status !== STATUS.CONCLUIDO;
+  const retornando = data.status === STATUS.EM_ANDAMENTO && atual.status === STATUS.CONCLUIDO;
+
+  if (concluindo) {
+    await testesService.garantirTestesAntesDeOperacao(id);
+    const dataConclusao = normalizeDate(data.data_conclusao) || new Date();
+    updates.data_conclusao = dataConclusao;
+    if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
+    if (data.garantia_validade) updates.garantia_validade = normalizeDate(data.garantia_validade);
+    if (updates.garantia_dias !== undefined && !updates.garantia_validade) {
+      updates.garantia_validade = addDays(dataConclusao, updates.garantia_dias);
+    }
+  } else if (retornando) {
+    updates.data_conclusao = null;
+    updates.garantia_dias = null;
+    updates.garantia_validade = null;
+  } else {
+    if (atual.status === STATUS.CONCLUIDO) {
+      if (data.garantia_dias !== undefined) updates.garantia_dias = data.garantia_dias;
+      if (data.garantia_validade) updates.garantia_validade = normalizeDate(data.garantia_validade);
+      if (
+        updates.garantia_dias !== undefined &&
+        !updates.garantia_validade &&
+        atual.data_conclusao
+      ) {
+        updates.garantia_validade = addDays(atual.data_conclusao, updates.garantia_dias);
+      }
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    const err = new Error('Nenhum campo válido para atualizar');
+    err.status = 400;
+    throw err;
+  }
+
+  const prisma = getPrisma();
+  const userId = user?.id || 1;
+
+  await prisma.$transaction(async (tx) => {
+    await ordensRepository.update(id, updates, userId, tx);
+
+    if (concluindo) {
+      const garantiaInfo = updates.garantia_dias
+        ? ` com garantia de ${updates.garantia_dias} dias`
+        : '';
+      const dataConclusaoStr = formatDataConclusao(updates.data_conclusao);
+      await historicoRepository.addEvent(
+        {
+          celular_id: atual.celular_id,
+          ordem_servico_id: id,
+          tipo_evento: EVENTOS.CONCLUIDA,
+          descricao: `Ordem de serviço #${id} concluída em ${dataConclusaoStr}${garantiaInfo}.`,
+        },
+        tx,
+      );
+      const garantiaDias =
+        updates.garantia_dias ??
+        data.garantia_dias ??
+        atual.garantia_dias ??
+        garantiasService.DEFAULT_PRAZOS[garantiasService.TipoGarantia.SERVICO];
+      await garantiasService.registrarGarantia(
+        {
+          origemTipo: garantiasService.GarantiaOrigem.ORDEM_SERVICO,
+          origemId: id,
+          clienteId: atual.cliente_id,
+          celularId: atual.celular_id,
+          tipoGarantia: garantiasService.TipoGarantia.SERVICO,
+          prazoDias: garantiaDias,
+          dataInicio: updates.data_conclusao,
+        },
+        { tx, userId, descricao: `Garantia de serviço vinculada à OS #${id}.` },
+      );
+    } else if (data.status && data.status !== atual.status) {
+      await historicoRepository.addEvent(
+        {
+          celular_id: atual.celular_id,
+          ordem_servico_id: id,
+          tipo_evento: EVENTOS.ATUALIZADA,
+          descricao: `Ordem de serviço #${id} atualizada para status ${data.status}.`,
+        },
+        tx,
+      );
+    }
+
+    if (!concluindo && retornando) {
+      await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.ORDEM_SERVICO, id, { tx });
+    } else if (!concluindo && targetStatus === STATUS.CONCLUIDO && (data.garantia_dias !== undefined || data.garantia_validade || data.data_conclusao)) {
+      const garantiaDias =
+        data.garantia_dias ??
+        atual.garantia_dias ??
+        garantiasService.DEFAULT_PRAZOS[garantiasService.TipoGarantia.SERVICO];
+      await garantiasService.registrarGarantia(
+        {
+          origemTipo: garantiasService.GarantiaOrigem.ORDEM_SERVICO,
+          origemId: id,
+          clienteId: atual.cliente_id,
+          celularId: atual.celular_id,
+          tipoGarantia: garantiasService.TipoGarantia.SERVICO,
+          prazoDias: garantiaDias,
+          dataInicio: updates.data_conclusao || atual.data_conclusao,
+        },
+        { tx, userId, descricao: `Garantia de serviço atualizada para OS #${id}.` },
+      );
+    }
+  });
+
+  return ordensRepository.getById(id);
+}
+
+/**
+ * Aggregates quantities for each unique peca_id in the itens array.
+ *
+ * If duplicate peca_id values are present, their quantities are summed.
+ * Throws an error if any item is invalid (missing or non-positive peca_id/quantidade).
+ *
+ * @param {Array<{peca_id: number, quantidade: number}>} itens - Array of item objects.
+ * @returns {Map<number, number>} Map of peca_id to total quantity.
+ */
+function aggregateItens(itens) {
+  if (!Array.isArray(itens) || itens.length === 0) {
+    const err = new Error('Informe ao menos uma peça para registrar');
+    err.status = 400;
+    throw err;
+  }
+
+  const map = new Map();
+  itens.forEach((item, index) => {
+    const pecaId = Number(item?.peca_id);
+    const quantidade = Number(item?.quantidade);
+    if (!Number.isInteger(pecaId) || pecaId <= 0) {
+      const err = new Error(`Peça inválida na posição ${index}`);
+      err.status = 400;
+      throw err;
+    }
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+      const err = new Error(`Quantidade inválida para a peça ${pecaId}`);
+      err.status = 400;
+      throw err;
+    }
+    const current = map.get(pecaId) || 0;
+    map.set(pecaId, current + quantidade);
+  });
+
+  return map;
+}
+
+function normalizePecasTarget(itens) {
+  if (itens === undefined) {
+    return new Map();
+  }
+  if (!Array.isArray(itens)) {
+    const err = new Error('Lista de peças inválida');
+    err.status = 400;
+    throw err;
+  }
+
+  const map = new Map();
+  itens.forEach((item, index) => {
+    const pecaId = Number(item?.peca_id);
+    if (!Number.isInteger(pecaId) || pecaId <= 0) {
+      const err = new Error(`Peça inválida na posição ${index}`);
+      err.status = 400;
+      throw err;
+    }
+    const quantidade = Number(item?.quantidade);
+    if (!Number.isInteger(quantidade) || quantidade < 0) {
+      const err = new Error(`Quantidade inválida para a peça ${pecaId}`);
+      err.status = 400;
+      throw err;
+    }
+    map.set(pecaId, quantidade);
+  });
+
+  return map;
+}
+
+async function registrarPecasNaTransacao({ tx, ordem, agregados, userId, validarTestes = true }) {
+  if (!agregados || agregados.size === 0) {
+    return;
+  }
+
+  if (validarTestes) {
+    await testesService.garantirTestesAntesDeOperacao(ordem.id);
+  }
+
+  const dataUso = new Date();
+  const ids = Array.from(agregados.keys());
+  const pecas = await tx.pecas.findMany({ where: { id: { in: ids } } });
+  const pecasMap = new Map(pecas.map((p) => [p.id, p]));
+
+  for (const [pecaId] of agregados.entries()) {
+    if (!pecasMap.has(pecaId)) {
+      const err = new Error(`Peça ${pecaId} não encontrada`);
+      err.status = 404;
+      throw err;
+    }
+  }
+
+  for (const [pecaId, quantidade] of agregados.entries()) {
+    const peca = pecasMap.get(pecaId);
+    const disponivel = Number.isFinite(Number(peca.quantidade)) ? Number(peca.quantidade) : 0;
+    if (disponivel < quantidade) {
+      const err = new Error(`Quantidade solicitada para a peça ${peca.nome} excede o estoque disponível (${disponivel}).`);
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  for (const [pecaId, quantidade] of agregados.entries()) {
+    await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { decrement: quantidade }, updated_by: userId } });
+    await tx.ordens_servico_pecas.upsert({
+      where: { ordem_servico_peca_unique: { ordem_servico_id: ordem.id, peca_id: pecaId } },
+      update: { quantidade: { increment: quantidade }, data_uso: dataUso },
+      create: { ordem_servico_id: ordem.id, peca_id: pecaId, quantidade, data_uso: dataUso },
+    });
+  }
+
+  const descricao = Array.from(agregados.entries())
+    .map(([pecaId, quantidade]) => {
+      const peca = pecasMap.get(pecaId);
+      if (!peca) {
+        throw new Error(`Invariante violada: peça ${pecaId} não encontrada ao construir a descrição.`);
+      }
+      return `${peca.nome} x${quantidade}`;
+    })
+    .join(', ');
+
+  await historicoRepository.addEvent(
+    {
+      celular_id: ordem.celular_id,
+      ordem_servico_id: ordem.id,
+      tipo_evento: EVENTOS.PECA_REGISTRADA,
+      descricao: `Peças registradas: ${descricao}.`,
+    },
+    tx,
+  );
+}
+
+async function registrarPecas(id, itens, user) {
+  const agregados = aggregateItens(itens);
+  const prisma = getPrisma();
+  const userId = user?.id || 1;
+
+  await prisma.$transaction(async (tx) => {
+    const ordem = await tx.ordens_servico.findUnique({ where: { id }, select: { id: true, celular_id: true } });
+    if (!ordem) {
+      const err = new Error('Ordem de serviço não encontrada');
+      err.status = 404;
+      throw err;
+    }
+
+    await registrarPecasNaTransacao({ tx, ordem, agregados, userId, validarTestes: true });
+  });
+
+  return ordensRepository.getById(id);
+}
+
+async function sincronizarPecas(id, itens, user) {
+  const desejado = normalizePecasTarget(itens);
+  const prisma = getPrisma();
+  const userId = user?.id || 1;
+
+  await prisma.$transaction(async (tx) => {
+    const ordem = await tx.ordens_servico.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        celular_id: true,
+        pecas_utilizadas: { select: { id: true, peca_id: true, quantidade: true } },
+      },
+    });
+    if (!ordem) {
+      const err = new Error('Ordem de serviço não encontrada');
+      err.status = 404;
+      throw err;
+    }
+
+    await testesService.garantirTestesAntesDeOperacao(id);
+
+    const atuais = new Map();
+    ordem.pecas_utilizadas.forEach((item) => {
+      atuais.set(item.peca_id, { quantidade: item.quantidade, registroId: item.id });
+    });
+
+    const ids = new Set([...atuais.keys(), ...desejado.keys()]);
+    if (ids.size === 0) {
+      return;
+    }
+
+    const pecasBD = await tx.pecas.findMany({ where: { id: { in: Array.from(ids) } } });
+    const pecasMap = new Map(pecasBD.map((p) => [p.id, p]));
+    const historicoMudancas = [];
+    const dataUso = new Date();
+
+    for (const pecaId of ids) {
+      const atualInfo = atuais.get(pecaId);
+      const atualQuantidade = atualInfo?.quantidade || 0;
+      const desejadaQuantidade = desejado.has(pecaId) ? Number(desejado.get(pecaId)) : 0;
+      if (desejadaQuantidade === atualQuantidade) {
+        continue;
+      }
+
+      if (desejadaQuantidade < 0) {
+        const err = new Error(`Quantidade negativa para a peça ${pecaId}`);
+        err.status = 400;
+        throw err;
+      }
+
+      const peca = pecasMap.get(pecaId);
+      if (!peca) {
+        const err = new Error(`Peça ${pecaId} não encontrada`);
+        err.status = 404;
+        throw err;
+      }
+
+      const delta = desejadaQuantidade - atualQuantidade;
+      if (delta > 0) {
+        const disponivel = Number.isFinite(Number(peca.quantidade)) ? Number(peca.quantidade) : 0;
+        if (disponivel < delta) {
+          const err = new Error(`Quantidade solicitada para a peça ${peca.nome} excede o estoque disponível (${disponivel}).`);
+          err.status = 400;
+          throw err;
+        }
+        await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { decrement: delta }, updated_by: userId } });
+      } else if (delta < 0) {
+        await tx.pecas.update({ where: { id: pecaId }, data: { quantidade: { increment: Math.abs(delta) }, updated_by: userId } });
+      }
+
+      if (desejadaQuantidade === 0 && atualInfo) {
+        await tx.ordens_servico_pecas.delete({ where: { id: atualInfo.registroId } });
+      } else if (atualInfo) {
+        await tx.ordens_servico_pecas.update({
+          where: { id: atualInfo.registroId },
+          data: { quantidade: desejadaQuantidade, data_uso: dataUso },
+        });
+      } else if (desejadaQuantidade > 0) {
+        await tx.ordens_servico_pecas.create({
+          data: {
+            ordem_servico_id: id,
+            peca_id: pecaId,
+            quantidade: desejadaQuantidade,
+            data_uso: dataUso,
+          },
+        });
+      }
+
+      if (delta !== 0) {
+        historicoMudancas.push(`${peca.nome} ${delta > 0 ? `+${delta}` : delta}`);
+      }
+    }
+
+    if (historicoMudancas.length) {
+      await historicoRepository.addEvent(
+        {
+          celular_id: ordem.celular_id,
+          ordem_servico_id: ordem.id,
+          tipo_evento: EVENTOS.PECA_REGISTRADA,
+          descricao: `Peças atualizadas: ${historicoMudancas.join(', ')}.`,
+        },
+        tx,
+      );
+    }
+  });
+
+  return ordensRepository.getById(id);
+}
+
+async function remove(id) {
+  const atual = await ordensRepository.getById(id);
+  if (!atual) {
+    return null;
+  }
+
+  const prisma = getPrisma();
+  await prisma.$transaction(async (tx) => {
+    await ordensRepository.remove(id, tx);
+    await garantiasService.cancelarPorOrigem(garantiasService.GarantiaOrigem.ORDEM_SERVICO, id, { tx });
+  });
+
+  return atual;
+}
+
+module.exports = { list, getById, create, update, registrarPecas, sincronizarPecas, remove, STATUS };

@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: techstock_db
+    environment:
+      POSTGRES_DB: techstock
+      POSTGRES_USER: techstock
+      POSTGRES_PASSWORD: techstock
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U techstock -d techstock"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: techstock_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      CORS_ORIGIN: http://localhost:5173
+      DATABASE_URL: postgresql://techstock:techstock@db:5432/techstock
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+    restart: unless-stopped
+
+volumes:
+  db_data:

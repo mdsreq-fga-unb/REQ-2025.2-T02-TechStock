@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - gitpages  
+      - docs/documentacao-pages
 
 permissions:
   contents: write
